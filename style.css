@@ -2148,12 +2148,18 @@ body.dark *:focus-visible {
        SIDEBAR ABOVE MAIN CONTENT
     ===================================================== */
 
+    /* =====================================================
+       MOBILE APP CONTAINER
+       SIDEBAR ABOVE MAIN CONTENT
+    ===================================================== */
+
     .app-container {
         display: flex !important;
         flex-direction: column !important;
 
         width: 100% !important;
         max-width: 100% !important;
+        min-width: 0 !important;
 
         height: auto !important;
         min-height: 100vh !important;
@@ -2162,6 +2168,7 @@ body.dark *:focus-visible {
         padding: 0 !important;
 
         overflow-x: hidden !important;
+        overflow-y: visible !important;
     }
 
 
