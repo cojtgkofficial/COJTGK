@@ -178,6 +178,21 @@ async function loadMembersFromSupabase() {
     }
 }
 
+
+function getSelectedMemberMinistries() {
+    const container = document.getElementById("memberMinistry");
+
+    if (!container) {
+        return [];
+    }
+
+    return Array.from(
+        container.querySelectorAll('input[type="checkbox"]:checked')
+    )
+        .map(checkbox => checkbox.value.trim())
+        .filter(value => value !== "");
+}
+
 // =====================================
 // MEMBERS - SUPABASE INSERT
 // =====================================
@@ -194,8 +209,8 @@ async function saveMemberToSupabase(member) {
                 contact: member.contact || '',
                 status: member.status || '',
                 ministry: member.ministry || '',
-                role: member.role || 'Member',
-                birthday: member.birthday || null
+                ministries: member.ministries || [],
+                role: member.role || 'Member'
             }])
             .select();
 
@@ -240,6 +255,7 @@ async function updateMemberToSupabase(member) {
                 contact: member.contact || '',
                 status: member.status || '',
                 ministry: member.ministry || '',
+                ministries: member.ministries || [],
                 role: member.role || 'Member',
                 birthday: member.birthday || null
             })
@@ -2412,19 +2428,40 @@ if (closeMemberModal) closeMemberModal.addEventListener("click", () => { if (mem
 if (cancelMember) cancelMember.addEventListener("click", () => { if (memberModal) memberModal.classList.add("hidden"); });
 if (saveMemberBtn) saveMemberBtn.addEventListener("click", saveMember);
 
+
+function getSelectedMemberMinistries() {
+    const container = document.getElementById("memberMinistry");
+
+    if (!container) {
+        return [];
+    }
+
+    return Array.from(
+        container.querySelectorAll('input[type="checkbox"]:checked')
+    )
+        .map(checkbox => checkbox.value.trim())
+        .filter(value => value !== "");
+}
+
 async function saveMember() {
 
     const editId = document.getElementById("editMemberId").value;
     const name = document.getElementById("memberName").value.trim();
     const contact = document.getElementById("memberContact").value.trim();
     const status = document.getElementById("memberStatus").value;
-    const ministry = document.getElementById("memberMinistry").value;
+    const ministries = getSelectedMemberMinistries();
+    const ministry = ministries[0] || "";
     const role = document.getElementById("memberRole").value.trim();
     const birthday = document.getElementById("memberBirthday").value;
 
     if (name === "") {
         alert("Please enter member name.");
         return;
+    }
+
+    if (ministries.length === 0) {
+    alert("Please select at least one ministry.");
+    return;
     }
 
     // =====================================
@@ -2436,14 +2473,15 @@ async function saveMember() {
 
         if (index !== -1) {
 
-            const updatedMember = {
-                id: Number(editId),
-                name,
-                contact: contact || "No Contact",
-                status,
+            const updatedMember = { 
+                id: Number(editId), 
+                name, 
+                contact: contact || "No Contact", 
+                status, 
                 ministry,
-                role: role || "Member",
-                birthday: birthday || null
+                ministries,
+                role: role || "Member", 
+                birthday: birthday || null 
             };
 
             const updatedInSupabase =
@@ -2467,14 +2505,15 @@ async function saveMember() {
     // =====================================
     } else {
 
-        const member = {
-            id: Date.now(),
-            name,
-            contact: contact || "No Contact",
-            status,
+        const member = { 
+            id: Date.now(), 
+            name, 
+            contact: contact || "No Contact", 
+            status, 
             ministry,
-            role: role || "Member",
-            birthday: birthday || null
+            ministries,
+            role: role || "Member", 
+            birthday: birthday || null 
         };
 
         const savedToSupabase =
@@ -2518,7 +2557,10 @@ function saveMembersToLocalStorage() {
 function loadSavedMembers() {
     try {
         const saved = localStorage.getItem("churchhq_members");
-        if (saved) members = JSON.parse(saved);
+
+        if (saved) {
+            members = JSON.parse(saved);
+        }
     } catch (e) {
         members = [];
     }
@@ -2526,13 +2568,227 @@ function loadSavedMembers() {
     const membersGrid = document.getElementById("membersGrid");
     if (!membersGrid) return;
 
-    membersGrid.innerHTML = "";
-    members.forEach(member => renderMemberCard(member));
+    // =====================================
+    // SORT MEMBERS ALPHABETICALLY BY NAME
+    // =====================================
 
-    const memberCountEl = document.getElementById("memberCount");
+    const sortedMembers = [...members].sort((a, b) =>
+        (a.name || "").localeCompare(
+            (b.name || ""),
+            undefined,
+            { sensitivity: "base" }
+        )
+    );
+
+    membersGrid.innerHTML = "";
+
+    sortedMembers.forEach(member => {
+        renderMemberCard(member);
+    });
+
+    const memberCountEl =
+        document.getElementById("memberCount");
+
     if (memberCountEl) {
         memberCountEl.textContent = members.length;
     }
+
+    // =====================================
+    // UPDATE MINISTRY FILTER
+    // =====================================
+
+    populateMemberMinistryFilter();
+}
+
+function populateMemberMinistryFilter() {
+
+    const filter =
+        document.getElementById("memberMinistryFilter");
+
+    if (!filter) return;
+
+    // Clear existing options
+    filter.innerHTML = "";
+
+    // Default option
+    const allOption = document.createElement("option");
+
+    allOption.value = "";
+    allOption.textContent = "All Ministries";
+
+    filter.appendChild(allOption);
+
+    // Store unique ministries
+    const ministries = new Set();
+
+    members.forEach(member => {
+
+        // New multiple-ministry format
+        if (
+            Array.isArray(member.ministries)
+        ) {
+
+            member.ministries.forEach(ministry => {
+
+                if (
+                    typeof ministry === "string" &&
+                    ministry.trim() !== ""
+                ) {
+                    ministries.add(
+                        ministry.trim()
+                    );
+                }
+
+            });
+
+        }
+
+        // Support old single-ministry data
+        else if (
+            typeof member.ministry === "string" &&
+            member.ministry.trim() !== ""
+        ) {
+
+            ministries.add(
+                member.ministry.trim()
+            );
+
+        }
+
+    });
+
+    // Sort ministries alphabetically
+    const sortedMinistries =
+        Array.from(ministries).sort((a, b) =>
+            a.localeCompare(
+                b,
+                undefined,
+                { sensitivity: "base" }
+            )
+        );
+
+    // Add ministries to dropdown
+    sortedMinistries.forEach(ministry => {
+
+        const option =
+            document.createElement("option");
+
+        option.value = ministry;
+        option.textContent = ministry;
+
+        filter.appendChild(option);
+    });
+}
+
+function filterMembers() {
+
+    const searchInput =
+        document.getElementById("memberSearch");
+
+    const ministryFilter =
+        document.getElementById("memberMinistryFilter");
+
+    const membersGrid =
+        document.getElementById("membersGrid");
+
+    if (!membersGrid) return;
+
+    const searchQuery =
+        searchInput
+            ? searchInput.value.trim().toLowerCase()
+            : "";
+
+    const selectedMinistry =
+        ministryFilter
+            ? ministryFilter.value
+            : "";
+
+    // =====================================
+    // FILTER MEMBERS
+    // =====================================
+
+    const filteredMembers = members.filter(member => {
+
+        // -------------------------------
+        // SEARCH
+        // -------------------------------
+
+        const ministries = Array.isArray(member.ministries)
+            ? member.ministries
+            : (
+                member.ministry
+                    ? [member.ministry]
+                    : []
+            );
+
+        const searchText = [
+            member.name || "",
+            member.contact || "",
+            member.status || "",
+            member.role || "",
+            ...ministries
+        ]
+            .join(" ")
+            .toLowerCase();
+
+        const matchesSearch =
+            searchQuery === "" ||
+            searchText.includes(searchQuery);
+
+        // -------------------------------
+        // MINISTRY FILTER
+        // -------------------------------
+
+        const matchesMinistry =
+            selectedMinistry === "" ||
+            ministries.includes(selectedMinistry);
+
+        return matchesSearch && matchesMinistry;
+    });
+
+    // =====================================
+    // SORT ALPHABETICALLY
+    // =====================================
+
+    filteredMembers.sort((a, b) =>
+        (a.name || "").localeCompare(
+            (b.name || ""),
+            undefined,
+            { sensitivity: "base" }
+        )
+    );
+
+    // =====================================
+    // RENDER RESULTS
+    // =====================================
+
+    membersGrid.innerHTML = "";
+
+    filteredMembers.forEach(member => {
+        renderMemberCard(member);
+    });
+}
+
+const memberSearch =
+    document.getElementById("memberSearch");
+
+if (memberSearch) {
+
+    memberSearch.addEventListener("input", () => {
+        filterMembers();
+    });
+
+}
+
+const memberMinistryFilter =
+    document.getElementById("memberMinistryFilter");
+
+if (memberMinistryFilter) {
+
+    memberMinistryFilter.addEventListener("change", () => {
+        filterMembers();
+    });
+
 }
 
 function renderMemberCard(member) {
@@ -2542,20 +2798,44 @@ function renderMemberCard(member) {
     const card = document.createElement("div");
     card.className = "song-card";
 
+    const ministries = Array.isArray(member.ministries) && member.ministries.length > 0
+        ? member.ministries
+        : (member.ministry ? [member.ministry] : []);
+
+    const ministryText = ministries.join(", ");
+
     card.innerHTML = `
         <div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                 <h3 style="margin: 0;">${member.name}</h3>
                 <span class="status-badge" style="background:#e2e8f0; padding:2px 6px; border-radius:4px; font-size:12px;">${member.status}</span>
             </div>
+
             <p class="artist">📞 ${member.contact}</p>
+
             <div style="margin-top: 10px; font-size: 12px; color:#64748b;">
-                <span>🏛️ ${member.ministry}</span> | <span>💼 ${member.role}</span>
+                <span>🏛️ ${ministryText}</span> |
+                <span>💼 ${member.role}</span>
             </div>
         </div>
+
         <div style="display:flex; justify-content:space-between; margin-top:15px;">
-            <button type="button" class="secondary-btn" style="padding: 4px 10px; font-size: 12px;" onclick="editMember(${member.id})">✏️ Edit</button>
-            <button type="button" onclick="deleteMember(${member.id})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size: 16px; font-weight:bold;">&times;</button>
+            <button
+                type="button"
+                class="secondary-btn"
+                style="padding: 4px 10px; font-size: 12px;"
+                onclick="editMember(${member.id})"
+            >
+                ✏️ Edit
+            </button>
+
+            <button
+                type="button"
+                onclick="deleteMember(${member.id})"
+                style="background:none; border:none; color:#ef4444; cursor:pointer; font-size: 16px; font-weight:bold;"
+            >
+                &times;
+            </button>
         </div>
     `;
 
@@ -2580,32 +2860,83 @@ function editMember(id) {
     if (mName) mName.value = member.name;
     if (mContact) mContact.value = member.contact;
     if (mStatus) mStatus.value = member.status;
-    
+
+    // =====================================
+    // LOAD MEMBER MINISTRIES
+    // =====================================
+
     if (ministrySelect) {
-        let hasOption = Array.from(ministrySelect.options).some(opt => opt.value === member.ministry);
-        if (!hasOption) {
-            const newOpt = new Option(member.ministry, member.ministry);
-            ministrySelect.add(newOpt);
-        }
-        ministrySelect.value = member.ministry;
+
+        const selectedMinistries =
+            Array.isArray(member.ministries) &&
+            member.ministries.length > 0
+                ? member.ministries
+                : (member.ministry ? [member.ministry] : []);
+
+        const checkboxes =
+            ministrySelect.querySelectorAll(
+                'input[type="checkbox"]'
+            );
+
+        checkboxes.forEach(checkbox => {
+            checkbox.checked =
+                selectedMinistries.includes(checkbox.value);
+        });
     }
 
     if (mRole) mRole.value = member.role;
+
     if (mBirthday) {
-    mBirthday.value = member.birthday || "";
-}
-    if (memberModal) memberModal.classList.remove("hidden");
+        mBirthday.value = member.birthday || "";
+    }
+
+    if (memberModal) {
+        memberModal.classList.remove("hidden");
+    }
 }
 
 function addCustomMinistry() {
     const newMinistry = prompt("Enter new Ministry Group name:");
+
     if (newMinistry && newMinistry.trim() !== "") {
-        const select = document.getElementById("memberMinistry");
-        if (select) {
-            const option = new Option(newMinistry.trim(), newMinistry.trim());
-            select.add(option);
-            select.value = newMinistry.trim();
-            alert(`Added "${newMinistry.trim()}" to Ministry list!`);
+
+        const container = document.getElementById("memberMinistry");
+
+        if (container) {
+
+            const ministryName = newMinistry.trim();
+
+            // Prevent duplicate ministry
+            const existingCheckboxes =
+                container.querySelectorAll('input[type="checkbox"]');
+
+            const alreadyExists = Array.from(existingCheckboxes)
+                .some(checkbox => checkbox.value === ministryName);
+
+            if (alreadyExists) {
+                alert(`"${ministryName}" already exists.`);
+                return;
+            }
+
+            // Create checkbox
+            const label = document.createElement("label");
+
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.value = ministryName;
+
+            const span = document.createElement("span");
+            span.textContent = ministryName;
+
+            label.appendChild(checkbox);
+            label.appendChild(span);
+
+            container.appendChild(label);
+
+            // Automatically select newly added ministry
+            checkbox.checked = true;
+
+            alert(`Added "${ministryName}" to Ministry list!`);
         }
     }
 }
@@ -2647,26 +2978,22 @@ function clearMemberForm() {
     const mRole = document.getElementById("memberRole");
     const mBirthday = document.getElementById("memberBirthday");
 
-
     if (editId) editId.value = "";
     if (mName) mName.value = "";
     if (mContact) mContact.value = "";
     if (mStatus) mStatus.selectedIndex = 0;
-    if (ministrySelect) ministrySelect.selectedIndex = 0;
+
+    if (ministrySelect) {
+        const checkboxes =
+            ministrySelect.querySelectorAll('input[type="checkbox"]');
+
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+    }
+
     if (mRole) mRole.value = "";
     if (mBirthday) mBirthday.value = "";
-
-}
-
-const memberSearch = document.getElementById("memberSearch");
-if (memberSearch) {
-    memberSearch.addEventListener("input", (e) => {
-        const query = e.target.value.toLowerCase();
-        document.querySelectorAll("#membersGrid .song-card").forEach(card => {
-            const text = card.textContent.toLowerCase();
-            card.style.display = text.includes(query) ? "flex" : "none";
-        });
-    });
 }
 
 /* =========================================
@@ -2904,39 +3231,190 @@ function renderAttendanceList() {
     listEl.innerHTML = "";
 
     if (members.length === 0) {
-        listEl.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #6b7280; padding: 20px;">No members found. Please add members in the <b>Members Tab</b> first.</p>`;
+        listEl.innerHTML = `
+            <p style="grid-column: 1/-1; text-align: center; color: #6b7280; padding: 20px;">
+                No members found. Please add members in the <b>Members Tab</b> first.
+            </p>
+        `;
         return;
     }
 
-    members.forEach(member => {
-        const isChecked = !!currentCheckIns[member.id];
+    // =====================================
+    // GET SEARCH QUERY
+    // =====================================
 
-        const card = document.createElement("div");
-        card.className = `att-card ${isChecked ? "checked" : ""}`;
+    const searchInput =
+        document.getElementById("attendanceSearch");
+
+    const searchQuery = searchInput
+        ? searchInput.value.trim().toLowerCase()
+        : "";
+
+    // =====================================
+    // SORT MEMBERS A-Z
+    // =====================================
+
+    const sortedMembers = [...members].sort((a, b) =>
+        (a.name || "").localeCompare(
+            (b.name || ""),
+            undefined,
+            { sensitivity: "base" }
+        )
+    );
+
+    // =====================================
+    // SEARCH
+    // =====================================
+
+    let visibleMembers;
+
+    if (searchQuery !== "") {
+
+        visibleMembers = sortedMembers.filter(member => {
+
+            const ministries =
+                Array.isArray(member.ministries)
+                    ? member.ministries
+                    : (
+                        member.ministry
+                            ? [member.ministry]
+                            : []
+                    );
+
+            const searchableText = [
+                member.name || "",
+                member.contact || "",
+                member.status || "",
+                member.role || "",
+                ...ministries
+            ]
+                .join(" ")
+                .toLowerCase();
+
+            return searchableText.includes(searchQuery);
+        });
+
+    } else {
+
+        // =====================================
+        // SHOW ONLY FIRST 15 MEMBERS
+        // =====================================
+
+        visibleMembers = sortedMembers.slice(0, 15);
+    }
+
+    // =====================================
+    // DISPLAY MEMBERS
+    // =====================================
+
+    visibleMembers.forEach(member => {
+
+        const isChecked =
+            !!currentCheckIns[member.id];
+
+        const card =
+            document.createElement("div");
+
+        card.className =
+            `att-card ${isChecked ? "checked" : ""}`;
+
         card.onclick = (e) => {
+
             if (e.target.tagName !== "INPUT") {
                 toggleCheckIn(member.id);
             }
+
         };
+
+        const ministries =
+            Array.isArray(member.ministries) &&
+            member.ministries.length > 0
+                ? member.ministries
+                : (
+                    member.ministry
+                        ? [member.ministry]
+                        : []
+                );
+
+        const ministryText =
+            ministries.join(", ");
 
         card.innerHTML = `
             <div>
-                <h4 style="margin: 0; font-size: 15px;">${member.name}</h4>
-                <p style="margin: 2px 0 0 0; font-size: 12px; color: #6b7280;">🏛️ ${member.ministry}</p>
+                <h4 style="margin: 0; font-size: 15px;">
+                    ${member.name}
+                </h4>
+
+                <p style="margin: 2px 0 0 0; font-size: 12px; color: #6b7280;">
+                    🏛️ ${ministryText}
+                </p>
             </div>
-            <input type="checkbox" ${isChecked ? "checked" : ""} onchange="toggleCheckIn(${member.id})">
+
+            <input
+                type="checkbox"
+                ${isChecked ? "checked" : ""}
+                onchange="toggleCheckIn(${member.id})"
+            >
         `;
 
         listEl.appendChild(card);
     });
 
-    const totalCount = members.length;
-    const presentCount = Object.values(currentCheckIns).filter(Boolean).length;
-    const absentCount = totalCount - presentCount;
+    // =====================================
+    // NO SEARCH RESULTS
+    // =====================================
 
-    if (document.getElementById("attTotalCount")) document.getElementById("attTotalCount").textContent = totalCount;
-    if (document.getElementById("attPresentCount")) document.getElementById("attPresentCount").textContent = presentCount;
-    if (document.getElementById("attAbsentCount")) document.getElementById("attAbsentCount").textContent = absentCount;
+    if (
+        searchQuery !== "" &&
+        visibleMembers.length === 0
+    ) {
+
+        listEl.innerHTML = `
+            <p style="grid-column: 1/-1; text-align: center; color: #6b7280; padding: 20px;">
+                No members found matching
+                "<b>${searchQuery}</b>".
+            </p>
+        `;
+    }
+
+    // =====================================
+    // ATTENDANCE COUNTS
+    // =====================================
+
+    const totalCount =
+        members.length;
+
+    const presentCount =
+        Object.values(currentCheckIns)
+            .filter(Boolean)
+            .length;
+
+    const absentCount =
+        totalCount - presentCount;
+
+    if (document.getElementById("attTotalCount")) {
+        document.getElementById("attTotalCount").textContent =
+            totalCount;
+    }
+
+    if (document.getElementById("attPresentCount")) {
+        document.getElementById("attPresentCount").textContent =
+            presentCount;
+    }
+
+    if (document.getElementById("attAbsentCount")) {
+        document.getElementById("attAbsentCount").textContent =
+            absentCount;
+    }
+}
+
+const attendanceSearch =
+    document.getElementById("attendanceSearch");
+
+if (attendanceSearch) {
+    attendanceSearch.addEventListener("input", () => {
+        renderAttendanceList();
+    });
 }
 
 function toggleCheckIn(memberId) {

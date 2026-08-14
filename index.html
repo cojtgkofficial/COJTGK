@@ -495,11 +495,21 @@
     <button class="primary-btn" id="addMemberBtn">+ New Member</button>
 </div>
 
-            <div class="planner-search">
-                <input type="text" id="memberSearch" placeholder="🔍 Search member name, ministry, or role...">
-            </div>
+            <div class="planner-search" style="display: flex; gap: 10px; flex-wrap: wrap;">
 
-            <div class="songs-grid" id="membersGrid"></div>
+    <input
+        type="text"
+        id="memberSearch"
+        placeholder="🔍 Search member name, ministry, or role..."
+    >
+
+    <select id="memberMinistryFilter">
+        <option value="">All Ministries</option>
+    </select>
+
+</div>
+
+<div class="songs-grid" id="membersGrid"></div>
 
         </section>
 
@@ -591,13 +601,17 @@
                 </div>
             </div>
 
-            <div class="planner-search">
-                <input type="text" id="attSearch" placeholder="🔍 Search member to check-in...">
-            </div>
+            <div class="planner-search" style="margin-bottom: 15px;">
+    <input
+        type="text"
+        id="attendanceSearch"
+        placeholder="🔍 Search member name, ministry, or role..."
+    >
+</div>
 
-            <div id="attendanceList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px;"></div>
+<div class="songs-grid" id="attendanceList"></div>
 
-            <!-- =========================================
+<!-- =========================================
      MEMBER ATTENDANCE SUMMARY
 ========================================= -->
 
@@ -1148,16 +1162,50 @@
                     <label>Ministry Group</label>
                     <button type="button" onclick="addCustomMinistry()" style="background:none; border:none; color:#2563eb; cursor:pointer; font-size:12px; font-weight:bold;">+ Add New Ministry</button>
                 </div>
-                <select id="memberMinistry">
-                    <option>Adults Ministry</option>
-                    <option>Children's Ministry</option>
-                    <option>General Member</option>
-                    <option>Multimedia Team</option>
-                    <option>Ushering & Security</option>
-                    <option>Worship Team</option>
-                    <option>Youth Ministry</option>
-                    <option>Young Pro Ministry</option>
-                </select>
+
+                <div id="memberMinistry" class="ministry-checkbox-list">
+
+                    <label>
+                        <input type="checkbox" value="Adults Ministry">
+                        <span>Adults Ministry</span>
+                    </label>
+
+                    <label>
+                        <input type="checkbox" value="Children Ministry">
+                        <span>Children Ministry</span>
+                    </label>
+
+                    <label>
+                        <input type="checkbox" value="General/Regular Member">
+                        <span>General/Regular Member</span>
+                    </label>
+
+                    <label>
+                        <input type="checkbox" value="Multimedia Team">
+                        <span>Multimedia Team</span>
+                    </label>
+
+                    <label>
+                        <input type="checkbox" value="Ushering & Security Ministry">
+                        <span> Ushering & Security Ministry</span>
+                    </label>
+
+                    <label>
+                        <input type="checkbox" value="Worship Team">
+                        <span>Worship Team</span>
+                    </label>
+
+                    <label>
+                        <input type="checkbox" value="Young Pro Ministry">
+                        <span>Young Pro Ministry</span>
+                    </label>
+
+                    <label>
+                        <input type="checkbox" value="Youth Ministry">
+                        <span>Youth Ministry</span>
+                    </label>
+
+                </div>
             </div>
 
             <div class="form-group">

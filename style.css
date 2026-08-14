@@ -978,7 +978,36 @@ body {
 
 }
 
+/* ===============================
+   MINISTRY CHECKBOX
+================================ */
 
+.ministry-checkbox-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 0;
+}
+
+.ministry-checkbox-list label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.ministry-checkbox-list input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.ministry-checkbox-list span {
+    display: inline-block;
+}
 
 /* ===============================
    SIDEBAR BLUE STYLE
