@@ -2201,3 +2201,193 @@ body.dark *:focus-visible {
 
 }
 
+/* =========================================
+   CHURCHHQ - MOBILE RESPONSIVE UI
+========================================= */
+
+@media (max-width: 768px) {
+
+    /* ---------- GENERAL ---------- */
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        overflow-x: hidden;
+    }
+
+    .page {
+        width: 100%;
+        max-width: 100%;
+        padding: 16px 12px;
+    }
+
+    .page-title {
+        font-size: 22px !important;
+    }
+
+    .page-subtitle {
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+
+    /* ---------- SIDEBAR ---------- */
+
+    .sidebar {
+        width: 70px;
+    }
+
+    .main-content {
+        margin-left: 70px;
+        width: calc(100% - 70px);
+    }
+
+
+    /* ---------- DASHBOARD ---------- */
+
+    .dashboard-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 10px;
+    }
+
+    .stat-card {
+        padding: 14px !important;
+    }
+
+    .stat-card h3 {
+        font-size: 13px;
+    }
+
+    .stat-card h2 {
+        font-size: 22px;
+    }
+
+    .stat-card p {
+        font-size: 11px;
+    }
+
+
+    /* ---------- CARDS ---------- */
+
+    .song-card,
+    .card {
+        width: 100%;
+        max-width: 100%;
+    }
+
+
+    /* ---------- FORM ROWS ---------- */
+
+    .form-row {
+        grid-template-columns: 1fr !important;
+    }
+
+    .form-group {
+        width: 100%;
+    }
+
+    input,
+    select,
+    textarea {
+        max-width: 100%;
+    }
+
+
+    /* ---------- MEMBERS ---------- */
+
+    #membersGrid {
+        grid-template-columns: 1fr !important;
+        gap: 12px;
+    }
+
+
+    /* ---------- PLANNER ---------- */
+
+    #todoColumn,
+    #progressColumn,
+    #completedColumn {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .task-card {
+        width: 100%;
+        max-width: 100%;
+    }
+
+
+    /* ---------- TABLES ---------- */
+
+    .table-container {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+        min-width: 600px;
+    }
+
+
+    /* ---------- MODALS ---------- */
+
+    .modal {
+        padding: 10px;
+    }
+
+    .modal-content {
+        width: 100%;
+        max-width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+
+    /* ---------- BUTTONS ---------- */
+
+    button {
+        max-width: 100%;
+    }
+
+
+    /* ---------- SEARCH ---------- */
+
+    #memberSearch,
+    #songSearch,
+    input[type="search"] {
+        width: 100%;
+        max-width: 100%;
+    }
+
+}
+
+
+/* =========================================
+   SMALL PHONES
+========================================= */
+
+@media (max-width: 480px) {
+
+    .page {
+        padding: 12px 10px;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .page-title {
+        font-size: 20px !important;
+    }
+
+    .stat-card h2 {
+        font-size: 20px;
+    }
+
+    .modal-content {
+        padding: 16px;
+    }
+
+}
