@@ -2483,22 +2483,32 @@ body.dark *:focus-visible {
 }
 
 /* =========================================================
-   MOBILE PAGE VISIBILITY FIX
+   FINAL MOBILE PAGE VISIBILITY
 ========================================================= */
 
 @media (max-width: 768px) {
 
-    /* Every page starts according to its hidden class */
     .main-content .page.hidden {
         display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        height: 0 !important;
+        overflow: hidden !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
 
-    /* Only the page without hidden is visible */
     .main-content .page:not(.hidden) {
         display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+
         width: 100% !important;
         max-width: 100% !important;
-        min-width: 0 !important;
+        height: auto !important;
+        overflow: visible !important;
     }
 
 }
