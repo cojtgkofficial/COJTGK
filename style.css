@@ -117,27 +117,6 @@ body{
     background:#1d4ed8;
 }
 
-/* ================= RESPONSIVE ================= */
-
-@media(max-width:768px){
-
-.sidebar{
-    width:90px;
-}
-
-.logo-area div:last-child{
-    display:none;
-}
-
-.nav-item span{
-    display:none;
-}
-
-.main-content{
-    padding:20px;
-}
-
-}
 
 /* ================= DARK MODE ================= */
 
@@ -2001,45 +1980,6 @@ i[data-lucide] {
 ================================ */
 
 
-@media(max-width:900px){
-
-
-    .sidebar {
-
-
-        position:fixed;
-
-
-        z-index:1000;
-
-
-    }
-
-
-
-    .main-content {
-
-
-        margin-left:0;
-
-    }
-
-
-
-    .dashboard-grid {
-
-
-        grid-template-columns:
-
-        repeat(2,1fr);
-
-    }
-
-
-}
-
-
-
 @media(max-width:600px){
 
 
@@ -2201,22 +2141,22 @@ body.dark *:focus-visible {
 
 }
 
-/* =========================================================
-   CHURCHHQ MOBILE UI
-   SIDEBAR → TOP NAVIGATION
-========================================================= */
-
 @media (max-width: 768px) {
 
     /* =====================================================
-       GLOBAL
+       MOBILE APP CONTAINER
+       SIDEBAR ABOVE MAIN CONTENT
     ===================================================== */
 
-    html,
-    body {
+    .app-container {
+        display: flex !important;
+        flex-direction: column !important;
+
         width: 100% !important;
         max-width: 100% !important;
-        min-width: 0 !important;
+
+        height: auto !important;
+        min-height: 100vh !important;
 
         margin: 0 !important;
         padding: 0 !important;
@@ -2224,16 +2164,9 @@ body.dark *:focus-visible {
         overflow-x: hidden !important;
     }
 
-    *,
-    *::before,
-    *::after {
-        box-sizing: border-box !important;
-    }
-
 
     /* =====================================================
-       SIDEBAR
-       MOVE ENTIRE SIDEBAR TO TOP
+       SIDEBAR → TOP
     ===================================================== */
 
     .sidebar {
@@ -2251,20 +2184,23 @@ body.dark *:focus-visible {
         height: auto !important;
         min-height: 0 !important;
 
+        flex: 0 0 auto !important;
+        flex-shrink: 0 !important;
+
         margin: 0 !important;
         padding: 8px !important;
 
         display: flex !important;
         flex-direction: column !important;
 
-        align-items: stretch !important;
+        order: 1 !important;
 
         float: none !important;
         transform: none !important;
 
-        z-index: 9999 !important;
+        overflow: hidden !important;
 
-        overflow: visible !important;
+        z-index: 9999 !important;
     }
 
 
@@ -2278,41 +2214,19 @@ body.dark *:focus-visible {
 
         margin: 0 0 8px 0 !important;
 
-        padding: 12px !important;
+        flex: 0 0 auto !important;
 
         display: flex !important;
         align-items: center !important;
 
+        padding: 12px !important;
+
         gap: 10px !important;
-
-        border-radius: 8px !important;
-
-        flex-shrink: 0 !important;
-    }
-
-    .sidebar-header img {
-        width: 50px !important;
-        height: 50px !important;
-
-        flex-shrink: 0 !important;
-    }
-
-    .sidebar-header h1 {
-        font-size: 15px !important;
-        line-height: 1.2 !important;
-
-        white-space: normal !important;
-
-        overflow-wrap: anywhere !important;
-    }
-
-    .sidebar-header span {
-        font-size: 10px !important;
     }
 
 
     /* =====================================================
-       NAVIGATION CONTAINER
+       SIDEBAR NAV
     ===================================================== */
 
     .sidebar nav {
@@ -2335,6 +2249,8 @@ body.dark *:focus-visible {
 
         white-space: nowrap !important;
 
+        flex: 0 0 auto !important;
+
         -webkit-overflow-scrolling: touch !important;
 
         scrollbar-width: none !important;
@@ -2346,12 +2262,10 @@ body.dark *:focus-visible {
 
 
     /* =====================================================
-       NAVIGATION ITEMS
+       NAV ITEMS
     ===================================================== */
 
     .sidebar .nav-item {
-        position: relative !important;
-
         flex: 0 0 auto !important;
 
         width: auto !important;
@@ -2361,24 +2275,23 @@ body.dark *:focus-visible {
         height: auto !important;
 
         margin: 0 !important;
+
         padding: 9px 12px !important;
 
         display: flex !important;
-
         flex-direction: row !important;
+
         align-items: center !important;
         justify-content: center !important;
 
         gap: 6px !important;
 
         white-space: nowrap !important;
-
-        overflow: visible !important;
     }
 
 
     /* =====================================================
-       NAVIGATION ICONS
+       NAV ICON
     ===================================================== */
 
     .sidebar .nav-item i,
@@ -2391,7 +2304,7 @@ body.dark *:focus-visible {
 
 
     /* =====================================================
-       NAVIGATION TEXT
+       NAV TEXT
     ===================================================== */
 
     .sidebar .nav-item span {
@@ -2407,21 +2320,7 @@ body.dark *:focus-visible {
 
 
     /* =====================================================
-       ACTIVE NAV ITEM
-    ===================================================== */
-
-    .sidebar .nav-item.active {
-        flex: 0 0 auto !important;
-
-        width: auto !important;
-        min-width: max-content !important;
-
-        white-space: nowrap !important;
-    }
-
-
-    /* =====================================================
-       MAIN CONTENT
+       MAIN CONTENT → BELOW SIDEBAR
     ===================================================== */
 
     .main-content {
@@ -2431,6 +2330,10 @@ body.dark *:focus-visible {
         max-width: 100% !important;
         min-width: 0 !important;
 
+        flex: 1 1 auto !important;
+
+        order: 2 !important;
+
         margin: 0 !important;
         margin-left: 0 !important;
 
@@ -2438,7 +2341,6 @@ body.dark *:focus-visible {
 
         overflow-x: hidden !important;
     }
-
 
     /* =====================================================
        PAGE
