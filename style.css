@@ -2141,11 +2141,32 @@ body.dark *:focus-visible {
 
 }
 
+/* =========================================================
+   CHURCHHQ MOBILE
+   SIDEBAR ON TOP + MAIN CONTENT BELOW
+========================================================= */
+
 @media (max-width: 768px) {
 
+    html,
+    body {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden !important;
+    }
+
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
+
+
     /* =====================================================
-       MOBILE APP CONTAINER
-       SIDEBAR ABOVE MAIN CONTENT
+       APP
     ===================================================== */
 
     .app-container {
@@ -2153,8 +2174,8 @@ body.dark *:focus-visible {
         flex-direction: column !important;
 
         width: 100% !important;
-        max-width: 100% !important;
         min-width: 0 !important;
+        max-width: 100% !important;
 
         height: auto !important;
         min-height: 100vh !important;
@@ -2162,32 +2183,23 @@ body.dark *:focus-visible {
         margin: 0 !important;
         padding: 0 !important;
 
-        overflow-x: hidden !important;
-        overflow-y: visible !important;
+        overflow: visible !important;
     }
 
 
     /* =====================================================
-       SIDEBAR → TOP
+       SIDEBAR
     ===================================================== */
 
-    .sidebar {
+    .app-container .sidebar {
         position: relative !important;
 
-        top: auto !important;
-        right: auto !important;
-        bottom: auto !important;
-        left: auto !important;
-
         width: 100% !important;
-        max-width: 100% !important;
         min-width: 0 !important;
+        max-width: 100% !important;
 
         height: auto !important;
         min-height: 0 !important;
-
-        flex: 0 0 auto !important;
-        flex-shrink: 0 !important;
 
         margin: 0 !important;
         padding: 8px !important;
@@ -2195,14 +2207,16 @@ body.dark *:focus-visible {
         display: flex !important;
         flex-direction: column !important;
 
+        flex: none !important;
+
         order: 1 !important;
 
         float: none !important;
         transform: none !important;
 
-        overflow: hidden !important;
+        overflow: visible !important;
 
-        z-index: 9999 !important;
+        z-index: 1000 !important;
     }
 
 
@@ -2216,19 +2230,26 @@ body.dark *:focus-visible {
 
         margin: 0 0 8px 0 !important;
 
-        flex: 0 0 auto !important;
-
         display: flex !important;
         align-items: center !important;
 
         padding: 12px !important;
-
         gap: 10px !important;
     }
 
 
+    .sidebar-header img {
+        flex-shrink: 0 !important;
+    }
+
+
+    .sidebar-header h1 {
+        min-width: 0 !important;
+    }
+
+
     /* =====================================================
-       SIDEBAR NAV
+       NAVIGATION
     ===================================================== */
 
     .sidebar nav {
@@ -2244,14 +2265,14 @@ body.dark *:focus-visible {
         gap: 4px !important;
 
         margin: 0 !important;
-        padding: 4px !important;
+        padding: 4px 0 !important;
 
         overflow-x: auto !important;
         overflow-y: hidden !important;
 
         white-space: nowrap !important;
 
-        flex: 0 0 auto !important;
+        flex: none !important;
 
         -webkit-overflow-scrolling: touch !important;
 
@@ -2289,25 +2310,10 @@ body.dark *:focus-visible {
         gap: 6px !important;
 
         white-space: nowrap !important;
+
+        transform: none !important;
     }
 
-
-    /* =====================================================
-       NAV ICON
-    ===================================================== */
-
-    .sidebar .nav-item i,
-    .sidebar .nav-item svg {
-        width: 20px !important;
-        height: 20px !important;
-
-        flex-shrink: 0 !important;
-    }
-
-
-    /* =====================================================
-       NAV TEXT
-    ===================================================== */
 
     .sidebar .nav-item span {
         display: inline !important;
@@ -2321,43 +2327,44 @@ body.dark *:focus-visible {
     }
 
 
+    .sidebar .nav-item i,
+    .sidebar .nav-item svg {
+        width: 20px !important;
+        height: 20px !important;
+
+        flex-shrink: 0 !important;
+    }
+
+
     /* =====================================================
-       MAIN CONTENT → BELOW SIDEBAR
+       MAIN CONTENT
     ===================================================== */
 
-    .main-content {
+    .app-container .main-content {
         position: relative !important;
 
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
+        display: block !important;
 
-        flex: 1 1 auto !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+
+        height: auto !important;
+        min-height: 1px !important;
+
+        margin: 0 !important;
+        padding: 16px 12px 40px !important;
+
+        flex: none !important;
 
         order: 2 !important;
 
-        margin: 0 !important;
-        margin-left: 0 !important;
+        overflow: visible !important;
 
-        padding: 0 !important;
+        visibility: visible !important;
+        opacity: 1 !important;
 
-        overflow-x: hidden !important;
-    }
-
-    /* =====================================================
-       PAGE
-    ===================================================== */
-
-    .page {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-
-        margin: 0 !important;
-
-        padding: 16px 12px 30px !important;
-
-        overflow-x: hidden !important;
+        transform: none !important;
     }
 
 
@@ -2365,12 +2372,28 @@ body.dark *:focus-visible {
        DASHBOARD
     ===================================================== */
 
-    .dashboard-grid {
+    #dashboard {
+        display: block !important;
+
         width: 100% !important;
         max-width: 100% !important;
         min-width: 0 !important;
 
+        height: auto !important;
+
+        margin: 0 !important;
+        padding: 0 !important;
+
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+
+    #dashboard .dashboard-grid {
         display: grid !important;
+
+        width: 100% !important;
+        max-width: 100% !important;
 
         grid-template-columns:
             repeat(2, minmax(0, 1fr)) !important;
@@ -2378,223 +2401,24 @@ body.dark *:focus-visible {
         gap: 10px !important;
     }
 
-    .stat-card {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
 
-        margin: 0 !important;
-        padding: 12px !important;
-    }
-
-    .stat-card h3 {
-        font-size: 12px !important;
-        white-space: normal !important;
-
-        overflow-wrap: anywhere !important;
-        word-break: break-word !important;
-    }
-
-    .stat-card h2 {
-        font-size: 22px !important;
-    }
-
-    .stat-card p {
-        font-size: 10px !important;
-    }
-
-
-    /* =====================================================
-       CARDS
-    ===================================================== */
-
-    .card,
-    .song-card {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-
-        overflow-wrap: anywhere !important;
-        word-break: break-word !important;
-    }
-
-
-    /* =====================================================
-       FORM ROWS
-    ===================================================== */
-
-    .form-row {
-        width: 100% !important;
-        max-width: 100% !important;
-
-        display: flex !important;
-        flex-direction: column !important;
-
-        gap: 10px !important;
-    }
-
-    .form-group {
-        width: 100% !important;
-        min-width: 0 !important;
-    }
-
-    input,
-    select,
-    textarea {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-
-        box-sizing: border-box !important;
-    }
-
-
-    /* =====================================================
-       PLANNER
-    ===================================================== */
-
-    .planner-container,
-    .planner-board,
-    .task-board {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-
-        display: flex !important;
-        flex-direction: column !important;
-
-        gap: 12px !important;
-    }
-
-    #todoColumn,
-    #progressColumn,
-    #completedColumn {
+    #dashboard .card,
+    #dashboard .song-card {
         width: 100% !important;
         max-width: 100% !important;
         min-width: 0 !important;
     }
 
-    .task-card {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
 
-        overflow-wrap: anywhere !important;
-        word-break: break-word !important;
-    }
-
-
-    /* =====================================================
-       MEMBERS
-    ===================================================== */
-
-    #membersGrid {
-        width: 100% !important;
-        max-width: 100% !important;
-
+    #dashboard .dashboard-lower {
         display: grid !important;
+
+        width: 100% !important;
 
         grid-template-columns: 1fr !important;
 
-        gap: 10px !important;
+        gap: 12px !important;
     }
-
-
-    /* =====================================================
-       TABLES
-    ===================================================== */
-
-    .table-container {
-        width: 100% !important;
-        max-width: 100% !important;
-
-        overflow-x: auto !important;
-        overflow-y: visible !important;
-
-        -webkit-overflow-scrolling: touch !important;
-    }
-
-    table {
-        width: 100% !important;
-        min-width: 0 !important;
-
-        table-layout: fixed !important;
-    }
-
-    th,
-    td {
-        padding: 7px 5px !important;
-
-        font-size: 11px !important;
-
-        white-space: normal !important;
-
-        overflow-wrap: anywhere !important;
-        word-break: break-word !important;
-    }
-
-
-    /* =====================================================
-       MODALS
-    ===================================================== */
-
-    .modal {
-        width: 100% !important;
-        max-width: 100% !important;
-
-        padding: 10px !important;
-    }
-
-    .modal-content {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-
-        max-height: 90vh !important;
-
-        padding: 16px !important;
-
-        overflow-x: hidden !important;
-        overflow-y: auto !important;
-    }
-
-
-    /* =====================================================
-       BUTTONS
-    ===================================================== */
-
-    button {
-        max-width: 100% !important;
-
-        box-sizing: border-box !important;
-    }
-
-
-    /* =====================================================
-       SEARCH
-    ===================================================== */
-
-    #memberSearch,
-    #songSearch,
-    input[type="search"] {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-    }
-
-
-    /* =====================================================
-       IMAGES
-    ===================================================== */
-
-    img {
-        max-width: 100% !important;
-        height: auto !important;
-    }
-
 }
 
 
@@ -2604,13 +2428,8 @@ body.dark *:focus-visible {
 
 @media (max-width: 480px) {
 
-    .sidebar {
-        padding: 6px !important;
-    }
-
     .sidebar-header {
         padding: 10px !important;
-        gap: 8px !important;
     }
 
     .sidebar-header img {
@@ -2626,13 +2445,12 @@ body.dark *:focus-visible {
         font-size: 9px !important;
     }
 
-    .sidebar nav {
-        gap: 3px !important;
-    }
-
     .sidebar .nav-item {
         padding: 8px 10px !important;
-        gap: 5px !important;
+    }
+
+    .sidebar .nav-item span {
+        font-size: 10px !important;
     }
 
     .sidebar .nav-item i,
@@ -2641,236 +2459,7 @@ body.dark *:focus-visible {
         height: 18px !important;
     }
 
-    .sidebar .nav-item span {
-        font-size: 10px !important;
-    }
-
-    .page {
-        padding: 14px 10px 25px !important;
-    }
-
-    .dashboard-grid {
-        grid-template-columns:
-            repeat(2, minmax(0, 1fr)) !important;
-
-        gap: 8px !important;
-    }
-
-    .stat-card {
-        padding: 10px !important;
-    }
-
-    .stat-card h3 {
-        font-size: 11px !important;
-    }
-
-    .stat-card h2 {
-        font-size: 20px !important;
-    }
-
-    .stat-card p {
-        font-size: 9px !important;
-    }
-
-    .page-title {
-        font-size: 19px !important;
-    }
-
-    .page-subtitle {
-        font-size: 11px !important;
-    }
-
-}
-
-/* =========================================================
-   CHURCHHQ MOBILE - FINAL CONTENT FIX
-   KEEP SIDEBAR ON TOP AND FORCE MAIN CONTENT VISIBLE
-========================================================= */
-
-@media (max-width: 768px) {
-
-    /* =====================================================
-       APP CONTAINER
-    ===================================================== */
-
-    .app-container {
-        display: flex !important;
-        flex-direction: column !important;
-
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-
-        height: auto !important;
-        min-height: 100vh !important;
-
-        margin: 0 !important;
-        padding: 0 !important;
-
-        overflow: visible !important;
-    }
-
-
-    /* =====================================================
-       SIDEBAR
-    ===================================================== */
-
-    .app-container > .sidebar {
-        position: relative !important;
-
-        top: auto !important;
-        right: auto !important;
-        bottom: auto !important;
-        left: auto !important;
-
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-
-        height: auto !important;
-        min-height: 0 !important;
-
-        flex: 0 0 auto !important;
-
-        order: 1 !important;
-
-        margin: 0 !important;
-
-        z-index: 10 !important;
-
-        transform: none !important;
-    }
-
-
-    /* =====================================================
-       MAIN CONTENT
-    ===================================================== */
-
-    .app-container > .main-content {
-        position: relative !important;
-
-        display: block !important;
-
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-
-        height: auto !important;
-        min-height: 1px !important;
-
-        flex: 1 1 auto !important;
-
-        order: 2 !important;
-
-        margin: 0 !important;
-        padding: 16px 12px 40px !important;
-
-        overflow: visible !important;
-
-        visibility: visible !important;
-        opacity: 1 !important;
-
-        transform: none !important;
-
-        z-index: 1 !important;
-    }
-
-
-    /* =====================================================
-       DASHBOARD
-       FORCE INITIAL PAGE TO BE VISIBLE
-    ===================================================== */
-
-    .app-container > .main-content > #dashboard {
-        display: block !important;
-
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-
-        height: auto !important;
-        min-height: 1px !important;
-
-        visibility: visible !important;
-        opacity: 1 !important;
-
-        position: relative !important;
-    }
-
-
-    /* =====================================================
-       PAGE CONTENT
-    ===================================================== */
-
-    .app-container > .main-content > .page {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-
-        margin: 0 !important;
-
-        padding: 0 !important;
-    }
-
-
-    /* =====================================================
-       DASHBOARD GRID
-    ===================================================== */
-
-    #dashboard .dashboard-grid {
-        display: grid !important;
-
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-
-        grid-template-columns:
-            repeat(2, minmax(0, 1fr)) !important;
-
-        gap: 10px !important;
-    }
-
-
-    /* =====================================================
-       DASHBOARD CARDS
-    ===================================================== */
-
-    #dashboard .card,
-    #dashboard .song-card {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-
-        box-sizing: border-box !important;
-    }
-
-
-    /* =====================================================
-       DASHBOARD LOWER SECTION
-    ===================================================== */
-
-    #dashboard .dashboard-lower {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-
-        display: grid !important;
-
-        grid-template-columns: 1fr !important;
-
-        gap: 12px !important;
-    }
-
-}
-
-
-/* =========================================================
-   SMALL PHONES
-========================================================= */
-
-@media (max-width: 480px) {
-
-    .app-container > .main-content {
+    .app-container .main-content {
         padding: 12px 10px 30px !important;
     }
 
@@ -2880,5 +2469,4 @@ body.dark *:focus-visible {
 
         gap: 8px !important;
     }
-
 }
