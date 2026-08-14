@@ -2242,72 +2242,84 @@ body.dark *:focus-visible {
    MOBILE TOP NAVIGATION
 ========================= */
 
-.sidebar {
-    position: relative !important;
-    top: auto !important;
-    right: auto !important;
-    bottom: auto !important;
-    left: auto !important;
+@media (max-width: 768px) {
 
-    width: 100vw !important;
-    max-width: 100vw !important;
-    min-width: 0 !important;
-
-    height: auto !important;
-    min-height: 0 !important;
-
-    margin: 0 !important;
-    padding: 8px 10px !important;
-
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-
-    white-space: nowrap !important;
-
-    z-index: 9999 !important;
-
-    transform: none !important;
-    float: none !important;
-    clear: both !important;
-}
-
-/* Sidebar navigation items */
-
-.sidebar a,
-.sidebar button,
-.sidebar .nav-item {
-    position: relative !important;
-
-    flex: 0 0 auto !important;
-
-    width: auto !important;
-    min-width: max-content !important;
-    max-width: none !important;
-
-    margin: 0 3px !important;
-    padding: 8px 12px !important;
-
-    white-space: nowrap !important;
-}
+    /* GLOBAL */
+    html,
+    body {
+        ...
+    }
 
 
-    /* =========================
-       MAIN CONTENT
-    ========================= */
+    /* SIDEBAR → TOP NAVIGATION */
+
+    .layout {
+        display: flex !important;
+        flex-direction: column !important;
+
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .sidebar {
+        position: relative !important;
+        top: auto !important;
+        right: auto !important;
+        bottom: auto !important;
+        left: auto !important;
+
+        width: 100vw !important;
+        max-width: 100vw !important;
+
+        height: auto !important;
+
+        display: flex !important;
+        flex-direction: row !important;
+
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+
+        white-space: nowrap !important;
+
+        order: 1 !important;
+        z-index: 9999 !important;
+    }
+
+
+    /* SIDEBAR ITEMS */
+
+    .sidebar a,
+    .sidebar button,
+    .sidebar .nav-item {
+        flex: 0 0 auto !important;
+
+        width: auto !important;
+        min-width: max-content !important;
+
+        padding: 8px 12px !important;
+        margin: 0 3px !important;
+
+        white-space: nowrap !important;
+    }
+
+
+    /* MAIN CONTENT */
 
     .main-content {
+        order: 2 !important;
+
         width: 100% !important;
         max-width: 100% !important;
 
         margin-left: 0 !important;
         padding: 0 !important;
-
-        min-width: 0 !important;
     }
+
+
+    /* ...remaining CSS mo... */
+
+}
 
 
     /* =========================
