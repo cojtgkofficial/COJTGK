@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>COJTGK</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- External CSS -->
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+
+<body>
+
+<div class="app-container">
+
+    <!-- ================= SIDEBAR ================= -->
+    <aside class="sidebar">
+
+        <div class="sidebar-header" style="background-color: #2563eb; color: white; display: flex; align-items: center; gap: 12px; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <img src="images/COJ Logo.png" alt="ChurchHQ Logo" style="width: 60px; height: 60px; object-fit: fill;">
+            <div>
+                <h1 style="margin: 0; font-size: 16px; color: white; line-height: 1;">Church of Jesus The Glorious King</h1>
+                <span style="font-size: 10px; color: #93c5fd;">Bets Edition</span>
+            </div>
+        </div>
+        <nav>
+            <div class="nav-item active" onclick="showPage('dashboard')">
+                <i data-lucide="layout-dashboard"></i>
+                <span>Dashboard</span>
+            </div>
+
+            <div class="nav-item" onclick="showPage('planner')">
+                <i data-lucide="calendar-days"></i>
+                <span>Planner</span>
+            </div>
+
+            <div class="nav-item" onclick="showPage('sunday-service')">
+                <i data-lucide="sun"></i>
+                <span>Sunday Service</span>
+            </div>
+
+            <div class="nav-item" onclick="showPage('midweek-service')">
+                <i data-lucide="moon"></i>
+                <span>Midweek Service</span>
+            </div>
+
+            <div class="nav-item" onclick="showPage('songs')">
+                <i data-lucide="music-4"></i>
+                <span>Song Library</span>
+            </div>
+
+            <div class="nav-item" onclick="showPage('members')">
+                <i data-lucide="users"></i>
+                <span>Members</span>
+            </div>
+
+            <div class="nav-item" onclick="showPage('attendance')">
+                <i data-lucide="clipboard-check"></i>
+                <span>Attendance</span>
+            </div>
+
+            <div class="nav-item" onclick="showPage('reports')">
+                <i data-lucide="bar-chart-3"></i>
+                <span>Reports</span>
+            </div>
+
+            <div class="nav-item" onclick="showPage('settings')">
+                <i data-lucide="settings"></i>
+                <span>Settings</span>
+            </div>
+        </nav>
+
+    </aside>
+
+    <!-- ================= MAIN CONTENT ================= -->
+    <main class="main-content">
+
+        <!------------------------------------------------------------- DASHBOARD --------------------------------------------------------------------------->
+        <section id="dashboard" class="page">
+    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px;">
+        <i data-lucide="layout-dashboard" style="width: 28px; height: 28px;"></i>
+        <h1 class="page-title" style="margin: 0;">Dashboard</h1>
+    </div>
+            <p class="page-subtitle">Welcome to Church of Jesus The Glorious King Management System</p>
+
+            <!-- Statistics -->
+            <div class="dashboard-grid">
+                <div class="card stat-card">
+                    <h3>👤 Members</h3>
+                    <h2 id="memberCount">0</h2>
+                    <p>Registered Members</p>
+                </div>
+
+                <div class="card stat-card">
+                    <h3>🎵 Songs</h3>
+                    <h2 id="songCount">0</h2>
+                    <p>Song Library</p>
+                </div>
+
+                <div class="card stat-card">
+                    <h3>📅 Events</h3>
+                    <h2 id="eventCount">0</h2>
+                    <p>This Month</p>
+                </div>
+
+                <div class="card stat-card">
+                    <h3>✅ Tasks</h3>
+                    <h2 id="taskCount">0</h2>
+                    <p>Pending Tasks</p>
+                </div>
+            </div>
+            <div class="song-card" style="margin-top:20px;">
+                <h3 style="margin-bottom:15px;">
+                    🏆 Top Attendance
+                </h3>
+                <div id="topAttendanceList">
+                    Loading...
+                </div>
+            </div>
+            <div class="song-card" style="padding:20px; margin-top:20px;">
+                <h3 style="margin-top:0;">
+                    🎂 Birthday This Month
+                </h3>
+                <div id="birthdayList">
+                    <p style="color:#6b7280;">
+                        No birthdays this month.
+                    </p>
+                </div>
+            </div>
+            <!-- DASHBOARD LOWER SECTION -->
+            <div class="dashboard-lower">
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h2 style="margin: 0;">📅 Upcoming Activities</h2>
+                        <button class="secondary-btn" style="padding: 4px 10px; font-size: 12px;" onclick="openActivityModal()">⚙️ Manage</button>
+                    </div>
+                    <ul class="activity-list" id="dashboardActivities"></ul>
+                </div>
+
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h2 style="margin: 0;">📢 Announcements</h2>
+                        <button class="secondary-btn" style="padding: 4px 10px; font-size: 12px;" onclick="openAnnouncementModal()">⚙️ Manage</button>
+                    </div>
+                    <ul class="announcement-list" id="dashboardAnnouncements"></ul>
+                </div>
+            </div>
+        </section>
+
+        <!----------------------------------------------------------------------------- PLANNER ------------------------------------------------------------------->
+<section id="planner" class="page hidden">
+    <div class="planner-header">
+        <div>
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 4px;">
+                <i data-lucide="calendar-days" style="width: 28px; height: 28px;"></i>
+                <h1 class="page-title" style="margin: 0;">Church Tasks</h1>
+            </div>
+            <p class="page-subtitle">Manage ministry tasks and assignments</p>
+        </div>
+        <button class="primary-btn" id="addTaskBtn">+ New Task</button>
+    </div>
+
+            <div class="planner-search">
+                <input type="text" id="taskSearch" placeholder="🔍 Search task...">
+            </div>
+
+            <div class="planner-board">
+                <div class="planner-column">
+                    <div class="column-header">
+                        <h3>📌 TO DO</h3>
+                        <span class="task-counter">0</span>
+                    </div>
+                    <div id="todoColumn" class="task-list"></div>
+                </div>
+
+                <div class="planner-column">
+                    <div class="column-header">
+                        <h3>🚧 IN PROGRESS</h3>
+                        <span class="task-counter">0</span>
+                    </div>
+                    <div id="progressColumn" class="task-list"></div>
+                </div>
+
+                <div class="planner-column">
+                    <div class="column-header">
+                        <h3>✅ COMPLETED</h3>
+                        <span class="task-counter">0</span>
+                    </div>
+                    <div id="completedColumn" class="task-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SUNDAY SERVICE PAGE ================= -->
+        <section id="sunday-service" class="page hidden">
+            <div class="planner-header">
+                <div>
+                    <h1 class="page-title">☀️ Sunday Service Planner</h1>
+                    <p class="page-subtitle">Create and save a Sunday lineup and roster per date</p>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <button class="secondary-btn" onclick="resetServiceForm('sunday')">➕ New Lineup</button>
+                    <button class="primary-btn" onclick="saveServiceData('sunday')">💾 Save Sunday Roster</button>
+                </div>
+            </div>
+
+            <div class="service-card" style="margin-bottom: 25px;">
+                <div class="form-group" style="max-width: 250px; margin-bottom: 15px;">
+                    <label style="font-size: 12px; font-weight:bold;">📅 Service Date:</label>
+                    <input type="date" id="sun_serviceDate" style="padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
+                </div>
+
+                <div class="service-grid">
+                    <div class="service-box">
+                        <h4>🎵 Music Ministry</h4>
+                        <label>Worship Leader:</label>
+                        <input type="text" id="sun_worshipLeader" placeholder="Name of Worship Leader">
+
+                        <label>Backing Vocals:</label>
+                        <input type="text" id="sun_backingVocals" placeholder="Vocalists (comma-separated)">
+
+                        <label>Keys / Piano:</label>
+                        <input type="text" id="sun_keys" placeholder="Name of Pianist / Keyboardist">
+
+                        <label>Guitar:</label>
+                        <input type="text" id="sun_guitar" placeholder="Name of Guitarist">
+
+                        <label>Bass:</label>
+                        <input type="text" id="sun_bass" placeholder="Name of Bassist">
+
+                        <label>Drums:</label>
+                        <input type="text" id="sun_drums" placeholder="Name of Drummer">
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        <div class="service-box">
+                            <h4>💻 Multimedia & Tech Team</h4>
+                            <label>PPT / Lyrics Operator:</label>
+                            <input type="text" id="sun_pptOperator" placeholder="Name">
+
+                            <label>Sound Engineer / Audio:</label>
+                            <input type="text" id="sun_soundEngineer" placeholder="Name">
+
+                            <label>Live Stream / Camera:</label>
+                            <input type="text" id="sun_liveStream" placeholder="Name">
+                        </div>
+
+                        <div class="service-box">
+                            <h4>📖 Speaker & Songs Lineup</h4>
+                            <label>Preacher / Pastor:</label>
+                            <input type="text" id="sun_preacher" placeholder="Pastor / Guest Speaker Name">
+
+                            <label>Sunday Message / Title:</label>
+                            <input type="text" id="sun_messageTitle" placeholder="Title of the Message / Sermon">
+
+                            <label>Songs / Lineup (Praise & Worship):</label>
+                            <textarea id="sun_songsLineup" rows="3" placeholder="1. Way Maker (Key: G)&#10;2. Gratitude (Key: B)"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📜 Saved Sunday Service Records</h3>
+                <div style="max-height: 250px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 6px;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; text-align: left;">
+                                <th style="padding: 10px;">Date</th>
+                                <th style="padding: 10px;">Worship Leader</th>
+                                <th style="padding: 10px;">Speaker</th>
+                                <th style="padding: 10px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sundayHistoryBody">
+                            <!-- Dito kusang papasok ang mga rows mula sa JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 25px;">
+                <h3>🔴 Live Stream Title & Description Generator</h3>
+                <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">Automatically retrieve details from your saved service records and lineup.</p>
+                
+                <button class="primary-btn" onclick="generateCOJTGKStreamDetailsFromSaved('sunday')">✨ Generate Live Details from Saved Records</button>
+
+                <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
+                    <div>
+                        <label style="font-size: 12px; font-weight: bold; color: #475569;">Generated Title:</label>
+                        <input type="text" id="outputStreamTitle" readonly style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; background: #f8fafc; font-weight: 600;">
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; font-weight: bold; color: #475569;">Generated Description:</label>
+                        <textarea id="outputStreamDesc" rows="12" readonly style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; background: #f8fafc; font-family: monospace; font-size: 13px;"></textarea>
+                    </div>
+                    <button class="secondary-btn" onclick="copyMidweekDetails()" style="align-self: flex-start;">📋 Copy to Clipboard</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= MIDWEEK SERVICE PAGE ================= -->
+        <section id="midweek-service" class="page hidden">
+            <div class="planner-header">
+                <div>
+                    <h1 class="page-title">🌙 Midweek Service Planner</h1>
+                    <p class="page-subtitle">Create and save a Midweek lineup and roster per date</p>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <button class="secondary-btn" onclick="resetServiceForm('midweek')">➕ New Lineup</button>
+                    <button class="primary-btn" onclick="saveServiceData('midweek')">💾 Save Midweek Roster</button>
+                </div>
+            </div>
+
+            <div class="service-card" style="margin-bottom: 25px;">
+                <div class="form-group" style="max-width: 250px; margin-bottom: 15px;">
+                    <label style="font-size: 12px; font-weight:bold;">📅 Service Date:</label>
+                    <input type="date" id="mid_serviceDate" style="padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
+                </div>
+
+                <div class="service-grid">
+                    <div class="service-box">
+                        <h4>🎵 Music Ministry</h4>
+                        <label>Worship Leader:</label>
+                        <input type="text" id="mid_worshipLeader" placeholder="Name of Worship Leader">
+
+                        <label>Backing Vocals:</label>
+                        <input type="text" id="mid_backingVocals" placeholder="Vocalists (comma-separated)">
+
+                        <label>Keys / Piano:</label>
+                        <input type="text" id="mid_keys" placeholder="Name of Pianist / Keyboardist">
+
+                        <label>Guitar:</label>
+                        <input type="text" id="mid_guitar" placeholder="Name of Guitarist">
+
+                        <label>Bass:</label>
+                        <input type="text" id="mid_bass" placeholder="Name of Bassist">
+
+                        <label>Drums:</label>
+                        <input type="text" id="mid_drums" placeholder="Name of Drummer">
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        <div class="service-box">
+                            <h4>💻 Multimedia & Tech Team</h4>
+                            <label>PPT / Lyrics Operator:</label>
+                            <input type="text" id="mid_pptOperator" placeholder="Name">
+
+                            <label>Sound Engineer / Audio:</label>
+                            <input type="text" id="mid_soundEngineer" placeholder="Name">
+
+                            <label>Live Stream / Camera:</label>
+                            <input type="text" id="mid_liveStream" placeholder="Name">
+                        </div>
+
+                        <div class="service-box">
+                            <h4>📖 Speaker & Songs Lineup</h4>
+                            <label>Preacher / Pastor:</label>
+                            <input type="text" id="mid_preacher" placeholder="Pastor / Guest Speaker Name">
+
+                            <label>Midweek Message / Title:</label>
+                            <input type="text" id="mid_messageTitle" placeholder="Title of the Message / Sermon">
+
+                            <label>Songs / Lineup (Midweek Service):</label>
+                            <textarea id="mid_songsLineup" rows="3" placeholder="1. Song Title (Key: G)&#10;2. Song Title (Key: B)"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📜 Saved Midweek Service Records</h3>
+                <div style="max-height: 250px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 6px;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; text-align: left;">
+                                <th style="padding: 10px;">Date</th>
+                                <th style="padding: 10px;">Worship Leader</th>
+                                <th style="padding: 10px;">Speaker</th>
+                                <th style="padding: 10px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="midweekHistoryBody">
+                            <!-- Dito naman papasok ang midweek records -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 25px;">
+                <h3>🌙 Midweek Service Title & Description Generator</h3>
+                <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">Automatically generate the title and description for Midweek Live based on your saved records.</p>
+                
+                <!-- INAYOS ANG FUNCTION DITO MULA SA generateMidweekStreamDetails() PATUNGONG generateCOJTGKStreamDetailsFromSaved('midweek') -->
+                <button class="primary-btn" onclick="generateCOJTGKMidweekStreamDetailsFromSaved()">✨ Generate Midweek Live Details</button>
+
+                <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
+                    <div>
+                        <label style="font-size: 12px; font-weight: bold; color: #475569;">Generated Title:</label>
+                        <input type="text" id="outputMidweekTitle" readonly style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; background: #f8fafc; font-weight: 600;">
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; font-weight: bold; color: #475569;">Generated Description:</label>
+                        <textarea id="outputMidweekDesc" rows="12" readonly style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; background: #f8fafc; font-family: monospace; font-size: 13px;"></textarea>
+                    </div>
+                    <button class="secondary-btn" onclick="copyMidweekDetails()" style="align-self: flex-start;">📋 Copy to Clipboard</button>
+                </div>
+            </div>
+        </section>
+
+        <!---------------------------------------------------------------------- SONGS LIBRARY -------------------------------------------------------------------------->
+        <section id="songs" class="page hidden">
+            <div class="songs-header">
+    <div>
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 4px;">
+            <i data-lucide="music-4" style="width: 28px; height: 28px;"></i>
+            <h1 class="page-title" style="margin: 0;">Song Library & Lineup</h1>
+        </div>
+        <p class="page-subtitle">Manage worship songs, chords, and Sunday service lineup</p>
+    </div>
+    <button class="primary-btn" id="addSongBtn">+ New Song</button>
+</div>
+            <div class="card" style="margin-bottom: 25px;">
+                <h3>🎵 Sunday Service Song Lineup</h3>
+                <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">Select a song from the Library to add to this week's lineup (usually 2-5 songs).</p>
+                
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <select id="selectSongDropdown" style="flex: 1; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                        <option value="">-- Select a song from the Library --</option>
+                    </select>
+                    <button class="primary-btn" onclick="addSongToServiceLineup()">➕ Add to Lineup</button>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; text-align: left; border-collapse: collapse;" id="serviceSongLineupTable">
+                        <thead>
+                            <tr style="border-bottom: 2px solid #e2e8f0; font-size: 14px; color: #64748b;">
+                                <th style="padding: 10px; width: 60px;">Order</th>
+                                <th style="padding: 10px;">Song Title</th>
+                                <th style="padding: 10px;">Artist</th>
+                                <th style="padding: 10px;">Key</th>
+                                <th style="padding: 10px; text-align: center;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="serviceSongLineupBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="planner-search" style="margin-bottom: 15px;">
+                <input type="text" id="songSearch" placeholder="🔍 Search song title, artist, or key..." oninput="filterSongTable(this.value)" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px;">
+            </div>
+
+            <div class="card">
+                <h3>📜 Worship Songs Repertoire (All Songs)</h3>
+                <div style="overflow-x: auto; margin-top: 15px;">
+                    <table style="width: 100%; text-align: left; border-collapse: collapse;" id="fullSongTable">
+                        <thead>
+                            <tr style="border-bottom: 2px solid #e2e8f0; font-size: 14px; color: #64748b;">
+                                <th style="padding: 10px;">Song Title</th>
+                                <th style="padding: 10px;">Artist</th>
+                                <th style="padding: 10px;">Key</th>
+                                <th style="padding: 10px;">Category</th>
+                                <th style="padding: 10px; text-align: center;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fullSongTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!---------------------------------------------------------------------- MEMBERS ------------------------------------------------------------------>
+        <section id="members" class="page hidden">
+            <div class="songs-header">
+    <div>
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 4px;">
+            <i data-lucide="users" style="width: 28px; height: 28px;"></i>
+            <h1 class="page-title" style="margin: 0;">Members Directory</h1>
+        </div>
+        <p class="page-subtitle">Manage church members, leaders, and volunteers</p>
+    </div>
+    <button class="primary-btn" id="addMemberBtn">+ New Member</button>
+</div>
+
+            <div class="planner-search">
+                <input type="text" id="memberSearch" placeholder="🔍 Search member name, ministry, or role...">
+            </div>
+
+            <div class="songs-grid" id="membersGrid"></div>
+
+        </section>
+
+        <!----------------------------------------------------------------------- ATTENDANCE ------------------------------------------------------------------->
+        <section id="attendance" class="page hidden">
+            <div class="songs-header">
+    <div>
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 4px;">
+            <i data-lucide="clipboard-check" style="width: 28px; height: 28px;"></i>
+            <h1 class="page-title" style="margin: 0;">Attendance Tracker</h1>
+        </div>
+        <p class="page-subtitle">Track service and ministry event attendance</p>
+    </div>
+    <button class="primary-btn" id="saveAttendanceBtn">💾 Save Attendance Record</button>
+</div>
+
+            <div class="song-controls-bar" style="margin-bottom: 20px;">
+
+    <div class="control-group">
+        <label>Event Name:</label>
+
+        <input
+            type="text"
+            id="attEventName"
+            value="Sunday General Service"
+            style="padding:6px 10px; border-radius:8px; border:1px solid #cbd5e1; font-size:13px;"
+        >
+    </div>
+
+
+    <div class="control-group">
+        <label>Service Type:</label>
+
+        <select
+            id="attServiceType"
+            style="padding:6px 10px; border-radius:8px; border:1px solid #cbd5e1; font-size:13px;"
+        >
+            <option value="sunday">Sunday Service</option>
+            <option value="midweek">Midweek Service</option>
+        </select>
+    </div>
+
+
+    <div class="control-group">
+        <label>Date:</label>
+
+        <input
+            type="date"
+            id="attDate"
+            style="padding:6px 10px; border-radius:8px; border:1px solid #cbd5e1; font-size:13px;"
+        >
+    </div>
+
+
+    <div class="control-group">
+        <label>Quick Action:</label>
+
+        <button
+            type="button"
+            class="secondary-btn"
+            onclick="markAllAttendance(true)"
+        >
+            Check All Present
+        </button>
+
+        <button
+            type="button"
+            class="secondary-btn"
+            onclick="markAllAttendance(false)"
+        >
+            Uncheck All
+        </button>
+    </div>
+
+</div>
+
+            <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
+                <div class="song-card" style="flex: 1; min-width: 150px; padding: 15px; text-align: center;">
+                    <p style="font-size: 12px; color: #6b7280; margin-bottom: 4px;">Total Members</p>
+                    <h2 id="attTotalCount" style="margin: 0; color: #2563eb;">0</h2>
+                </div>
+                <div class="song-card" style="flex: 1; min-width: 150px; padding: 15px; text-align: center;">
+                    <p style="font-size: 12px; color: #6b7280; margin-bottom: 4px;">Present</p>
+                    <h2 id="attPresentCount" style="margin: 0; color: #16a34a;">0</h2>
+                </div>
+                <div class="song-card" style="flex: 1; min-width: 150px; padding: 15px; text-align: center;">
+                    <p style="font-size: 12px; color: #6b7280; margin-bottom: 4px;">Absent</p>
+                    <h2 id="attAbsentCount" style="margin: 0; color: #dc2626;">0</h2>
+                </div>
+            </div>
+
+            <div class="planner-search">
+                <input type="text" id="attSearch" placeholder="🔍 Search member to check-in...">
+            </div>
+
+            <div id="attendanceList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px;"></div>
+
+            <!-- =========================================
+     MEMBER ATTENDANCE SUMMARY
+========================================= -->
+
+<div style="margin-top: 30px;">
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+
+        <div>
+            <h2 style="margin: 0; font-size: 20px;">
+                📊 Member Attendance Summary
+            </h2>
+
+            <p style="margin: 4px 0 0; color: #6b7280; font-size: 13px;">
+                Total attendance for Sunday and Midweek Services
+            </p>
+        </div>
+
+        <div>
+            <input
+                type="text"
+                id="attendanceSummarySearch"
+                placeholder="🔍 Search member..."
+                style="
+                    padding: 8px 12px;
+                    border: 1px solid #cbd5e1;
+                    border-radius: 8px;
+                    font-size: 13px;
+                    min-width: 220px;
+                "
+            >
+        </div>
+
+    </div>
+
+
+    <div style="
+        background: white;
+        border-radius: 10px;
+        overflow-x: auto;
+        border: 1px solid #e5e7eb;
+    ">
+
+        <table style="
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 650px;
+        ">
+            <div style="margin-bottom:15px;">
+
+    <label style="font-size:13px;">
+        Attendance Year:
+    </label>
+
+    <select 
+        id="attendanceYearSelect"
+        style="
+            padding:6px 10px;
+            border-radius:8px;
+            border:1px solid #cbd5e1;
+            margin-left:8px;
+        "
+    >
+    </select>
+
+</div>
+            <thead>
+
+                <tr style="background: #f8fafc;">
+
+                    <th style="padding: 12px; text-align: left;">
+                        Member
+                    </th>
+
+                    <th style="padding: 12px; text-align: center;">
+                        Sunday Present
+                    </th>
+
+                    <th style="padding: 12px; text-align: center;">
+                        Midweek Present
+                    </th>
+
+                    <th style="padding: 12px; text-align: center;">
+                        Total Present
+                    </th>
+
+                </tr>
+
+            </thead>
+
+            <tbody id="attendanceSummaryBody">
+
+                <tr>
+
+                    <td
+                        colspan="4"
+                        style="
+                            padding: 20px;
+                            text-align: center;
+                            color: #6b7280;
+                        "
+                    >
+                        No attendance summary available.
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+            <!-- =========================================
+     ATTENDANCE HISTORY
+========================================= -->
+<div style="margin-top: 30px;">
+
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+        <div>
+            <h3 style="margin: 0;">Attendance Records</h3>
+            <p style="margin: 4px 0 0; font-size: 12px; color: #6b7280;">
+                View and manage saved attendance records
+            </p>
+        </div>
+    </div>
+
+    <div class="song-card" style="padding: 0; overflow: hidden;">
+
+        <div style="overflow-x: auto;">
+
+            <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+
+                <thead>
+                    <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+
+                        <th style="padding: 12px; text-align: left;">
+                            Date
+                        </th>
+
+                        <th style="padding: 12px; text-align: left;">
+                            Event
+                        </th>
+
+                        <th style="padding: 12px; text-align: center;">
+                            Total
+                        </th>
+
+                        <th style="padding: 12px; text-align: center;">
+                            Present
+                        </th>
+
+                        <th style="padding: 12px; text-align: center;">
+                            Action
+                        </th>
+
+                    </tr>
+                </thead>
+
+                <tbody id="attendanceHistoryBody">
+
+                    <tr>
+                        <td colspan="5"
+                            style="padding: 20px; text-align: center; color: #9ca3af;">
+                            No attendance records found.
+                        </td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+        </section>
+
+        <!---------------------------------------------------------------------------- REPORTS ---------------------------------------------------------------------->
+        <section id="reports" class="page hidden">
+            <div class="songs-header">
+                <div>
+                    <h1 class="page-title">📈 Church Analytics & Reports</h1>
+                    <p class="page-subtitle">Visual insights, attendance growth, and ministry distribution</p>
+                </div>
+                <button class="primary-btn" onclick="generateReportsData()">⟳ Refresh Analytics</button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin: 20px 0;">
+                <div class="song-card" style="padding: 20px; border-left: 5px solid #2563eb;">
+                    <p style="color: #6b7280; font-size: 13px; font-weight: 600; margin: 0;">TOTAL MEMBERS</p>
+                    <h2 id="rep-total-members" style="font-size: 28px; margin: 8px 0 0 0; color: #1f2937;">0</h2>
+                    <span id="rep-active-members-badge" style="font-size: 12px; color: #16a34a; font-weight: 500;">0 Active</span>
+                </div>
+
+                <div class="song-card" style="padding: 20px; border-left: 5px solid #16a34a;">
+                    <p style="color: #6b7280; font-size: 13px; font-weight: 600; margin: 0;">LATEST ATTENDANCE</p>
+                    <h2 id="rep-latest-att" style="font-size: 28px; margin: 8px 0 0 0; color: #1f2937;">0</h2>
+                    <span id="rep-latest-att-rate" style="font-size: 12px; color: #2563eb; font-weight: 500;">0% turnout</span>
+                </div>
+
+                <div class="song-card" style="padding: 20px; border-left: 5px solid #9333ea;">
+                    <p style="color: #6b7280; font-size: 13px; font-weight: 600; margin: 0;">SONG REPERTOIRE</p>
+                    <h2 id="rep-total-songs" style="font-size: 28px; margin: 8px 0 0 0; color: #1f2937;">0</h2>
+                    <span style="font-size: 12px; color: #6b7280;">Worship Library</span>
+                </div>
+
+                <div class="song-card" style="padding: 20px; border-left: 5px solid #eab308;">
+                    <p style="color: #6b7280; font-size: 13px; font-weight: 600; margin: 0;">PLANNER PROGRESS</p>
+                    <h2 id="rep-task-progress" style="font-size: 28px; margin: 8px 0 0 0; color: #1f2937;">0%</h2>
+                    <span id="rep-task-counts" style="font-size: 12px; color: #6b7280;">0 of 0 Completed</span>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+                <div class="song-card" style="padding: 20px;">
+                    <h3 style="margin-top: 0; font-size: 16px; color: #1f2937;">👤 Members per Ministry</h3>
+                    <div id="rep-ministry-list" style="display: flex; flex-direction: column; gap: 12px; margin-top: 16px;"></div>
+                </div>
+
+                <div class="song-card" style="padding: 20px;">
+                    <h3 style="margin-top: 0; font-size: 16px; color: #1f2937;">📅 Recent Attendance Summary</h3>
+                    <div id="rep-attendance-history" style="display: flex; flex-direction: column; gap: 10px; margin-top: 16px;"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-------------------------------------------------------------------------------- SETTINGS --------------------------------------------------------------------->
+        <section id="settings" class="page hidden">
+    <div class="songs-header">
+        <div>
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 4px;">
+                <i data-lucide="settings" style="width: 28px; height: 28px;"></i>
+                <h1 class="page-title" style="margin: 0;">Settings & Data Management</h1>
+            </div>
+            <p class="page-subtitle">Backup, restore, and manage your Church database</p>
+        </div>
+    </div>
+            <div style="display: flex; flex-direction: column; gap: 20px; max-width: 700px; margin-top: 20px;">
+                <div class="song-card" style="padding: 24px;">
+                    <h3 style="margin-top: 0; color: #2563eb; font-size: 18px;">📦 Data Backup & Restore</h3>
+                    <p style="color: #6b7280; font-size: 14px; line-height: 1.5;">
+                        Download all your saved data to keep a safe copy.
+                    </p>
+
+                    <div style="display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap;">
+                        <button class="primary-btn" onclick="exportChurchData()">📥 Export / Download Backup (.json)</button>
+                        <label class="secondary-btn" style="cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                            📤 Restore / Import Backup
+                            <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importChurchData(event)">
+                        </label>
+                    </div>
+                </div>
+
+                <div class="song-card" style="padding: 24px; border: 1px solid #fca5a5;">
+                    <h3 style="margin-top: 0; color: #dc2626; font-size: 18px;">⚠️ System Reset</h3>
+                    <p style="color: #6b7280; font-size: 14px; line-height: 1.5;">
+                        Make sure to export a backup before resetting. This action will delete all saved records.
+                    </p>
+
+                    <div style="margin-top: 20px;">
+                        <button class="secondary-btn" style="color: #dc2626; border-color: #fca5a5;" onclick="clearAllChurchData()">
+                            ❌ Clear All Church Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+</div>
+
+<!-- ================= MODALS SECTION ================= -->
+
+<!-- 1. ACTIVITY MODAL -->
+<div id="activityModal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Manage Activities</h2>
+            <button onclick="closeActivityModal()" class="close-btn">&times;</button>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Activity Title</label>
+                <input type="text" id="actTitleInput" placeholder="e.g. Youth Gathering">
+            </div>
+            <div class="form-group">
+                <label>Date</label>
+                <input type="text" id="actDateInput" placeholder="e.g. Aug 15">
+            </div>
+        </div>
+        <button class="primary-btn" onclick="addActivity()" style="width: 100%; margin-bottom: 20px;">+ Add Activity</button>
+        <hr style="margin-bottom: 15px; border-color: #eee;">
+        <div id="activityManagerList" style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto;"></div>
+        <div class="modal-footer" style="margin-top: 20px;">
+            <button onclick="closeActivityModal()" class="secondary-btn">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- 2. ANNOUNCEMENT MODAL -->
+<div id="announcementModal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Manage Announcements</h2>
+            <button onclick="closeAnnouncementModal()" class="close-btn">&times;</button>
+        </div>
+        <div class="form-group">
+            <label>Announcement Text</label>
+            <input type="text" id="annTextInput" placeholder="e.g. Choir practice this Friday at 5 PM">
+        </div>
+        <button class="primary-btn" onclick="addAnnouncement()" style="width: 100%; margin-bottom: 20px;">+ Add Announcement</button>
+        <hr style="margin-bottom: 15px; border-color: #eee;">
+        <div id="announcementManagerList" style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto;"></div>
+        <div class="modal-footer" style="margin-top: 20px;">
+            <button onclick="closeAnnouncementModal()" class="secondary-btn">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- 3. MANAGE DASHBOARD GENERAL MODAL -->
+<div id="manageDashboardModal" class="modal hidden">
+    <div class="modal-content" style="width: 500px; max-width: 90%; max-height: 80vh; overflow-y: auto;">
+        <div class="modal-header">
+            <h3 id="manageModalTitle" style="margin: 0;">Manage Dashboard Items</h3>
+            <button onclick="closeDashboardManageModal()" class="close-btn">&times;</button>
+        </div>
+        <div id="manageModalBody">
+            <!-- Dito lalabas ang listahan ng activities/announcements -->
+        </div>
+        <div class="modal-footer" style="margin-top: 20px;">
+            <button class="secondary-btn" onclick="closeDashboardManageModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- 4. ADD TASK MODAL -->
+<div id="taskModal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Add New Task</h2>
+            <button id="closeModal" class="close-btn">&times;</button>
+        </div>
+
+        <div class="form-group">
+            <label>Task Title</label>
+            <input type="text" id="taskTitle">
+        </div>
+
+        <div class="form-group">
+            <label>Description</label>
+            <textarea id="taskDescription"></textarea>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Category</label>
+                <select id="taskCategory">
+                    <option>Worship</option>
+                    <option>Choir</option>
+                    <option>Youth</option>
+                    <option>Finance</option>
+                    <option>Maintenance</option>
+                    <option>Others</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Priority</label>
+                <select id="taskPriority">
+                    <option>High</option>
+                    <option>Medium</option>
+                    <option>Low</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Due Date</label>
+                <input type="date" id="taskDate">
+            </div>
+
+            <div class="form-group">
+                <label>Status</label>
+                <select id="taskStatus">
+                    <option value="todo">To Do</option>
+                    <option value="progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button id="cancelTask" class="secondary-btn">Cancel</button>
+            <button id="saveTask" class="primary-btn">Save Task</button>
+        </div>
+    </div>
+</div>
+
+<!-- 5. ADD SONG MODAL -->
+<div id="songModal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Add New Song</h2>
+            <button id="closeSongModal" class="close-btn">&times;</button>
+        </div>
+
+        <div class="form-group">
+            <label>Song Title</label>
+            <input type="text" id="songTitle" placeholder="e.g. Way Maker">
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Artist / Composer</label>
+                <input type="text" id="songArtist" placeholder="e.g. Sinach">
+            </div>
+
+            <div class="form-group">
+                <label>Key</label>
+                <select id="songKey">
+                    <option value="C">C</option>
+                    <option value="C#">C#</option>
+                    <option value="D">D</option>
+                    <option value="Eb">Eb</option>
+                    <option value="E">E</option>
+                    <option value="F">F</option>
+                    <option value="F#">F#</option>
+                    <option value="G">G</option>
+                    <option value="Ab">Ab</option>
+                    <option value="A">A</option>
+                    <option value="Bb">Bb</option>
+                    <option value="B">B</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Category</label>
+            <select id="songCategory">
+                <option>Praise</option>
+                <option>Worship</option>
+                <option>Special Item</option>
+                <option>Hymn</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Lyrics & Chords</label>
+            <textarea id="songLyrics" placeholder="Enter lyrics and chord placements here..." style="height:150px;"></textarea>
+        </div>
+
+        <div class="modal-footer">
+            <button id="cancelSong" class="secondary-btn">Cancel</button>
+            <button id="saveSong" class="primary-btn">Save Song</button>
+        </div>
+    </div>
+</div>
+
+<!-- 6. VIEW SONG MODAL -->
+<div id="viewSongModal" class="modal hidden">
+    <div class="modal-content" style="max-width: 700px;">
+        <div class="modal-header">
+            <div>
+                <h2 id="viewSongTitle">Song Title</h2>
+                <p id="viewSongSubtitle" style="color:#6b7280; font-size:14px;"></p>
+            </div>
+            <button id="closeViewSongModal" class="close-btn">&times;</button>
+        </div>
+
+        <div class="song-controls-bar">
+            <div class="control-group">
+                <label>Display:</label>
+                <select id="viewDisplayMode" onchange="updateSongViewDisplay()">
+                    <option value="both">Chords & Lyrics</option>
+                    <option value="chords">Chords Only</option>
+                    <option value="lyrics">Lyrics Only</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Transpose Key:</label>
+                <div class="transpose-buttons">
+                    <button class="secondary-btn" onclick="transposeSong(-1)">-1 Semi</button>
+                    <span id="currentKeyDisplay" class="key-badge">Key: -</span>
+                    <button class="secondary-btn" onclick="transposeSong(1)">+1 Semi</button>
+                </div>
+            </div>
+        </div>
+
+        <div style="background:#f8fafc; padding:20px; border-radius:12px; border:1px solid #e5e7eb; max-height:400px; overflow-y:auto; margin-top:15px;">
+            <pre id="viewSongLyrics" style="font-family: monospace; white-space: pre-wrap; font-size:15px; line-height: 1.6;"></pre>
+        </div>
+
+        <div class="modal-footer" style="margin-top:15px;">
+            <button id="closeViewSongBtn" class="secondary-btn">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- 7. ADD / EDIT MEMBER MODAL -->
+<div id="memberModal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="memberModalTitle">Add New Member</h2>
+            <button id="closeMemberModal" class="close-btn">&times;</button>
+        </div>
+
+        <input type="hidden" id="editMemberId">
+
+        <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="memberName" placeholder="e.g. Juan Cruz">
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Contact Number</label>
+                <input type="text" id="memberContact" placeholder="e.g. 09123456789">
+            </div>
+
+            <div class="form-group">
+                <label>Status</label>
+                <select id="memberStatus">
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                    <option value="Visitor">Visitor</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+    <label>Birthday:</label>
+    <input 
+        type="date" 
+        id="memberBirthday"
+    >
+</div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <label>Ministry Group</label>
+                    <button type="button" onclick="addCustomMinistry()" style="background:none; border:none; color:#2563eb; cursor:pointer; font-size:12px; font-weight:bold;">+ Add New Ministry</button>
+                </div>
+                <select id="memberMinistry">
+                    <option>Adults Ministry</option>
+                    <option>Children's Ministry</option>
+                    <option>General Member</option>
+                    <option>Multimedia Team</option>
+                    <option>Ushering & Security</option>
+                    <option>Worship Team</option>
+                    <option>Youth Ministry</option>
+                    <option>Young Pro Ministry</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Role</label>
+                <input type="text" id="memberRole" placeholder="e.g. Leader, Guitarist, Member">
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button id="cancelMember" class="secondary-btn">Cancel</button>
+            <button id="saveMember" class="primary-btn">Save Member</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
