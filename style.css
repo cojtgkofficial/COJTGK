@@ -2481,3 +2481,24 @@ body.dark *:focus-visible {
         gap: 8px !important;
     }
 }
+
+/* =========================================================
+   MOBILE PAGE VISIBILITY FIX
+========================================================= */
+
+@media (max-width: 768px) {
+
+    /* Every page starts according to its hidden class */
+    .main-content .page.hidden {
+        display: none !important;
+    }
+
+    /* Only the page without hidden is visible */
+    .main-content .page:not(.hidden) {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+}
