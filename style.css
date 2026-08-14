@@ -2203,7 +2203,7 @@ body.dark *:focus-visible {
 
 /* =========================================================
    CHURCHHQ MOBILE UI
-   MOBILE TOP NAVIGATION / NO HORIZONTAL PAGE SCROLL
+   SIDEBAR → TOP NAVIGATION
 ========================================================= */
 
 @media (max-width: 768px) {
@@ -2232,24 +2232,8 @@ body.dark *:focus-visible {
 
 
     /* =====================================================
-       MAIN LAYOUT
-    ===================================================== */
-
-    .layout {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-
-        display: flex !important;
-        flex-direction: column !important;
-
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-
-    /* =====================================================
-       SIDEBAR → TOP NAVIGATION
+       SIDEBAR
+       MOVE ENTIRE SIDEBAR TO TOP
     ===================================================== */
 
     .sidebar {
@@ -2268,35 +2252,103 @@ body.dark *:focus-visible {
         min-height: 0 !important;
 
         margin: 0 !important;
-        padding: 8px 10px !important;
+        padding: 8px !important;
+
+        display: flex !important;
+        flex-direction: column !important;
+
+        align-items: stretch !important;
+
+        float: none !important;
+        transform: none !important;
+
+        z-index: 9999 !important;
+
+        overflow: visible !important;
+    }
+
+
+    /* =====================================================
+       SIDEBAR HEADER
+    ===================================================== */
+
+    .sidebar-header {
+        width: 100% !important;
+        max-width: 100% !important;
+
+        margin: 0 0 8px 0 !important;
+
+        padding: 12px !important;
+
+        display: flex !important;
+        align-items: center !important;
+
+        gap: 10px !important;
+
+        border-radius: 8px !important;
+
+        flex-shrink: 0 !important;
+    }
+
+    .sidebar-header img {
+        width: 50px !important;
+        height: 50px !important;
+
+        flex-shrink: 0 !important;
+    }
+
+    .sidebar-header h1 {
+        font-size: 15px !important;
+        line-height: 1.2 !important;
+
+        white-space: normal !important;
+
+        overflow-wrap: anywhere !important;
+    }
+
+    .sidebar-header span {
+        font-size: 10px !important;
+    }
+
+
+    /* =====================================================
+       NAVIGATION CONTAINER
+    ===================================================== */
+
+    .sidebar nav {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
 
         display: flex !important;
         flex-direction: row !important;
+
         align-items: center !important;
 
-        order: 1 !important;
+        gap: 4px !important;
+
+        margin: 0 !important;
+        padding: 4px !important;
 
         overflow-x: auto !important;
         overflow-y: hidden !important;
 
         white-space: nowrap !important;
 
-        z-index: 9999 !important;
+        -webkit-overflow-scrolling: touch !important;
 
-        transform: none !important;
-        float: none !important;
-        clear: both !important;
+        scrollbar-width: none !important;
+    }
 
-        flex-shrink: 0 !important;
+    .sidebar nav::-webkit-scrollbar {
+        display: none !important;
     }
 
 
     /* =====================================================
-       SIDEBAR ITEMS
+       NAVIGATION ITEMS
     ===================================================== */
 
-    .sidebar a,
-    .sidebar button,
     .sidebar .nav-item {
         position: relative !important;
 
@@ -2306,12 +2358,65 @@ body.dark *:focus-visible {
         min-width: max-content !important;
         max-width: none !important;
 
-        margin: 0 3px !important;
-        padding: 8px 12px !important;
+        height: auto !important;
+
+        margin: 0 !important;
+        padding: 9px 12px !important;
+
+        display: flex !important;
+
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: center !important;
+
+        gap: 6px !important;
 
         white-space: nowrap !important;
 
         overflow: visible !important;
+    }
+
+
+    /* =====================================================
+       NAVIGATION ICONS
+    ===================================================== */
+
+    .sidebar .nav-item i,
+    .sidebar .nav-item svg {
+        width: 20px !important;
+        height: 20px !important;
+
+        flex-shrink: 0 !important;
+    }
+
+
+    /* =====================================================
+       NAVIGATION TEXT
+    ===================================================== */
+
+    .sidebar .nav-item span {
+        display: inline !important;
+
+        width: auto !important;
+        max-width: none !important;
+
+        white-space: nowrap !important;
+
+        font-size: 11px !important;
+    }
+
+
+    /* =====================================================
+       ACTIVE NAV ITEM
+    ===================================================== */
+
+    .sidebar .nav-item.active {
+        flex: 0 0 auto !important;
+
+        width: auto !important;
+        min-width: max-content !important;
+
+        white-space: nowrap !important;
     }
 
 
@@ -2331,8 +2436,6 @@ body.dark *:focus-visible {
 
         padding: 0 !important;
 
-        order: 2 !important;
-
         overflow-x: hidden !important;
     }
 
@@ -2351,33 +2454,6 @@ body.dark *:focus-visible {
         padding: 16px 12px 30px !important;
 
         overflow-x: hidden !important;
-    }
-
-
-    /* =====================================================
-       HEADER
-    ===================================================== */
-
-    .page-title {
-        width: 100% !important;
-
-        font-size: 21px !important;
-        line-height: 1.25 !important;
-
-        overflow-wrap: anywhere !important;
-        word-break: break-word !important;
-    }
-
-    .page-subtitle {
-        width: 100% !important;
-
-        font-size: 12px !important;
-        line-height: 1.5 !important;
-
-        margin-bottom: 14px !important;
-
-        overflow-wrap: anywhere !important;
-        word-break: break-word !important;
     }
 
 
@@ -2403,17 +2479,12 @@ body.dark *:focus-visible {
         max-width: 100% !important;
         min-width: 0 !important;
 
-        padding: 12px !important;
         margin: 0 !important;
-
-        overflow: hidden !important;
+        padding: 12px !important;
     }
 
     .stat-card h3 {
-        width: 100% !important;
-
         font-size: 12px !important;
-
         white-space: normal !important;
 
         overflow-wrap: anywhere !important;
@@ -2422,21 +2493,15 @@ body.dark *:focus-visible {
 
     .stat-card h2 {
         font-size: 22px !important;
-
-        overflow-wrap: anywhere !important;
-        word-break: break-word !important;
     }
 
     .stat-card p {
         font-size: 10px !important;
-
-        overflow-wrap: anywhere !important;
-        word-break: break-word !important;
     }
 
 
     /* =====================================================
-       ALL CARDS
+       CARDS
     ===================================================== */
 
     .card,
@@ -2460,7 +2525,6 @@ body.dark *:focus-visible {
     .form-row {
         width: 100% !important;
         max-width: 100% !important;
-        min-width: 0 !important;
 
         display: flex !important;
         flex-direction: column !important;
@@ -2470,7 +2534,6 @@ body.dark *:focus-visible {
 
     .form-group {
         width: 100% !important;
-        max-width: 100% !important;
         min-width: 0 !important;
     }
 
@@ -2482,10 +2545,6 @@ body.dark *:focus-visible {
         min-width: 0 !important;
 
         box-sizing: border-box !important;
-    }
-
-    textarea {
-        resize: vertical !important;
     }
 
 
@@ -2504,8 +2563,6 @@ body.dark *:focus-visible {
         flex-direction: column !important;
 
         gap: 12px !important;
-
-        overflow-x: hidden !important;
     }
 
     #todoColumn,
@@ -2514,8 +2571,6 @@ body.dark *:focus-visible {
         width: 100% !important;
         max-width: 100% !important;
         min-width: 0 !important;
-
-        margin: 0 !important;
     }
 
     .task-card {
@@ -2535,7 +2590,6 @@ body.dark *:focus-visible {
     #membersGrid {
         width: 100% !important;
         max-width: 100% !important;
-        min-width: 0 !important;
 
         display: grid !important;
 
@@ -2552,12 +2606,7 @@ body.dark *:focus-visible {
     .table-container {
         width: 100% !important;
         max-width: 100% !important;
-        min-width: 0 !important;
 
-        /*
-         * Only the table can scroll horizontally.
-         * The entire page will not scroll horizontally.
-         */
         overflow-x: auto !important;
         overflow-y: visible !important;
 
@@ -2569,8 +2618,6 @@ body.dark *:focus-visible {
         min-width: 0 !important;
 
         table-layout: fixed !important;
-
-        border-collapse: collapse !important;
     }
 
     th,
@@ -2595,8 +2642,6 @@ body.dark *:focus-visible {
         max-width: 100% !important;
 
         padding: 10px !important;
-
-        box-sizing: border-box !important;
     }
 
     .modal-content {
@@ -2608,10 +2653,8 @@ body.dark *:focus-visible {
 
         padding: 16px !important;
 
-        overflow-y: auto !important;
         overflow-x: hidden !important;
-
-        box-sizing: border-box !important;
+        overflow-y: auto !important;
     }
 
 
@@ -2623,8 +2666,6 @@ body.dark *:focus-visible {
         max-width: 100% !important;
 
         box-sizing: border-box !important;
-
-        overflow-wrap: anywhere !important;
     }
 
 
@@ -2638,24 +2679,6 @@ body.dark *:focus-visible {
         width: 100% !important;
         max-width: 100% !important;
         min-width: 0 !important;
-
-        box-sizing: border-box !important;
-    }
-
-
-    /* =====================================================
-       FLEX CONTAINERS
-    ===================================================== */
-
-    .dashboard-grid,
-    .form-row,
-    .card,
-    .song-card,
-    .modal-content {
-        max-width: 100% !important;
-
-        overflow-wrap: anywhere !important;
-        word-break: break-word !important;
     }
 
 
@@ -2673,47 +2696,54 @@ body.dark *:focus-visible {
 
 /* =========================================================
    SMALL PHONES
-   480px AND BELOW
 ========================================================= */
 
 @media (max-width: 480px) {
 
-    /* =====================================================
-       PAGE
-    ===================================================== */
+    .sidebar {
+        padding: 6px !important;
+    }
+
+    .sidebar-header {
+        padding: 10px !important;
+        gap: 8px !important;
+    }
+
+    .sidebar-header img {
+        width: 45px !important;
+        height: 45px !important;
+    }
+
+    .sidebar-header h1 {
+        font-size: 13px !important;
+    }
+
+    .sidebar-header span {
+        font-size: 9px !important;
+    }
+
+    .sidebar nav {
+        gap: 3px !important;
+    }
+
+    .sidebar .nav-item {
+        padding: 8px 10px !important;
+        gap: 5px !important;
+    }
+
+    .sidebar .nav-item i,
+    .sidebar .nav-item svg {
+        width: 18px !important;
+        height: 18px !important;
+    }
+
+    .sidebar .nav-item span {
+        font-size: 10px !important;
+    }
 
     .page {
         padding: 14px 10px 25px !important;
     }
-
-
-    /* =====================================================
-       TOP NAVIGATION
-    ===================================================== */
-
-    .sidebar {
-        padding: 7px 8px !important;
-
-        overflow-x: auto !important;
-        overflow-y: hidden !important;
-
-        -webkit-overflow-scrolling: touch !important;
-    }
-
-    .sidebar a,
-    .sidebar button,
-    .sidebar .nav-item {
-        padding: 7px 10px !important;
-
-        margin: 0 2px !important;
-
-        font-size: 11px !important;
-    }
-
-
-    /* =====================================================
-       DASHBOARD
-    ===================================================== */
 
     .dashboard-grid {
         grid-template-columns:
@@ -2738,44 +2768,12 @@ body.dark *:focus-visible {
         font-size: 9px !important;
     }
 
-
-    /* =====================================================
-       PAGE TITLE
-    ===================================================== */
-
     .page-title {
         font-size: 19px !important;
     }
 
     .page-subtitle {
         font-size: 11px !important;
-    }
-
-
-    /* =====================================================
-       TABLE
-    ===================================================== */
-
-    th,
-    td {
-        padding: 6px 4px !important;
-
-        font-size: 10px !important;
-    }
-
-
-    /* =====================================================
-       MODAL
-    ===================================================== */
-
-    .modal {
-        padding: 8px !important;
-    }
-
-    .modal-content {
-        padding: 14px !important;
-
-        max-height: 92vh !important;
     }
 
 }
