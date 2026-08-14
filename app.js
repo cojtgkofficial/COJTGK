@@ -1644,9 +1644,28 @@ async function loadTasksFromSupabase() {
         // RENDER PLANNER UI
         // =====================================
 
-        if (typeof renderTasks === "function") {
-            renderTasks();
-        }
+       if (typeof renderTask === "function") {
+
+    // Clear existing Planner columns
+    const todoCol =
+        document.getElementById("todoColumn");
+
+    const progCol =
+        document.getElementById("progressColumn");
+
+    const compCol =
+        document.getElementById("completedColumn");
+
+    if (todoCol) todoCol.innerHTML = "";
+    if (progCol) progCol.innerHTML = "";
+    if (compCol) compCol.innerHTML = "";
+
+    // Render Supabase tasks
+    tasks.forEach(task => renderTask(task));
+
+    // Update counters
+    updateCounters();
+}
 
         console.log(
             "✅ Planner tasks loaded from Supabase:",
