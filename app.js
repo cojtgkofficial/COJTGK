@@ -45,7 +45,6 @@ async function testSupabaseConnection() {
     }
 }
 
-testSupabaseConnection();
 // ChurchHQ Engine - Optimized & Fixed
 // =====================================
 
@@ -130,13 +129,14 @@ async function loadMembersFromSupabase() {
 
                 if (migrateError) {
 
-                    console.error(
-                        "❌ Failed to migrate old members:",
-                        migrateError
-                    );
+    console.error(
+        "❌ Failed to migrate old members:",
+        migrateError
+    );
 
-                    return false;
-                }
+    // Huwag ihinto ang normal member loading.
+    // Migration lamang ang nabigo.
+}
 
                 console.log(
                     "✅ Old members migrated to Supabase:",
