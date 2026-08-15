@@ -2541,3 +2541,548 @@ body.dark *:focus-visible {
     }
 
 }
+
+/* =====================================================
+   CHURCHHQ LOGIN PAGE
+===================================================== */
+
+/* =====================================================
+   CHURCHHQ LOGIN PAGE
+===================================================== */
+
+
+/* ===============================
+   LOGIN SCREEN / BACKGROUND
+================================ */
+
+.login-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+
+    width: 100vw;
+    min-height: 100vh;
+    min-height: 100dvh;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: clamp(16px, 3vw, 32px);
+
+    background: #f8fafc;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+
+/* FULL SCREEN BACKGROUND IMAGE */
+
+.login-screen::before {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    background-image: url("images/Background 1.jpg");
+    background-repeat: no-repeat;
+    background-position: center center;
+
+    /* Fill the entire screen */
+    background-size: cover;
+
+    opacity: 0.75;
+
+    z-index: 0;
+
+    pointer-events: none;
+}
+
+
+/* LIGHT OVERLAY */
+
+.login-screen::after {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    background: rgba(248, 250, 252, 0.45);
+
+    z-index: 1;
+
+    pointer-events: none;
+}
+
+
+/* ===============================
+   LOGIN CARD
+================================ */
+
+.login-card {
+    position: relative;
+    z-index: 2;
+
+    width: min(100%, 420px);
+
+    padding: clamp(22px, 4vw, 34px);
+
+    background: rgba(255, 255, 255, 0.95);
+
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    border-radius: 22px;
+
+    box-shadow:
+        0 25px 60px rgba(15, 23, 42, 0.16);
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+
+    box-sizing: border-box;
+
+    animation: loginFadeIn 0.35s ease;
+}
+
+
+.login-card *,
+.login-card *::before,
+.login-card *::after {
+    box-sizing: border-box;
+}
+
+
+@keyframes loginFadeIn {
+
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+}
+
+
+/* ===============================
+   BRAND / LOGO
+================================ */
+
+.login-brand {
+    text-align: center;
+}
+
+
+.login-logo-wrap {
+    width: 105px;
+    height: 105px;
+
+    margin: 0 auto 18px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #2563eb;
+
+    border: 1px solid #1d4ed8;
+    border-radius: 22px;
+
+    box-shadow:
+        0 12px 28px rgba(37, 99, 235, 0.28);
+
+    overflow: hidden;
+}
+
+
+.login-logo {
+    display: block;
+
+    width: 88px;
+    height: 88px;
+
+    object-fit: contain;
+}
+
+
+.login-brand h1 {
+    margin: 0;
+
+    font-size: clamp(25px, 4vw, 30px);
+    font-weight: 800;
+
+    color: #0f172a;
+
+    letter-spacing: -0.6px;
+}
+
+
+.login-church-name {
+    margin: 7px 0 3px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    color: #334155;
+}
+
+
+.login-subtitle {
+    display: block;
+
+    font-size: 12px;
+    font-weight: 500;
+
+    color: #94a3b8;
+}
+
+
+/* ===============================
+   DIVIDER
+================================ */
+
+.login-divider {
+    height: 1px;
+
+    margin: 25px 0;
+
+    background: #e2e8f0;
+}
+
+
+/* ===============================
+   FORM
+================================ */
+
+.login-form {
+    width: 100%;
+}
+
+
+.login-field {
+    margin-bottom: 18px;
+}
+
+
+.login-field label {
+    display: block;
+
+    margin-bottom: 7px;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    color: #475569;
+}
+
+
+.login-input-wrap {
+    position: relative;
+}
+
+
+.login-input-icon {
+    position: absolute;
+
+    left: 14px;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    font-size: 15px;
+
+    pointer-events: none;
+}
+
+
+.login-input-wrap input {
+    width: 100%;
+
+    padding: 13px 14px 13px 42px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 11px;
+
+    background: #ffffff;
+
+    color: #0f172a;
+
+    font-size: 14px;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.login-input-wrap input::placeholder {
+    color: #94a3b8;
+}
+
+
+.login-input-wrap input:focus {
+    border-color: #2563eb;
+
+    box-shadow:
+        0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+
+/* ===============================
+   LOGIN BUTTON
+================================ */
+
+.login-button {
+    width: 100%;
+
+    margin-top: 5px;
+
+    padding: 13px 16px;
+
+    border: none;
+    border-radius: 11px;
+
+    background: #2563eb;
+
+    color: #ffffff;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.login-button:hover {
+    background: #1d4ed8;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 8px 20px rgba(37, 99, 235, 0.22);
+}
+
+
+.login-button:active {
+    transform: translateY(0);
+}
+
+
+/* ===============================
+   LOGIN MESSAGE
+================================ */
+
+.login-message {
+    min-height: 18px;
+
+    margin: 14px 0 0;
+
+    text-align: center;
+
+    font-size: 13px;
+    font-weight: 500;
+}
+
+
+/* ===============================
+   FOOTER
+================================ */
+
+.login-footer {
+    margin-top: 24px;
+
+    padding-top: 18px;
+
+    border-top: 1px solid #f1f5f9;
+
+    text-align: center;
+
+    color: #94a3b8;
+
+    font-size: 11px;
+}
+
+
+/* =====================================================
+   TABLET
+===================================================== */
+
+@media (max-width: 768px) {
+
+    .login-screen {
+        padding: 20px;
+    }
+
+    .login-card {
+        width: min(100%, 400px);
+
+        padding: 28px 24px;
+
+        border-radius: 18px;
+    }
+
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 600px) {
+
+    .login-screen {
+        padding: 14px;
+    }
+
+    .login-screen::before {
+        background-size: cover;
+        background-position: center center;
+
+        opacity: 0.15;
+    }
+
+    .login-screen::after {
+        background: rgba(248, 250, 252, 0.50);
+    }
+
+    .login-card {
+        width: 100%;
+        max-width: 380px;
+
+        padding: 24px 18px;
+
+        border-radius: 16px;
+    }
+
+    .login-logo-wrap {
+        width: 86px;
+        height: 86px;
+
+        margin-bottom: 14px;
+
+        border-radius: 18px;
+    }
+
+    .login-logo {
+        width: 70px;
+        height: 70px;
+    }
+
+    .login-brand h1 {
+        font-size: 25px;
+    }
+
+    .login-church-name {
+        font-size: 13px;
+    }
+
+    .login-subtitle {
+        font-size: 11px;
+    }
+
+    .login-divider {
+        margin: 18px 0;
+    }
+
+    .login-field {
+        margin-bottom: 14px;
+    }
+
+    .login-input-wrap input {
+        font-size: 16px;
+
+        padding-top: 12px;
+        padding-bottom: 12px;
+    }
+
+}
+
+
+/* =====================================================
+   SMALL PHONE
+===================================================== */
+
+@media (max-width: 380px) {
+
+    .login-screen {
+        padding: 10px;
+    }
+
+    .login-card {
+        padding: 20px 15px;
+    }
+
+    .login-logo-wrap {
+        width: 74px;
+        height: 74px;
+    }
+
+    .login-logo {
+        width: 60px;
+        height: 60px;
+    }
+
+    .login-brand h1 {
+        font-size: 23px;
+    }
+
+}
+
+
+/* =====================================================
+   SHORT SCREEN / LANDSCAPE PHONE
+===================================================== */
+
+@media (max-height: 650px) {
+
+    .login-screen {
+        align-items: flex-start;
+
+        padding-top: 14px;
+        padding-bottom: 14px;
+    }
+
+    .login-card {
+        margin: auto 0;
+
+        padding-top: 20px;
+        padding-bottom: 20px;
+    }
+
+    .login-logo-wrap {
+        width: 70px;
+        height: 70px;
+
+        margin-bottom: 10px;
+    }
+
+    .login-logo {
+        width: 56px;
+        height: 56px;
+    }
+
+    .login-divider {
+        margin: 14px 0;
+    }
+
+    .login-field {
+        margin-bottom: 12px;
+    }
+
+}

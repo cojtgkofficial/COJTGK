@@ -21,7 +21,74 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 
-<body>
+<!-- ================= LOGIN SCREEN ================= -->
+
+<div id="loginScreen" class="login-screen">
+
+    <div class="login-card">
+
+        <div class="login-brand">
+
+            <div class="login-logo-wrap">
+                <img
+                    src="images/COJ Logo.png"
+                    alt="Church Logo"
+                    class="login-logo"
+                >
+            </div>
+
+            <h1>ChurchHQ</h1>
+
+            <p class="login-church-name">
+                Church of Jesus The Glorious King
+            </p>
+
+            <span class="login-subtitle">
+                Church Management System
+            </span>
+
+        </div>
+
+        <div class="login-divider"></div>
+
+        <div class="login-field">
+            <label>Email Address</label>
+
+            <input
+                id="loginEmail"
+                type="email"
+                placeholder="Enter your email"
+            >
+        </div>
+
+        <div class="login-field">
+            <label>Password</label>
+
+            <input
+                id="loginPassword"
+                type="password"
+                placeholder="Enter your password"
+            >
+        </div>
+
+        <button
+            type="button"
+            class="login-button"
+            onclick="loginUser()"
+        >
+            Sign In
+        </button>
+
+        <p id="loginMessage" class="login-message"></p>
+
+    </div>
+
+</div>
+
+<!-- ================= MAIN APP ================= -->
+
+<div id="churchApp" style="display:none;">
+
 
 <div class="app-container">
 
@@ -81,6 +148,22 @@
                 <span>Settings</span>
             </div>
         </nav>
+
+        <button 
+    onclick="logoutUser()"
+    style="
+        margin-top:20px;
+        width:100%;
+        padding:10px;
+        background:#dc2626;
+        color:white;
+        border:none;
+        border-radius:8px;
+        cursor:pointer;
+    "
+>
+    🚪 Logout
+</button>
 
     </aside>
 
@@ -144,7 +227,14 @@
                 <div class="card">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                         <h2 style="margin: 0;">📅 Upcoming Activities</h2>
-                        <button class="secondary-btn" style="padding: 4px 10px; font-size: 12px;" onclick="openActivityModal()">⚙️ Manage</button>
+                        <button
+    class="secondary-btn"
+    data-admin-only="true"
+    style="padding: 4px 10px; font-size: 12px;"
+    onclick="openActivityModal()"
+>
+    ⚙️ Manage
+</button>
                     </div>
                     <ul class="activity-list" id="dashboardActivities"></ul>
                 </div>
@@ -152,7 +242,14 @@
                 <div class="card">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                         <h2 style="margin: 0;">📢 Announcements</h2>
-                        <button class="secondary-btn" style="padding: 4px 10px; font-size: 12px;" onclick="openAnnouncementModal()">⚙️ Manage</button>
+                        <button
+    class="secondary-btn"
+    data-admin-only="true"
+    style="padding: 4px 10px; font-size: 12px;"
+    onclick="openAnnouncementModal()"
+>
+    ⚙️ Manage
+</button>
                     </div>
                     <ul class="announcement-list" id="dashboardAnnouncements"></ul>
                 </div>
@@ -169,7 +266,13 @@
             </div>
             <p class="page-subtitle">Manage ministry tasks and assignments</p>
         </div>
-        <button class="primary-btn" id="addTaskBtn">+ New Task</button>
+        <button
+    class="primary-btn"
+    id="addTaskBtn"
+    data-admin-only="true"
+>
+    + New Task
+</button>
     </div>
 
             <div class="planner-search">
@@ -211,8 +314,21 @@
                     <p class="page-subtitle">Create and save a Sunday lineup and roster per date</p>
                 </div>
                 <div style="display:flex; gap:10px;">
-                    <button class="secondary-btn" onclick="resetServiceForm('sunday')">➕ New Lineup</button>
-                    <button class="primary-btn" onclick="saveServiceData('sunday')">💾 Save Sunday Roster</button>
+                    <button
+    class="secondary-btn"
+    onclick="resetServiceForm('sunday')"
+    data-admin-only="true"
+>
+    ➕ New Lineup
+</button>
+
+<button
+    class="primary-btn"
+    onclick="saveServiceData('sunday')"
+    data-admin-only="true"
+>
+    💾 Save Sunday Roster
+</button>
                 </div>
             </div>
 
@@ -319,8 +435,21 @@
                     <p class="page-subtitle">Create and save a Midweek lineup and roster per date</p>
                 </div>
                 <div style="display:flex; gap:10px;">
-                    <button class="secondary-btn" onclick="resetServiceForm('midweek')">➕ New Lineup</button>
-                    <button class="primary-btn" onclick="saveServiceData('midweek')">💾 Save Midweek Roster</button>
+                    <button
+    class="secondary-btn"
+    onclick="resetServiceForm('midweek')"
+    data-admin-only="true"
+>
+    ➕ New Lineup
+</button>
+
+<button
+    class="primary-btn"
+    onclick="saveServiceData('midweek')"
+    data-admin-only="true"
+>
+    💾 Save Midweek Roster
+</button>
                 </div>
             </div>
 
@@ -430,7 +559,13 @@
         </div>
         <p class="page-subtitle">Manage worship songs, chords, and Sunday service lineup</p>
     </div>
-    <button class="primary-btn" id="addSongBtn">+ New Song</button>
+    <button
+    class="primary-btn"
+    id="addSongBtn"
+    data-admin-only="true"
+>
+    + New Song
+</button>
 </div>
             <div class="card" style="margin-bottom: 25px;">
                 <h3>🎵 Sunday Service Song Lineup</h3>
@@ -440,7 +575,13 @@
                     <select id="selectSongDropdown" style="flex: 1; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px;">
                         <option value="">-- Select a song from the Library --</option>
                     </select>
-                    <button class="primary-btn" onclick="addSongToServiceLineup()">➕ Add to Lineup</button>
+                    <button
+    class="primary-btn"
+    onclick="addSongToServiceLineup()"
+    data-admin-only="true"
+>
+    ➕ Add to Lineup
+</button>
                 </div>
 
                 <div style="overflow-x: auto;">
@@ -492,7 +633,13 @@
         </div>
         <p class="page-subtitle">Manage church members, leaders, and volunteers</p>
     </div>
-    <button class="primary-btn" id="addMemberBtn">+ New Member</button>
+    <button
+    class="primary-btn"
+    id="addMemberBtn"
+    data-admin-only="true"
+>
+    + New Member
+</button>
 </div>
 
             <div class="planner-search" style="display: flex; gap: 10px; flex-wrap: wrap;">
@@ -523,7 +670,13 @@
         </div>
         <p class="page-subtitle">Track service and ministry event attendance</p>
     </div>
-    <button class="primary-btn" id="saveAttendanceBtn">💾 Save Attendance Record</button>
+    <button
+    class="primary-btn"
+    id="saveAttendanceBtn"
+    data-admin-only="true"
+>
+    💾 Save Attendance Record
+</button>
 </div>
 
             <div class="song-controls-bar" style="margin-bottom: 20px;">
@@ -568,20 +721,22 @@
         <label>Quick Action:</label>
 
         <button
-            type="button"
-            class="secondary-btn"
-            onclick="markAllAttendance(true)"
-        >
-            Check All Present
-        </button>
+    type="button"
+    class="secondary-btn"
+    onclick="markAllAttendance(true)"
+    data-admin-only="true"
+>
+    Check All Present
+</button>
 
-        <button
-            type="button"
-            class="secondary-btn"
-            onclick="markAllAttendance(false)"
-        >
-            Uncheck All
-        </button>
+<button
+    type="button"
+    class="secondary-btn"
+    onclick="markAllAttendance(false)"
+    data-admin-only="true"
+>
+    Uncheck All
+</button>
     </div>
 
 </div>
@@ -862,10 +1017,21 @@
 
                     <div style="display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap;">
                         <button class="primary-btn" onclick="exportChurchData()">📥 Export / Download Backup (.json)</button>
-                        <label class="secondary-btn" style="cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
-                            📤 Restore / Import Backup
-                            <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importChurchData(event)">
-                        </label>
+                        <label
+    class="secondary-btn"
+    data-admin-only="true"
+    style="cursor: pointer; display: inline-flex; align-items: center; gap: 6px;"
+>
+    📤 Restore / Import Backup
+
+    <input
+        type="file"
+        id="importFile"
+        accept=".json"
+        style="display: none;"
+        onchange="importChurchData(event)"
+    >
+</label>
                     </div>
                 </div>
 
@@ -876,9 +1042,14 @@
                     </p>
 
                     <div style="margin-top: 20px;">
-                        <button class="secondary-btn" style="color: #dc2626; border-color: #fca5a5;" onclick="clearAllChurchData()">
-                            ❌ Clear All Church Data
-                        </button>
+                        <button
+    class="secondary-btn"
+    data-admin-only="true"
+    style="color: #dc2626; border-color: #fca5a5;"
+    onclick="clearAllChurchData()"
+>
+    ❌ Clear All Church Data
+</button>
                     </div>
                 </div>
             </div>
@@ -1160,7 +1331,13 @@
             <div class="form-group">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <label>Ministry Group</label>
-                    <button type="button" onclick="addCustomMinistry()" style="background:none; border:none; color:#2563eb; cursor:pointer; font-size:12px; font-weight:bold;">+ Add New Ministry</button>
+                    <button
+    type="button"
+    onclick="addCustomMinistry()"
+    data-admin-only="true"
+>
+    + Add New Ministry
+</button>
                 </div>
 
                 <div id="memberMinistry" class="ministry-checkbox-list">
@@ -1216,13 +1393,24 @@
 
         <div class="modal-footer">
             <button id="cancelMember" class="secondary-btn">Cancel</button>
-            <button id="saveMember" class="primary-btn">Save Member</button>
+            <button
+    id="saveMember"
+    class="primary-btn"
+    data-admin-only="true"
+>
+    Save Member
+</button>
         </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="app.js"></script>
+
+</div> <!-- app-container -->
+
+</div> <!-- churchApp -->
+
 
 </body>
 </html>

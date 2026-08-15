@@ -11,6 +11,9 @@ const churchSupabase = window.supabase.createClient(
     SUPABASE_ANON_KEY
 );
 
+let currentUser = null;
+let currentUserRole = null;
+
 console.log("✅ ChurchHQ Supabase client created.");
 console.log(
     "Supabase .from():",
@@ -105,8 +108,10 @@ async function loadMembersFromSupabase() {
                 !existingIds.has(Number(member.id))
             );
 
-            if (membersToMigrate.length > 0) {
-
+            if (
+    membersToMigrate.length > 0 &&
+    isAdminUser()
+) {
                 const { data: migratedData, error: migrateError } =
                     await churchSupabase
                         .from("members")
@@ -838,6 +843,11 @@ let sundayServices = [];
 let midweekServices = [];
 
 async function saveServiceData(type) {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
     const prefix = type === "sunday" ? "sun_" : "mid_";
 
     const dateEl = document.getElementById(prefix + "serviceDate");
@@ -920,13 +930,22 @@ const updatedInSupabase =
         midweekServices = targetArray;
     }
 
-    alert(`✅ ${type === "sunday" ? "Sunday" : "Midweek"} Service roster para sa petsang (${dateValue}) ay matagumpay na nai-save!`);
+    alert(`✅ ${type === "sunday" ? "Sunday" : "Midweek"} Service roster for the date (${dateValue}) has been successfully saved!`);
     renderServiceHistory(type);
     updateServiceDateDropdowns();
 }
 
 function loadServiceRecord(type, date) {
-    const targetArray = type === "sunday" ? sundayServices : midweekServices;
+
+    if (!requireAdmin()) {
+        return;
+    }
+
+    const targetArray =
+        type === "sunday"
+            ? sundayServices
+            : midweekServices;
+
     const record = targetArray.find(item => item.date === date);
     
     if (!record) return;
@@ -976,8 +995,25 @@ function renderServiceHistory(type) {
             <td style="padding: 10px;">${record.worshipLeader || '-'}</td>
             <td style="padding: 10px;">${record.preacher || '-'}</td>
             <td style="padding: 10px; display:flex; gap:8px;">
-                <button type="button" class="secondary-btn" style="padding: 3px 8px; font-size: 12px;" onclick="loadServiceRecord('${type}', '${record.date}')">✏️ Load/Edit</button>
-                <button type="button" class="secondary-btn" style="padding: 3px 8px; font-size: 12px; color:#ef4444; border-color:#fca5a5;" onclick="deleteServiceRecord('${type}', '${record.date}')">❌ Delete</button>
+                <button
+    type="button"
+    class="secondary-btn"
+    data-admin-only="true"
+    style="padding: 3px 8px; font-size: 12px;"
+    onclick="loadServiceRecord('${type}', '${record.date}')"
+>
+    ✏️ Load/Edit
+</button>
+
+<button
+    type="button"
+    class="secondary-btn"
+    data-admin-only="true"
+    style="padding: 3px 8px; font-size: 12px; color:#ef4444; border-color:#fca5a5;"
+    onclick="deleteServiceRecord('${type}', '${record.date}')"
+>
+    ❌ Delete
+</button>
             </td>
         `;
         listBody.appendChild(tr);
@@ -1249,6 +1285,10 @@ function loadSavedServices() {
 
 async function deleteServiceRecord(type, date) {
 
+    if (!requireAdmin()) {
+        return;
+    }
+
     if (!confirm(`Are you sure you want to delete the record for ${date}?`)) {
         return;
     }
@@ -1462,13 +1502,62 @@ let editingTaskId = null;
 const saveTaskBtn = document.getElementById("saveTask");
 if (saveTaskBtn) saveTaskBtn.addEventListener("click", saveTask);
 
-document.addEventListener("DOMContentLoaded", () => {
+// =====================================
+// CHURCHHQ INITIALIZATION
+// =====================================
+
+async function initializeChurchHQ(){
+
+    console.log(
+        "🚀 Loading ChurchHQ Engine..."
+    );
+
 
     loadSavedTasks();
+
     loadSavedServices();
+
     loadSavedSongs();
+
     loadSavedMembers();
+
     loadSavedAttendance();
+
+
+    // SUPABASE LOADERS
+
+    await loadMembersFromSupabase();
+
+    await loadServicesFromSupabase();
+
+
+    if(typeof loadActivitiesFromSupabase === "function"){
+        await loadActivitiesFromSupabase();
+    }
+
+
+    if(typeof loadAnnouncementsFromSupabase === "function"){
+        await loadAnnouncementsFromSupabase();
+    }
+
+
+    console.log(
+        "✅ ChurchHQ Engine Ready"
+    );
+
+}
+
+
+
+// WAIT FOR PAGE
+
+document.addEventListener(
+"DOMContentLoaded",
+()=>{
+
+    checkLoginSession();
+
+});
 
     const attendanceYearSelect =
         document.getElementById(
@@ -1497,12 +1586,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
-});
-
-
-
 
 async function saveTask() {
+
+    if (!requireAdmin()) {
+        return;
+    }
 
     const title = document.getElementById("taskTitle").value.trim();
     const description = document.getElementById("taskDescription").value.trim();
@@ -1603,6 +1692,11 @@ async function saveTask() {
 }
 
 function openEditTaskModal(id) {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
     const task = tasks.find(t => t.id === id);
     if (!task) return;
 
@@ -1914,8 +2008,25 @@ function renderTask(task) {
         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <h4>${task.title}</h4>
             <div style="display: flex; gap: 6px; align-items: center;">
-                <button type="button" onclick="openEditTaskModal(${task.id})" style="background:none; border:none; color:#2563eb; cursor:pointer; font-size:14px;" title="Edit">✏️</button>
-                <button type="button" onclick="deleteTask(${task.id})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-weight:bold; font-size:18px;" title="Delete">&times;</button>
+                <button
+    type="button"
+    data-admin-only="true"
+    onclick="openEditTaskModal(${task.id})"
+    style="background:none; border:none; color:#2563eb; cursor:pointer; font-size:14px;"
+    title="Edit"
+>
+    ✏️
+</button>
+
+<button
+    type="button"
+    data-admin-only="true"
+    onclick="deleteTask(${task.id})"
+    style="background:none; border:none; color:#ef4444; cursor:pointer; font-weight:bold; font-size:18px;"
+    title="Delete"
+>
+    &times;
+</button>
             </div>
         </div>
         <p>${task.description || "<i>No description</i>"}</p>
@@ -1931,9 +2042,15 @@ function renderTask(task) {
     } else if (task.status === "completed" && document.getElementById("completedColumn")) {
         document.getElementById("completedColumn").appendChild(card);
     }
+
+    applyRoleBasedUI();
 }
 
 async function deleteTask(id) {
+
+    if (!requireAdmin()) {
+        return;
+    }
 
     if (!confirm("Are you sure you want to delete this task?")) {
         return;
@@ -2100,6 +2217,11 @@ if (editingSongId !== null) {
 }
 
 function openEditSongModal(id) {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
     const song = songs.find(s => s.id === id);
     if (!song) return;
 
@@ -2159,13 +2281,32 @@ function renderFullSongTable(songsArray) {
             <td style="padding: 10px; text-align: center; display: flex; justify-content: center; gap: 8px;">
                 <button type="button" class="secondary-btn" style="padding: 3px 8px; font-size: 12px; cursor: pointer;" onclick="quickAddToServiceLineup(${song.id})" title="Add to Sunday Service">➕ Add</button>
                 <button type="button" class="secondary-btn" style="padding: 3px 8px; font-size: 12px; cursor: pointer;" onclick="viewSong(${song.id})">👀 View</button>
-                <button type="button" onclick="openEditSongModal(${song.id})" style="background:none; border:none; color:#2563eb; cursor:pointer; font-size:14px;" title="Edit">✏️</button>
-                <button type="button" onclick="deleteSong(${song.id})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-weight:bold; font-size:16px;" title="❌ Delete">&times;</button>
+                <button
+    type="button"
+    data-admin-only="true"
+    onclick="openEditSongModal(${song.id})"
+    style="background:none; border:none; color:#2563eb; cursor:pointer; font-size:14px;"
+    title="Edit"
+>
+    ✏️
+</button>
+
+<button
+    type="button"
+    data-admin-only="true"
+    onclick="deleteSong(${song.id})"
+    style="background:none; border:none; color:#ef4444; cursor:pointer; font-weight:bold; font-size:16px;"
+    title="❌ Delete"
+>
+    &times;
+</button>
             </td>
         `;
         tableBody.appendChild(tr);
     });
 }
+
+applyRoleBasedUI();
 
 function populateSongDropdown() {
     const dropdown = document.getElementById("selectSongDropdown");
@@ -2369,6 +2510,11 @@ function isLineChords(line) {
 }
 
 async function deleteSong(id) {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
     if (confirm("Are you sure you want to delete this song?")) {
 
         const deletedFromSupabase =
@@ -2444,6 +2590,10 @@ function getSelectedMemberMinistries() {
 }
 
 async function saveMember() {
+
+    if (!requireAdmin()) {
+        return;
+    }
 
     const editId = document.getElementById("editMemberId").value;
     const name = document.getElementById("memberName").value.trim();
@@ -2843,6 +2993,11 @@ function renderMemberCard(member) {
 }
 
 function editMember(id) {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
     const member = members.find(m => m.id === id);
     if (!member) return;
 
@@ -2896,6 +3051,11 @@ function editMember(id) {
 }
 
 function addCustomMinistry() {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
     const newMinistry = prompt("Enter new Ministry Group name:");
 
     if (newMinistry && newMinistry.trim() !== "") {
@@ -2942,6 +3102,10 @@ function addCustomMinistry() {
 }
 
 async function deleteMember(id) {
+
+    if (!requireAdmin()) {
+        return;
+    }
 
     if (!confirm("Are you sure you want to delete this member?")) {
         return;
@@ -3418,16 +3582,29 @@ if (attendanceSearch) {
 }
 
 function toggleCheckIn(memberId) {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
     currentCheckIns[memberId] = !currentCheckIns[memberId];
     renderAttendanceList();
+
 }
 
 function markAllAttendance(status) {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
     members.forEach(member => {
         currentCheckIns[member.id] = status;
     });
+
     renderAttendanceList();
 }
+
 
 async function saveAttendance() {
 
@@ -4160,6 +4337,10 @@ function renderAttendanceSummary(searchText = "") {
 
 async function deleteAttendance(date, serviceType) {
 
+    if (!requireAdmin()) {
+        return;
+    }
+
     if (!confirm(
         `Are you sure you want to delete the attendance record for ${date}?`
     )) {
@@ -4314,20 +4495,22 @@ function renderAttendanceHistory() {
             <td style="padding: 10px; text-align: center;">
 
                 <button
-                    type="button"
-                    class="secondary-btn"
-                    style="padding: 4px 8px; font-size: 12px;"
-                    onclick="loadAttendanceRecord('${record.date}', '${record.serviceType || "sunday"}')">
-                    ✏️ Load
-                </button>
+    type="button"
+    class="secondary-btn"
+    data-admin-only="true"
+    style="padding: 4px 8px; font-size: 12px;"
+    onclick="loadAttendanceRecord('${record.date}', '${record.serviceType || "sunday"}')">
+    ✏️ Load
+</button>
 
-                <button
-                    type="button"
-                    class="secondary-btn"
-                    style="padding: 4px 8px; font-size: 12px; color:#ef4444; border-color:#fca5a5;"
-                    onclick="deleteAttendance('${record.date}', '${record.serviceType || "sunday"}')">
-                    ✖ Delete
-                </button>
+<button
+    type="button"
+    class="secondary-btn"
+    data-admin-only="true"
+    style="padding: 4px 8px; font-size: 12px; color:#ef4444; border-color:#fca5a5;"
+    onclick="deleteAttendance('${record.date}', '${record.serviceType || "sunday"}')">
+    ✖ Delete
+</button>
 
             </td>
         `;
@@ -4342,7 +4525,12 @@ function renderAttendanceHistory() {
 
 function loadAttendanceRecord(date, serviceType) {
 
-    const actualServiceType = serviceType || "sunday";
+    if (!requireAdmin()) {
+        return;
+    }
+
+    const actualServiceType =
+        serviceType || "sunday";
 
     const record = attendanceRecords.find(
         r =>
@@ -4420,6 +4608,9 @@ function exportChurchData() {
 }
 
 function importChurchData(event) {
+    if (!requireAdmin()) {
+    return;
+}
     const file = event.target.files[0];
     if (!file) return;
 
@@ -4459,10 +4650,19 @@ function importChurchData(event) {
 }
 
 function clearAllChurchData() {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
     if (confirm("🚨 ARE YOU SURE?\n\nThis will permanently delete all saved tasks, songs, members, service plans, and attendance records!")) {
+
         if (confirm("Final Check: Are you 100% sure you want to reset everything?")) {
+
             localStorage.clear();
+
             alert("🗑️ System reset complete. Reloading...");
+
             location.reload();
         }
     }
@@ -4919,7 +5119,13 @@ function renderManageModalContent() {
                 <h4 style="margin: 0 0 10px 0;">Add New Activity</h4>
                 <input type="text" id="newActTitle" placeholder="Title (Example: Youth Fellowship)" style="width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
                 <input type="text" id="newActDate" placeholder="Date (Example: August 5, 2026)" style="width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
-                <button type="button" class="secondary-btn" onclick="addNewActivityItem()" style="background: #2563eb; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px;">➕ Add</button>
+                <button type="button"
+    class="secondary-btn"
+    data-admin-only="true"
+    onclick="addNewActivityItem()"
+    style="background: #2563eb; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px;">
+    ➕ Add
+</button>
             </div>
             <h4 style="margin-bottom: 10px;">List of Activity/ies):</h4>
             <div style="max-height: 250px; overflow-y: auto;">
@@ -4936,9 +5142,20 @@ function renderManageModalContent() {
                             <small style="color: #64748b;">📅 ${act.date}</small>
                         </div>
                         <div style="display: flex; gap: 5px;">
-                            <button type="button" onclick="editActivityItem(${act.id})" style="background:none; border:none; color:#2563eb; cursor:pointer;" title="Edit">✏️</button>
-                            <button type="button" onclick="deleteActivityItem(${act.id})" style="background:none; border:none; color:#ef4444; cursor:pointer;" title="Delete">❌</button>
-                        </div>
+                            <button type="button"
+    data-admin-only="true"
+    onclick="editActivityItem(${act.id})"
+    style="background:none; border:none; color:#2563eb; cursor:pointer;"
+    title="Edit">
+    ✏️
+</button>
+                            <button type="button"
+    data-admin-only="true"
+    onclick="deleteActivityItem(${act.id})"
+    style="background:none; border:none; color:#ef4444; cursor:pointer;"
+    title="Delete">
+    ❌
+</button>
                     </div>
                 `;
             });
@@ -4954,7 +5171,15 @@ function renderManageModalContent() {
             <div style="margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 6px;">
                 <h4 style="margin: 0 0 10px 0;">Add New Announcement</h4>
                 <input type="text" id="newAnnText" placeholder="Place announcemt here" style="width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
-                <button type="button" class="secondary-btn" onclick="addNewAnnouncementItem()" style="background: #2563eb; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px;">➕ Add</button>
+                <button
+    type="button"
+    class="secondary-btn"
+    data-admin-only="true"
+    onclick="addNewAnnouncementItem()"
+    style="background: #2563eb; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px;"
+>
+    ➕ Add
+</button>
             </div>
             <h4 style="margin-bottom: 10px;">Announcement List</h4>
             <div style="max-height: 250px; overflow-y: auto;">
@@ -4968,9 +5193,24 @@ function renderManageModalContent() {
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #e2e8f0; gap: 10px;">
                         <span style="font-size: 14px;">${ann.text}</span>
                         <div style="display: flex; gap: 5px;">
-                            <button type="button" onclick="editAnnouncementItem(${ann.id})" style="background:none; border:none; color:#2563eb; cursor:pointer;" title="Edit">✏️</button>
-                            <button type="button" onclick="deleteAnnouncementItem(${ann.id})" style="background:none; border:none; color:#ef4444; cursor:pointer;" title="Delete">❌</button>
-                        </div>
+                            <button
+    type="button"
+    data-admin-only="true"
+    onclick="editAnnouncementItem(${ann.id})"
+    style="background:none; border:none; color:#2563eb; cursor:pointer;"
+    title="Edit"
+>
+    ✏️
+</button>
+                            <button
+    type="button"
+    data-admin-only="true"
+    onclick="deleteAnnouncementItem(${ann.id})"
+    style="background:none; border:none; color:#ef4444; cursor:pointer;"
+    title="Delete"
+>
+    ❌
+</button>
                     </div>
                 `;
             });
@@ -4981,6 +5221,11 @@ function renderManageModalContent() {
 }
 
 function addNewActivityItem() {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
     let titleEl = document.getElementById("newActTitle");
     let dateEl = document.getElementById("newActDate");
     let title = titleEl ? titleEl.value.trim() : "";
@@ -5020,9 +5265,15 @@ function addNewActivityItem() {
 
     renderManageModalContent();
     renderDashboardLists();
+
 }
 
 function editActivityItem(id) {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
     let activities = [];
     try { activities = JSON.parse(localStorage.getItem("churchhq_activities")) || []; } catch(e){}
     let act = activities.find(a => a.id === id);
@@ -5085,6 +5336,11 @@ function editActivityItem(id) {
 
 
 async function deleteActivityItem(id) {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
     if (!confirm("Are you sure you want to delete this?")) return;
 
     const deletedFromSupabase =
@@ -5114,9 +5370,14 @@ async function deleteActivityItem(id) {
 
     renderManageModalContent();
     renderDashboardLists();
+    applyRoleBasedUI();
 }
 
 function addNewAnnouncementItem() {
+    if (!requireAdmin()) {
+    return;
+}
+
     let annTextEl = document.getElementById("newAnnText");
     let text = annTextEl ? annTextEl.value.trim() : "";
     if (!text) {
@@ -5142,6 +5403,10 @@ saveAnnouncementToSupabase(newAnnouncement);
 }
 
 function editAnnouncementItem(id) {
+    if (!requireAdmin()) {
+    return;
+}
+
     let announcements = [];
 
     try {
@@ -5257,6 +5522,9 @@ function editAnnouncementItem(id) {
 }
 
 async function deleteAnnouncementItem(id) {
+    if (!requireAdmin()) {
+    return;
+}
     if (!confirm("Are you sure you want to delete this")) return;
 
     // SUPABASE DELETE
@@ -5626,8 +5894,371 @@ async function initializeChurchHQ() {
 
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
+// =====================================
+// CHURCHHQ LOGIN SYSTEM
+// =====================================
 
-    await initializeChurchHQ();
+
+async function loginUser(){
+
+    const email =
+        document.getElementById("loginEmail").value.trim();
+
+    const password =
+        document.getElementById("loginPassword").value.trim();
+
+
+    const message =
+        document.getElementById("loginMessage");
+
+
+    if(!email || !password){
+
+        message.innerHTML =
+        "❌ Please enter email and password.";
+
+        return;
+    }
+
+
+
+    const {data,error} =
+        await churchSupabase.auth.signInWithPassword({
+
+            email: email,
+            password: password
+
+        });
+
+
+
+    if(error){
+
+        console.error(error);
+
+        message.innerHTML =
+        "❌ Invalid login.";
+
+        return;
+    }
+
+
+
+    console.log(
+        "✅ Login successful:",
+        data
+    );
+
+
+showChurchApp();
+
+await loadCurrentUserRole();
+
+applyRoleBasedUI();
+
+initializeChurchHQ();
+
+
+}
+
+// =====================================
+// CHURCHHQ USER ROLE
+// =====================================
+
+
+
+async function loadCurrentUserRole(){
+
+    try {
+
+        const {
+            data: {
+                user
+            },
+            error: userError
+        } = await churchSupabase.auth.getUser();
+
+
+        if(userError){
+
+            console.error(
+                "❌ Failed to get current user:",
+                userError
+            );
+
+            currentUser = null;
+            currentUserRole = null;
+
+            return null;
+        }
+
+
+        if(!user){
+
+            console.log(
+                "ℹ️ No authenticated user."
+            );
+
+            currentUser = null;
+            currentUserRole = null;
+
+            return null;
+        }
+
+
+        currentUser = user;
+
+
+        const {
+            data: roleData,
+            error: roleError
+        } = await churchSupabase
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", user.id)
+            .maybeSingle();
+
+
+        if(roleError){
+
+            console.error(
+                "❌ Failed to load user role:",
+                roleError
+            );
+
+            currentUserRole = null;
+
+            return null;
+        }
+
+
+        currentUserRole =
+            roleData?.role || null;
+
+
+        console.log(
+            "👤 Current user:",
+            currentUser.email
+        );
+
+
+        console.log(
+            "🔐 Current role:",
+            currentUserRole
+        );
+
+
+        return currentUserRole;
+
+
+    } catch(error){
+
+        console.error(
+            "❌ User role detection error:",
+            error
+        );
+
+        currentUser = null;
+        currentUserRole = null;
+
+        return null;
+    }
+
+}
+
+// =====================================
+// CHURCHHQ ROLE PERMISSIONS
+// =====================================
+
+function isAdminUser(){
+
+    return currentUserRole === "admin";
+
+}
+
+
+function isViewerUser(){
+
+    return currentUserRole === "viewer";
+
+}
+
+
+function requireAdmin(){
+
+    if(!isAdminUser()){
+
+        console.warn(
+            "🚫 Admin permission required."
+        );
+
+        alert(
+            "You do not have permission to perform this action."
+        );
+
+        return false;
+    }
+
+    return true;
+
+}
+
+function applyRoleBasedUI(){
+
+    console.log(
+        "🔐 Applying role-based UI:",
+        currentUserRole
+    );
+
+
+    const adminControls =
+        document.querySelectorAll(
+            '[data-admin-only="true"]'
+        );
+
+
+    adminControls.forEach(element => {
+
+        if(isAdminUser()){
+
+            element.style.display = "";
+
+            element.disabled = false;
+
+        }else{
+
+            element.style.display = "none";
+
+            element.disabled = true;
+
+        }
+
+    });
+
+
+    console.log(
+        isAdminUser()
+            ? "👑 Admin UI enabled"
+            : "👁️ Viewer UI enabled"
+    );
+
+}
+
+
+function showChurchApp(){
+
+    const login =
+    document.getElementById("loginScreen");
+
+
+    const app =
+    document.getElementById("churchApp");
+
+
+    if(login)
+        login.style.display="none";
+
+
+    if(app)
+        app.style.display="block";
+
+
+    console.log(
+        "✅ ChurchHQ App unlocked"
+    );
+
+
+}
+
+
+
+// CHECK EXISTING SESSION
+
+// CHECK EXISTING SESSION
+
+async function checkLoginSession(){
+
+    const {
+        data
+    } =
+    await churchSupabase.auth.getSession();
+
+
+    if(
+        data.session
+    ){
+
+        console.log(
+            "✅ Existing session found"
+        );
+
+showChurchApp();
+
+await loadCurrentUserRole();
+
+applyRoleBasedUI();
+
+initializeChurchHQ();
+
+    }
+
+}
+
+
+// RUN ON LOAD
+
+document.addEventListener(
+"DOMContentLoaded",
+()=>{
+
+    checkLoginSession();
 
 });
+
+// =====================================
+// LOGOUT SYSTEM
+// =====================================
+
+async function logoutUser(){
+
+    const { error } =
+        await churchSupabase.auth.signOut();
+
+
+    if(error){
+
+        console.error(
+            "Logout error:",
+            error
+        );
+
+        return;
+    }
+
+
+    console.log(
+        "✅ Logged out"
+    );
+
+currentUser = null;
+currentUserRole = null;
+
+
+    const login =
+        document.getElementById("loginScreen");
+
+
+    const app =
+        document.getElementById("churchApp");
+
+
+    if(login)
+        login.style.display="flex";
+
+
+    if(app)
+        app.style.display="none";
+
+
+}
+
