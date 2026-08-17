@@ -117,27 +117,6 @@ body{
     background:#1d4ed8;
 }
 
-/* ================= RESPONSIVE ================= */
-
-@media(max-width:768px){
-
-.sidebar{
-    width:90px;
-}
-
-.logo-area div:last-child{
-    display:none;
-}
-
-.nav-item span{
-    display:none;
-}
-
-.main-content{
-    padding:20px;
-}
-
-}
 
 /* ================= DARK MODE ================= */
 
@@ -999,7 +978,36 @@ body {
 
 }
 
+/* ===============================
+   MINISTRY CHECKBOX
+================================ */
 
+.ministry-checkbox-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 0;
+}
+
+.ministry-checkbox-list label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.ministry-checkbox-list input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.ministry-checkbox-list span {
+    display: inline-block;
+}
 
 /* ===============================
    SIDEBAR BLUE STYLE
@@ -2001,45 +2009,6 @@ i[data-lucide] {
 ================================ */
 
 
-@media(max-width:900px){
-
-
-    .sidebar {
-
-
-        position:fixed;
-
-
-        z-index:1000;
-
-
-    }
-
-
-
-    .main-content {
-
-
-        margin-left:0;
-
-    }
-
-
-
-    .dashboard-grid {
-
-
-        grid-template-columns:
-
-        repeat(2,1fr);
-
-    }
-
-
-}
-
-
-
 @media(max-width:600px){
 
 
@@ -2201,3 +2170,1892 @@ body.dark *:focus-visible {
 
 }
 
+/* =========================================================
+   CHURCHHQ MOBILE
+   SIDEBAR ON TOP + MAIN CONTENT BELOW
+========================================================= */
+
+@media (max-width: 768px) {
+
+    html,
+    body {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden !important;
+    }
+
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
+
+
+    /* =====================================================
+       APP
+    ===================================================== */
+
+    .app-container {
+        display: flex !important;
+        flex-direction: column !important;
+
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+
+        height: auto !important;
+        min-height: 100vh !important;
+
+        margin: 0 !important;
+        padding: 0 !important;
+
+        overflow: visible !important;
+    }
+
+
+    /* =====================================================
+       SIDEBAR
+    ===================================================== */
+
+    .app-container .sidebar {
+        position: relative !important;
+
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+
+        height: auto !important;
+        min-height: 0 !important;
+
+        margin: 0 !important;
+        padding: 8px !important;
+
+        display: flex !important;
+        flex-direction: column !important;
+
+        flex: none !important;
+
+        order: 1 !important;
+
+        float: none !important;
+        transform: none !important;
+
+        overflow: visible !important;
+
+        z-index: 1000 !important;
+    }
+
+
+    /* =====================================================
+       SIDEBAR HEADER
+    ===================================================== */
+
+    .sidebar-header {
+        width: 100% !important;
+        max-width: 100% !important;
+
+        margin: 0 0 8px 0 !important;
+
+        display: flex !important;
+        align-items: center !important;
+
+        padding: 12px !important;
+        gap: 10px !important;
+    }
+
+
+    .sidebar-header img {
+        flex-shrink: 0 !important;
+    }
+
+
+    .sidebar-header h1 {
+        min-width: 0 !important;
+    }
+
+
+    /* =====================================================
+       NAVIGATION
+    ===================================================== */
+
+    .sidebar nav {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+
+        display: flex !important;
+        flex-direction: row !important;
+
+        align-items: center !important;
+
+        gap: 4px !important;
+
+        margin: 0 !important;
+        padding: 4px 0 !important;
+
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+
+        white-space: nowrap !important;
+
+        flex: none !important;
+
+        -webkit-overflow-scrolling: touch !important;
+
+        scrollbar-width: none !important;
+    }
+
+    .sidebar nav::-webkit-scrollbar {
+        display: none !important;
+    }
+
+
+    /* =====================================================
+       NAV ITEMS
+    ===================================================== */
+
+    .sidebar .nav-item {
+        flex: 0 0 auto !important;
+
+        width: auto !important;
+        min-width: max-content !important;
+        max-width: none !important;
+
+        height: auto !important;
+
+        margin: 0 !important;
+
+        padding: 9px 12px !important;
+
+        display: flex !important;
+        flex-direction: row !important;
+
+        align-items: center !important;
+        justify-content: center !important;
+
+        gap: 6px !important;
+
+        white-space: nowrap !important;
+
+        transform: none !important;
+    }
+
+
+    .sidebar .nav-item span {
+        display: inline !important;
+
+        width: auto !important;
+        max-width: none !important;
+
+        white-space: nowrap !important;
+
+        font-size: 11px !important;
+    }
+
+
+    .sidebar .nav-item i,
+    .sidebar .nav-item svg {
+        width: 20px !important;
+        height: 20px !important;
+
+        flex-shrink: 0 !important;
+    }
+
+
+    /* =====================================================
+       MAIN CONTENT
+    ===================================================== */
+
+    .app-container .main-content {
+        position: relative !important;
+
+        display: block !important;
+
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+
+        height: auto !important;
+        min-height: 1px !important;
+
+        margin: 0 !important;
+        padding: 16px 12px 40px !important;
+
+        flex: none !important;
+
+        order: 2 !important;
+
+        overflow: visible !important;
+
+        visibility: visible !important;
+        opacity: 1 !important;
+
+        transform: none !important;
+    }
+
+
+    /* =====================================================
+   PAGES
+   JAVASCRIPT CONTROLS WHICH PAGE IS VISIBLE
+===================================================== */
+
+.app-container .main-content .page {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+
+    height: auto !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+
+/* Hidden pages must remain hidden */
+.app-container .main-content .page.hidden {
+    display: none !important;
+}
+
+
+/* Active page */
+.app-container .main-content .page:not(.hidden) {
+    display: block !important;
+
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+
+    #dashboard .dashboard-grid {
+        display: grid !important;
+
+        width: 100% !important;
+        max-width: 100% !important;
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr)) !important;
+
+        gap: 10px !important;
+    }
+
+
+    #dashboard .card,
+    #dashboard .song-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+
+    #dashboard .dashboard-lower {
+        display: grid !important;
+
+        width: 100% !important;
+
+        grid-template-columns: 1fr !important;
+
+        gap: 12px !important;
+    }
+}
+
+
+/* =========================================================
+   SMALL PHONES
+========================================================= */
+
+@media (max-width: 480px) {
+
+    .sidebar-header {
+        padding: 10px !important;
+    }
+
+    .sidebar-header img {
+        width: 45px !important;
+        height: 45px !important;
+    }
+
+    .sidebar-header h1 {
+        font-size: 13px !important;
+    }
+
+    .sidebar-header span {
+        font-size: 9px !important;
+    }
+
+    .sidebar .nav-item {
+        padding: 8px 10px !important;
+    }
+
+    .sidebar .nav-item span {
+        font-size: 10px !important;
+    }
+
+    .sidebar .nav-item i,
+    .sidebar .nav-item svg {
+        width: 18px !important;
+        height: 18px !important;
+    }
+
+    .app-container .main-content {
+        padding: 12px 10px 30px !important;
+    }
+
+    #dashboard .dashboard-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr)) !important;
+
+        gap: 8px !important;
+    }
+}
+
+/* =========================================================
+   FINAL MOBILE PAGE VISIBILITY
+========================================================= */
+
+@media (max-width: 768px) {
+
+    .main-content .page.hidden {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        height: 0 !important;
+        overflow: hidden !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .main-content .page:not(.hidden) {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+
+}
+
+/* =====================================================
+   CHURCHHQ LOGIN PAGE
+===================================================== */
+
+/* =====================================================
+   CHURCHHQ LOGIN PAGE
+===================================================== */
+
+
+/* ===============================
+   LOGIN SCREEN / BACKGROUND
+================================ */
+
+.login-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+
+    width: 100vw;
+    min-height: 100vh;
+    min-height: 100dvh;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: clamp(16px, 3vw, 32px);
+
+    background: #f8fafc;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+
+/* FULL SCREEN BACKGROUND IMAGE */
+
+.login-screen::before {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    background-image: url("images/Background 1.jpg");
+    background-repeat: no-repeat;
+    background-position: center center;
+
+    /* Fill the entire screen */
+    background-size: cover;
+
+    opacity: 0.75;
+
+    z-index: 0;
+
+    pointer-events: none;
+}
+
+
+/* LIGHT OVERLAY */
+
+.login-screen::after {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    background: rgba(248, 250, 252, 0.45);
+
+    z-index: 1;
+
+    pointer-events: none;
+}
+
+
+/* ===============================
+   LOGIN CARD
+================================ */
+
+.login-card {
+    position: relative;
+    z-index: 2;
+
+    width: min(100%, 420px);
+
+    padding: clamp(22px, 4vw, 34px);
+
+    background: rgba(255, 255, 255, 0.95);
+
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    border-radius: 22px;
+
+    box-shadow:
+        0 25px 60px rgba(15, 23, 42, 0.16);
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+
+    box-sizing: border-box;
+
+    animation: loginFadeIn 0.35s ease;
+}
+
+
+.login-card *,
+.login-card *::before,
+.login-card *::after {
+    box-sizing: border-box;
+}
+
+
+@keyframes loginFadeIn {
+
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+}
+
+
+/* ===============================
+   BRAND / LOGO
+================================ */
+
+.login-brand {
+    text-align: center;
+}
+
+
+.login-logo-wrap {
+    width: 105px;
+    height: 105px;
+
+    margin: 0 auto 18px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #2563eb;
+
+    border: 1px solid #1d4ed8;
+    border-radius: 22px;
+
+    box-shadow:
+        0 12px 28px rgba(37, 99, 235, 0.28);
+
+    overflow: hidden;
+}
+
+
+.login-logo {
+    display: block;
+
+    width: 88px;
+    height: 88px;
+
+    object-fit: contain;
+}
+
+
+.login-brand h1 {
+    margin: 0;
+
+    font-size: clamp(25px, 4vw, 30px);
+    font-weight: 800;
+
+    color: #0f172a;
+
+    letter-spacing: -0.6px;
+}
+
+
+.login-church-name {
+    margin: 7px 0 3px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    color: #334155;
+}
+
+
+.login-subtitle {
+    display: block;
+
+    font-size: 12px;
+    font-weight: 500;
+
+    color: #94a3b8;
+}
+
+
+/* ===============================
+   DIVIDER
+================================ */
+
+.login-divider {
+    height: 1px;
+
+    margin: 25px 0;
+
+    background: #e2e8f0;
+}
+
+
+/* ===============================
+   FORM
+================================ */
+
+.login-form {
+    width: 100%;
+}
+
+
+.login-field {
+    margin-bottom: 18px;
+}
+
+
+.login-field label {
+    display: block;
+
+    margin-bottom: 7px;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    color: #475569;
+}
+
+
+.login-input-wrap {
+    position: relative;
+}
+
+
+.login-input-icon {
+    position: absolute;
+
+    left: 14px;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    font-size: 15px;
+
+    pointer-events: none;
+}
+
+
+.login-input-wrap input {
+    width: 100%;
+
+    padding: 13px 14px 13px 42px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 11px;
+
+    background: #ffffff;
+
+    color: #0f172a;
+
+    font-size: 14px;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.login-input-wrap input::placeholder {
+    color: #94a3b8;
+}
+
+
+.login-input-wrap input:focus {
+    border-color: #2563eb;
+
+    box-shadow:
+        0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+
+/* ===============================
+   LOGIN BUTTON
+================================ */
+
+.login-button {
+    width: 100%;
+
+    margin-top: 5px;
+
+    padding: 13px 16px;
+
+    border: none;
+    border-radius: 11px;
+
+    background: #2563eb;
+
+    color: #ffffff;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.login-button:hover {
+    background: #1d4ed8;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 8px 20px rgba(37, 99, 235, 0.22);
+}
+
+
+.login-button:active {
+    transform: translateY(0);
+}
+
+
+/* ===============================
+   LOGIN MESSAGE
+================================ */
+
+.login-message {
+    min-height: 18px;
+
+    margin: 14px 0 0;
+
+    text-align: center;
+
+    font-size: 13px;
+    font-weight: 500;
+}
+
+
+/* ===============================
+   FOOTER
+================================ */
+
+.login-footer {
+    margin-top: 24px;
+
+    padding-top: 18px;
+
+    border-top: 1px solid #f1f5f9;
+
+    text-align: center;
+
+    color: #94a3b8;
+
+    font-size: 11px;
+}
+
+
+/* =====================================================
+   TABLET
+===================================================== */
+
+@media (max-width: 768px) {
+
+    .login-screen {
+        padding: 20px;
+    }
+
+    .login-card {
+        width: min(100%, 400px);
+
+        padding: 28px 24px;
+
+        border-radius: 18px;
+    }
+
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 600px) {
+
+    .login-screen {
+        padding: 14px;
+    }
+
+    .login-screen::before {
+        background-size: cover;
+        background-position: center center;
+
+        opacity: 0.15;
+    }
+
+    .login-screen::after {
+        background: rgba(248, 250, 252, 0.50);
+    }
+
+    .login-card {
+        width: 100%;
+        max-width: 380px;
+
+        padding: 24px 18px;
+
+        border-radius: 16px;
+    }
+
+    .login-logo-wrap {
+        width: 86px;
+        height: 86px;
+
+        margin-bottom: 14px;
+
+        border-radius: 18px;
+    }
+
+    .login-logo {
+        width: 70px;
+        height: 70px;
+    }
+
+    .login-brand h1 {
+        font-size: 25px;
+    }
+
+    .login-church-name {
+        font-size: 13px;
+    }
+
+    .login-subtitle {
+        font-size: 11px;
+    }
+
+    .login-divider {
+        margin: 18px 0;
+    }
+
+    .login-field {
+        margin-bottom: 14px;
+    }
+
+    .login-input-wrap input {
+        font-size: 16px;
+
+        padding-top: 12px;
+        padding-bottom: 12px;
+    }
+
+}
+
+
+/* =====================================================
+   SMALL PHONE
+===================================================== */
+
+@media (max-width: 380px) {
+
+    .login-screen {
+        padding: 10px;
+    }
+
+    .login-card {
+        padding: 20px 15px;
+    }
+
+    .login-logo-wrap {
+        width: 74px;
+        height: 74px;
+    }
+
+    .login-logo {
+        width: 60px;
+        height: 60px;
+    }
+
+    .login-brand h1 {
+        font-size: 23px;
+    }
+
+}
+
+
+/* =====================================================
+   SHORT SCREEN / LANDSCAPE PHONE
+===================================================== */
+
+@media (max-height: 650px) {
+
+    .login-screen {
+        align-items: flex-start;
+
+        padding-top: 14px;
+        padding-bottom: 14px;
+    }
+
+    .login-card {
+        margin: auto 0;
+
+        padding-top: 20px;
+        padding-bottom: 20px;
+    }
+
+    .login-logo-wrap {
+        width: 70px;
+        height: 70px;
+
+        margin-bottom: 10px;
+    }
+
+    .login-logo {
+        width: 56px;
+        height: 56px;
+    }
+
+    .login-divider {
+        margin: 14px 0;
+    }
+
+    .login-field {
+        margin-bottom: 12px;
+    }
+
+}
+
+/* =========================================
+   SERVICE MEMBER AUTOCOMPLETE
+========================================= */
+
+.member-autocomplete-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+
+.member-autocomplete-wrapper input {
+    width: 100%;
+}
+
+
+.member-autocomplete-list {
+
+    position: absolute;
+
+    top: calc(100% + 4px);
+    left: 0;
+
+    width: 100%;
+
+    max-height: 240px;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    background: #ffffff;
+
+    border: 1px solid #cbd5e1;
+
+    border-radius: 10px;
+
+    box-shadow:
+        0 12px 30px
+        rgba(15, 23, 42, 0.15);
+
+    z-index: 9999;
+}
+
+
+.member-autocomplete-item {
+
+    padding: 10px 12px;
+
+    cursor: pointer;
+
+    border-bottom:
+        1px solid #f1f5f9;
+
+    transition:
+        background-color 0.15s ease;
+}
+
+
+.member-autocomplete-item:last-child {
+    border-bottom: none;
+}
+
+
+.member-autocomplete-item:hover {
+    background: #eff6ff;
+}
+
+
+.member-autocomplete-name {
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    color: #0f172a;
+}
+
+
+.member-autocomplete-meta {
+
+    margin-top: 2px;
+
+    font-size: 11px;
+
+    color: #64748b;
+
+    white-space: normal;
+
+    overflow-wrap: anywhere;
+}
+
+
+.member-autocomplete-empty {
+
+    padding: 12px;
+
+    text-align: center;
+
+    font-size: 12px;
+
+    color: #94a3b8;
+}
+
+
+/* MOBILE */
+
+@media (max-width: 768px) {
+
+    .member-autocomplete-list {
+
+        max-height: 200px;
+
+        font-size: 13px;
+
+    }
+
+}
+
+/* =========================================
+   BACKUP STATUS
+========================================= */
+
+.backup-status {
+    margin-top: 14px;
+    padding: 12px 14px;
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 10px;
+
+    font-size: 13px;
+    color: #475569;
+}
+
+.backup-status strong {
+    color: #2563eb;
+}
+
+@media (max-width: 600px) {
+    .backup-status {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+/* =========================================
+   MEMBER ATTENDANCE ANALYTICS
+========================================= */
+
+.attendance-analytics-section {
+    width: 100%;
+    margin-top: 24px;
+    padding: 20px;
+
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+}
+
+.attendance-analytics-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+
+    margin-bottom: 18px;
+}
+
+.attendance-analytics-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #0f172a;
+}
+
+.attendance-analytics-header p {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: #64748b;
+}
+
+.attendance-analytics-search {
+    width: 280px;
+    max-width: 100%;
+}
+
+.attendance-analytics-search input {
+    width: 100%;
+    padding: 10px 12px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+
+    font-size: 14px;
+    background: #ffffff;
+
+    outline: none;
+}
+
+.attendance-analytics-search input:focus {
+    border-color: #2563eb;
+}
+
+.attendance-analytics-grid {
+    width: 100%;
+
+    display: grid;
+    grid-template-columns: 1fr;
+
+    gap: 14px;
+}
+
+.attendance-analytics-card {
+    width: 100%;
+    min-width: 0;
+
+    padding: 18px;
+
+    background: #ffffff;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+
+    box-shadow:
+        0 2px 8px rgba(15, 23, 42, 0.05);
+}
+
+.analytics-member-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    gap: 12px;
+
+    margin-bottom: 18px;
+}
+
+.analytics-member-header h4 {
+    margin: 0;
+
+    font-size: 16px;
+    color: #0f172a;
+}
+
+.analytics-member-header p {
+    margin: 4px 0 0;
+
+    font-size: 12px;
+    color: #64748b;
+}
+
+.analytics-status {
+    padding: 5px 9px;
+
+    border-radius: 999px;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+.analytics-excellent {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.analytics-good {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.analytics-warning {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.analytics-low {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.analytics-none {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.analytics-overall {
+    margin-bottom: 18px;
+}
+
+.analytics-overall > div:first-child {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 7px;
+}
+
+.analytics-label {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.analytics-overall strong {
+    font-size: 20px;
+    color: #2563eb;
+}
+
+.analytics-progress {
+    width: 100%;
+    height: 8px;
+
+    background: #e2e8f0;
+    border-radius: 999px;
+
+    overflow: hidden;
+}
+
+.analytics-progress-fill {
+    height: 100%;
+
+    background: #2563eb;
+    border-radius: inherit;
+}
+
+.analytics-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    gap: 10px;
+}
+
+.analytics-stat {
+    min-width: 0;
+
+    padding: 12px 8px;
+
+    text-align: center;
+
+    background: #f8fafc;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+}
+
+.analytics-stat span {
+    display: block;
+
+    margin-bottom: 4px;
+
+    font-size: 11px;
+    color: #64748b;
+}
+
+.analytics-stat strong {
+    display: block;
+
+    font-size: 16px;
+    color: #0f172a;
+}
+
+.analytics-stat small {
+    display: block;
+
+    margin-top: 3px;
+
+    font-size: 10px;
+    color: #64748b;
+}
+
+.analytics-last-attended {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 12px;
+
+    margin-top: 16px;
+    padding-top: 12px;
+
+    border-top: 1px solid #e2e8f0;
+}
+
+.analytics-last-attended span {
+    font-size: 11px;
+    color: #64748b;
+}
+
+.analytics-last-attended strong {
+    font-size: 12px;
+    color: #334155;
+
+    text-align: right;
+}
+
+.attendance-analytics-empty {
+    width: 100%;
+
+    padding: 28px;
+
+    text-align: center;
+
+    background: #f8fafc;
+
+    border: 1px dashed #cbd5e1;
+    border-radius: 10px;
+
+    color: #94a3b8;
+
+    font-size: 13px;
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 768px) {
+
+    .attendance-analytics-section {
+        padding: 14px;
+    }
+
+    .attendance-analytics-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .attendance-analytics-search {
+        width: 100%;
+    }
+
+    .attendance-analytics-card {
+        padding: 14px;
+    }
+
+    .analytics-member-header {
+        flex-direction: column;
+    }
+
+    .analytics-status {
+        align-self: flex-start;
+    }
+
+    .analytics-stats {
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+    }
+
+    .analytics-last-attended {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .analytics-last-attended strong {
+        text-align: left;
+    }
+}
+
+/* =========================================
+   MEMBER STATUS ALERTS
+========================================= */
+
+.dashboard-alerts-card {
+    margin-top: 20px;
+    padding: 20px;
+
+    background: #ffffff;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+}
+
+.dashboard-alerts-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 12px;
+
+    margin-bottom: 15px;
+}
+
+.dashboard-alerts-header h3 {
+    margin: 0;
+
+    font-size: 17px;
+    color: #0f172a;
+}
+
+.dashboard-alerts-header p {
+    margin: 4px 0 0;
+
+    font-size: 12px;
+    color: #64748b;
+}
+
+.member-alert-count {
+    min-width: 30px;
+    height: 30px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 8px;
+
+    border-radius: 999px;
+
+    background: #eff6ff;
+    color: #2563eb;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.member-alert-item {
+    display: flex;
+    align-items: flex-start;
+
+    gap: 10px;
+
+    padding: 11px 12px;
+
+    margin-bottom: 8px;
+
+    border-radius: 10px;
+
+    border: 1px solid #e2e8f0;
+}
+
+.member-alert-icon {
+    flex-shrink: 0;
+
+    font-size: 16px;
+}
+
+.member-alert-content {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 3px;
+}
+
+.member-alert-content strong {
+    font-size: 13px;
+    color: #0f172a;
+}
+
+.member-alert-content span {
+    font-size: 11px;
+    color: #64748b;
+}
+
+.member-alert-warning {
+    background: #fff7ed;
+    border-color: #fed7aa;
+}
+
+.member-alert-birthday {
+    background: #fdf2f8;
+    border-color: #fbcfe8;
+}
+
+.member-alert-info {
+    background: #f8fafc;
+}
+
+.member-alert-empty {
+    padding: 20px;
+
+    text-align: center;
+
+    color: #94a3b8;
+
+    font-size: 12px;
+}
+
+@media (max-width: 768px) {
+
+    .dashboard-alerts-card {
+        padding: 14px;
+    }
+
+    .dashboard-alerts-header {
+        align-items: flex-start;
+    }
+}
+
+/* =========================================
+   ALL MEMBERS LOOK GOOD
+========================================= */
+
+.member-alert-all-good {
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 14px;
+
+    background: #f0fdf4;
+
+    border: 1px solid #bbf7d0;
+    border-radius: 10px;
+}
+
+
+.member-alert-good-icon {
+    width: 34px;
+    height: 34px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #dcfce7;
+    color: #15803d;
+
+    border-radius: 50%;
+
+    font-size: 18px;
+    font-weight: 700;
+}
+
+
+.member-alert-good-content {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 3px;
+}
+
+
+.member-alert-good-content strong {
+    font-size: 13px;
+    color: #166534;
+}
+
+
+.member-alert-good-content span {
+    font-size: 11px;
+    color: #64748b;
+}
+
+/* =========================================
+   MINISTRY DASHBOARD
+========================================= */
+
+.ministry-dashboard-card {
+    margin-top: 20px;
+    padding: 20px;
+
+    background: #ffffff;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+}
+
+
+.ministry-dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 16px;
+
+    margin-bottom: 18px;
+}
+
+
+.ministry-dashboard-header h3 {
+    margin: 0;
+
+    font-size: 17px;
+    color: #0f172a;
+}
+
+
+.ministry-dashboard-header p {
+    margin: 4px 0 0;
+
+    font-size: 12px;
+    color: #64748b;
+}
+
+
+#ministryDashboardSelect {
+    min-width: 220px;
+
+    padding: 9px 12px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+
+    background: #ffffff;
+
+    font-size: 13px;
+}
+
+
+.ministry-dashboard-empty {
+    padding: 24px;
+
+    text-align: center;
+
+    color: #94a3b8;
+
+    background: #f8fafc;
+
+    border: 1px dashed #cbd5e1;
+    border-radius: 10px;
+}
+
+
+.ministry-dashboard-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 14px;
+}
+
+
+.ministry-dashboard-title h4 {
+    margin: 0;
+
+    font-size: 16px;
+    color: #0f172a;
+}
+
+
+.ministry-dashboard-title span {
+    font-size: 11px;
+    color: #64748b;
+}
+
+
+.ministry-stat-grid,
+.ministry-attendance-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 10px;
+}
+
+
+.ministry-stat-box,
+.ministry-attendance-box {
+    padding: 14px 10px;
+
+    text-align: center;
+
+    background: #f8fafc;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+}
+
+
+.ministry-stat-box span,
+.ministry-attendance-box span {
+    display: block;
+
+    font-size: 11px;
+    color: #64748b;
+}
+
+
+.ministry-stat-box strong,
+.ministry-attendance-box strong {
+    display: block;
+
+    margin-top: 4px;
+
+    font-size: 18px;
+    color: #0f172a;
+}
+
+
+.ministry-attendance-box small {
+    display: block;
+
+    margin-top: 3px;
+
+    font-size: 10px;
+    color: #64748b;
+}
+
+
+.ministry-attendance-section,
+.ministry-members-section {
+    margin-top: 18px;
+}
+
+
+.ministry-attendance-section h5,
+.ministry-members-section h5 {
+    margin: 0 0 10px;
+
+    font-size: 13px;
+    color: #334155;
+}
+
+
+.ministry-member-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 10px 0;
+
+    border-bottom: 1px solid #f1f5f9;
+}
+
+
+.ministry-member-row:last-child {
+    border-bottom: none;
+}
+
+
+.ministry-member-row > div {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+.ministry-member-row strong {
+    font-size: 13px;
+    color: #0f172a;
+}
+
+
+.ministry-member-row span {
+    font-size: 11px;
+    color: #64748b;
+}
+
+
+.ministry-member-status {
+    flex-shrink: 0;
+
+    padding: 4px 8px;
+
+    background: #f1f5f9;
+
+    border-radius: 999px;
+
+    font-size: 10px !important;
+}
+
+
+@media (max-width: 768px) {
+
+    .ministry-dashboard-card {
+        padding: 14px;
+    }
+
+    .ministry-dashboard-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    #ministryDashboardSelect {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .ministry-stat-grid,
+    .ministry-attendance-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+/* =====================================
+   FILES PAGE
+===================================== */
+
+.files-grid {
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(
+        auto-fit,
+        minmax(240px,1fr)
+    );
+
+    gap:20px;
+
+    margin-top:25px;
+
+}
+
+
+.file-folder-card {
+
+    padding:22px;
+
+    background:#ffffff;
+
+    border:
+    1px solid #e2e8f0;
+
+    border-radius:14px;
+
+    text-align:center;
+
+}
+
+
+.file-folder-card:hover {
+
+    transform:translateY(-3px);
+
+}
+
+
+.file-icon {
+
+    font-size:40px;
+
+    margin-bottom:12px;
+
+}
+
+
+.file-folder-card h3 {
+
+    margin:8px 0;
+
+    color:#1f2937;
+
+}
+
+
+.file-folder-card p {
+
+    font-size:13px;
+
+    color:#64748b;
+
+    min-height:40px;
+
+}
+
+
+@media(max-width:768px){
+
+    .files-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+}

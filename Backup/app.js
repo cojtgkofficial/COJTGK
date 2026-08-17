@@ -11,6 +11,9 @@ const churchSupabase = window.supabase.createClient(
     SUPABASE_ANON_KEY
 );
 
+let currentUser = null;
+let currentUserRole = null;
+
 console.log("✅ ChurchHQ Supabase client created.");
 console.log(
     "Supabase .from():",
@@ -42,7 +45,6 @@ async function testSupabaseConnection() {
     }
 }
 
-testSupabaseConnection();
 // ChurchHQ Engine - Optimized & Fixed
 // =====================================
 
@@ -105,8 +107,10 @@ async function loadMembersFromSupabase() {
                 !existingIds.has(Number(member.id))
             );
 
-            if (membersToMigrate.length > 0) {
-
+            if (
+    membersToMigrate.length > 0 &&
+    isAdminUser()
+) {
                 const { data: migratedData, error: migrateError } =
                     await churchSupabase
                         .from("members")
@@ -125,13 +129,14 @@ async function loadMembersFromSupabase() {
 
                 if (migrateError) {
 
-                    console.error(
-                        "❌ Failed to migrate old members:",
-                        migrateError
-                    );
+    console.error(
+        "❌ Failed to migrate old members:",
+        migrateError
+    );
 
-                    return false;
-                }
+    // Huwag ihinto ang normal member loading.
+    // Migration lamang ang nabigo.
+}
 
                 console.log(
                     "✅ Old members migrated to Supabase:",
@@ -159,7 +164,8 @@ async function loadMembersFromSupabase() {
         // -------------------------------------
         loadSavedMembers();
         loadDashboardBirthdays();
-
+        initializeServiceMemberAutocomplete();
+        initializeBackingVocalsAutocomplete();
         console.log(
             "✅ Members loaded from Supabase:",
             members
@@ -178,6 +184,21 @@ async function loadMembersFromSupabase() {
     }
 }
 
+
+function getSelectedMemberMinistries() {
+    const container = document.getElementById("memberMinistry");
+
+    if (!container) {
+        return [];
+    }
+
+    return Array.from(
+        container.querySelectorAll('input[type="checkbox"]:checked')
+    )
+        .map(checkbox => checkbox.value.trim())
+        .filter(value => value !== "");
+}
+
 // =====================================
 // MEMBERS - SUPABASE INSERT
 // =====================================
@@ -194,6 +215,7 @@ async function saveMemberToSupabase(member) {
                 contact: member.contact || '',
                 status: member.status || '',
                 ministry: member.ministry || '',
+                ministries: member.ministries || [],
                 role: member.role || 'Member',
                 birthday: member.birthday || null
             }])
@@ -240,6 +262,7 @@ async function updateMemberToSupabase(member) {
                 contact: member.contact || '',
                 status: member.status || '',
                 ministry: member.ministry || '',
+                ministries: member.ministries || [],
                 role: member.role || 'Member',
                 birthday: member.birthday || null
             })
@@ -822,6 +845,11 @@ let sundayServices = [];
 let midweekServices = [];
 
 async function saveServiceData(type) {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
     const prefix = type === "sunday" ? "sun_" : "mid_";
 
     const dateEl = document.getElementById(prefix + "serviceDate");
@@ -904,13 +932,22 @@ const updatedInSupabase =
         midweekServices = targetArray;
     }
 
-    alert(`✅ ${type === "sunday" ? "Sunday" : "Midweek"} Service roster para sa petsang (${dateValue}) ay matagumpay na nai-save!`);
+    alert(`✅ ${type === "sunday" ? "Sunday" : "Midweek"} Service roster for the date (${dateValue}) has been successfully saved!`);
     renderServiceHistory(type);
     updateServiceDateDropdowns();
 }
 
 function loadServiceRecord(type, date) {
-    const targetArray = type === "sunday" ? sundayServices : midweekServices;
+
+    if (!requireAdmin()) {
+        return;
+    }
+
+    const targetArray =
+        type === "sunday"
+            ? sundayServices
+            : midweekServices;
+
     const record = targetArray.find(item => item.date === date);
     
     if (!record) return;
@@ -960,8 +997,25 @@ function renderServiceHistory(type) {
             <td style="padding: 10px;">${record.worshipLeader || '-'}</td>
             <td style="padding: 10px;">${record.preacher || '-'}</td>
             <td style="padding: 10px; display:flex; gap:8px;">
-                <button type="button" class="secondary-btn" style="padding: 3px 8px; font-size: 12px;" onclick="loadServiceRecord('${type}', '${record.date}')">✏️ Load/Edit</button>
-                <button type="button" class="secondary-btn" style="padding: 3px 8px; font-size: 12px; color:#ef4444; border-color:#fca5a5;" onclick="deleteServiceRecord('${type}', '${record.date}')">❌ Delete</button>
+                <button
+    type="button"
+    class="secondary-btn"
+    data-admin-only="true"
+    style="padding: 3px 8px; font-size: 12px;"
+    onclick="loadServiceRecord('${type}', '${record.date}')"
+>
+    ✏️ Load/Edit
+</button>
+
+<button
+    type="button"
+    class="secondary-btn"
+    data-admin-only="true"
+    style="padding: 3px 8px; font-size: 12px; color:#ef4444; border-color:#fca5a5;"
+    onclick="deleteServiceRecord('${type}', '${record.date}')"
+>
+    ❌ Delete
+</button>
             </td>
         `;
         listBody.appendChild(tr);
@@ -1233,6 +1287,10 @@ function loadSavedServices() {
 
 async function deleteServiceRecord(type, date) {
 
+    if (!requireAdmin()) {
+        return;
+    }
+
     if (!confirm(`Are you sure you want to delete the record for ${date}?`)) {
         return;
     }
@@ -1446,13 +1504,14 @@ let editingTaskId = null;
 const saveTaskBtn = document.getElementById("saveTask");
 if (saveTaskBtn) saveTaskBtn.addEventListener("click", saveTask);
 
-document.addEventListener("DOMContentLoaded", () => {
 
-    loadSavedTasks();
-    loadSavedServices();
-    loadSavedSongs();
-    loadSavedMembers();
-    loadSavedAttendance();
+document.addEventListener(
+"DOMContentLoaded",
+()=>{
+
+    checkLoginSession();
+      updateLastBackupDisplay();
+});
 
     const attendanceYearSelect =
         document.getElementById(
@@ -1481,12 +1540,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
-});
-
-
-
 
 async function saveTask() {
+
+    if (!requireAdmin()) {
+        return;
+    }
 
     const title = document.getElementById("taskTitle").value.trim();
     const description = document.getElementById("taskDescription").value.trim();
@@ -1587,6 +1646,11 @@ async function saveTask() {
 }
 
 function openEditTaskModal(id) {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
     const task = tasks.find(t => t.id === id);
     if (!task) return;
 
@@ -1644,9 +1708,28 @@ async function loadTasksFromSupabase() {
         // RENDER PLANNER UI
         // =====================================
 
-        if (typeof renderTasks === "function") {
-            renderTasks();
-        }
+       if (typeof renderTask === "function") {
+
+    // Clear existing Planner columns
+    const todoCol =
+        document.getElementById("todoColumn");
+
+    const progCol =
+        document.getElementById("progressColumn");
+
+    const compCol =
+        document.getElementById("completedColumn");
+
+    if (todoCol) todoCol.innerHTML = "";
+    if (progCol) progCol.innerHTML = "";
+    if (compCol) compCol.innerHTML = "";
+
+    // Render Supabase tasks
+    tasks.forEach(task => renderTask(task));
+
+    // Update counters
+    updateCounters();
+}
 
         console.log(
             "✅ Planner tasks loaded from Supabase:",
@@ -1879,8 +1962,25 @@ function renderTask(task) {
         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <h4>${task.title}</h4>
             <div style="display: flex; gap: 6px; align-items: center;">
-                <button type="button" onclick="openEditTaskModal(${task.id})" style="background:none; border:none; color:#2563eb; cursor:pointer; font-size:14px;" title="Edit">✏️</button>
-                <button type="button" onclick="deleteTask(${task.id})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-weight:bold; font-size:18px;" title="Delete">&times;</button>
+                <button
+    type="button"
+    data-admin-only="true"
+    onclick="openEditTaskModal(${task.id})"
+    style="background:none; border:none; color:#2563eb; cursor:pointer; font-size:14px;"
+    title="Edit"
+>
+    ✏️
+</button>
+
+<button
+    type="button"
+    data-admin-only="true"
+    onclick="deleteTask(${task.id})"
+    style="background:none; border:none; color:#ef4444; cursor:pointer; font-weight:bold; font-size:18px;"
+    title="Delete"
+>
+    &times;
+</button>
             </div>
         </div>
         <p>${task.description || "<i>No description</i>"}</p>
@@ -1896,9 +1996,15 @@ function renderTask(task) {
     } else if (task.status === "completed" && document.getElementById("completedColumn")) {
         document.getElementById("completedColumn").appendChild(card);
     }
+
+    applyRoleBasedUI();
 }
 
 async function deleteTask(id) {
+
+    if (!requireAdmin()) {
+        return;
+    }
 
     if (!confirm("Are you sure you want to delete this task?")) {
         return;
@@ -2065,6 +2171,11 @@ if (editingSongId !== null) {
 }
 
 function openEditSongModal(id) {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
     const song = songs.find(s => s.id === id);
     if (!song) return;
 
@@ -2124,13 +2235,32 @@ function renderFullSongTable(songsArray) {
             <td style="padding: 10px; text-align: center; display: flex; justify-content: center; gap: 8px;">
                 <button type="button" class="secondary-btn" style="padding: 3px 8px; font-size: 12px; cursor: pointer;" onclick="quickAddToServiceLineup(${song.id})" title="Add to Sunday Service">➕ Add</button>
                 <button type="button" class="secondary-btn" style="padding: 3px 8px; font-size: 12px; cursor: pointer;" onclick="viewSong(${song.id})">👀 View</button>
-                <button type="button" onclick="openEditSongModal(${song.id})" style="background:none; border:none; color:#2563eb; cursor:pointer; font-size:14px;" title="Edit">✏️</button>
-                <button type="button" onclick="deleteSong(${song.id})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-weight:bold; font-size:16px;" title="❌ Delete">&times;</button>
+                <button
+    type="button"
+    data-admin-only="true"
+    onclick="openEditSongModal(${song.id})"
+    style="background:none; border:none; color:#2563eb; cursor:pointer; font-size:14px;"
+    title="Edit"
+>
+    ✏️
+</button>
+
+<button
+    type="button"
+    data-admin-only="true"
+    onclick="deleteSong(${song.id})"
+    style="background:none; border:none; color:#ef4444; cursor:pointer; font-weight:bold; font-size:16px;"
+    title="❌ Delete"
+>
+    &times;
+</button>
             </td>
         `;
         tableBody.appendChild(tr);
     });
 }
+
+applyRoleBasedUI();
 
 function populateSongDropdown() {
     const dropdown = document.getElementById("selectSongDropdown");
@@ -2334,6 +2464,11 @@ function isLineChords(line) {
 }
 
 async function deleteSong(id) {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
     if (confirm("Are you sure you want to delete this song?")) {
 
         const deletedFromSupabase =
@@ -2393,19 +2528,44 @@ if (closeMemberModal) closeMemberModal.addEventListener("click", () => { if (mem
 if (cancelMember) cancelMember.addEventListener("click", () => { if (memberModal) memberModal.classList.add("hidden"); });
 if (saveMemberBtn) saveMemberBtn.addEventListener("click", saveMember);
 
+
+function getSelectedMemberMinistries() {
+    const container = document.getElementById("memberMinistry");
+
+    if (!container) {
+        return [];
+    }
+
+    return Array.from(
+        container.querySelectorAll('input[type="checkbox"]:checked')
+    )
+        .map(checkbox => checkbox.value.trim())
+        .filter(value => value !== "");
+}
+
 async function saveMember() {
+
+    if (!requireAdmin()) {
+        return;
+    }
 
     const editId = document.getElementById("editMemberId").value;
     const name = document.getElementById("memberName").value.trim();
     const contact = document.getElementById("memberContact").value.trim();
     const status = document.getElementById("memberStatus").value;
-    const ministry = document.getElementById("memberMinistry").value;
+    const ministries = getSelectedMemberMinistries();
+    const ministry = ministries[0] || "";
     const role = document.getElementById("memberRole").value.trim();
     const birthday = document.getElementById("memberBirthday").value;
 
     if (name === "") {
         alert("Please enter member name.");
         return;
+    }
+
+    if (ministries.length === 0) {
+    alert("Please select at least one ministry.");
+    return;
     }
 
     // =====================================
@@ -2417,14 +2577,15 @@ async function saveMember() {
 
         if (index !== -1) {
 
-            const updatedMember = {
-                id: Number(editId),
-                name,
-                contact: contact || "No Contact",
-                status,
+            const updatedMember = { 
+                id: Number(editId), 
+                name, 
+                contact: contact || "No Contact", 
+                status, 
                 ministry,
-                role: role || "Member",
-                birthday: birthday || null
+                ministries,
+                role: role || "Member", 
+                birthday: birthday || null 
             };
 
             const updatedInSupabase =
@@ -2448,14 +2609,15 @@ async function saveMember() {
     // =====================================
     } else {
 
-        const member = {
-            id: Date.now(),
-            name,
-            contact: contact || "No Contact",
-            status,
+        const member = { 
+            id: Date.now(), 
+            name, 
+            contact: contact || "No Contact", 
+            status, 
             ministry,
-            role: role || "Member",
-            birthday: birthday || null
+            ministries,
+            role: role || "Member", 
+            birthday: birthday || null 
         };
 
         const savedToSupabase =
@@ -2499,7 +2661,10 @@ function saveMembersToLocalStorage() {
 function loadSavedMembers() {
     try {
         const saved = localStorage.getItem("churchhq_members");
-        if (saved) members = JSON.parse(saved);
+
+        if (saved) {
+            members = JSON.parse(saved);
+        }
     } catch (e) {
         members = [];
     }
@@ -2507,13 +2672,740 @@ function loadSavedMembers() {
     const membersGrid = document.getElementById("membersGrid");
     if (!membersGrid) return;
 
-    membersGrid.innerHTML = "";
-    members.forEach(member => renderMemberCard(member));
+    // =====================================
+    // SORT MEMBERS ALPHABETICALLY BY NAME
+    // =====================================
 
-    const memberCountEl = document.getElementById("memberCount");
+    const sortedMembers = [...members].sort((a, b) =>
+        (a.name || "").localeCompare(
+            (b.name || ""),
+            undefined,
+            { sensitivity: "base" }
+        )
+    );
+
+    membersGrid.innerHTML = "";
+
+    sortedMembers.forEach(member => {
+        renderMemberCard(member);
+    });
+
+    const memberCountEl =
+        document.getElementById("memberCount");
+
     if (memberCountEl) {
         memberCountEl.textContent = members.length;
     }
+
+    // =====================================
+    // UPDATE MINISTRY FILTER
+    // =====================================
+
+    populateMemberMinistryFilter();
+}
+
+/* =========================================
+   SERVICE MEMBER AUTOCOMPLETE
+   SUNDAY + MIDWEEK
+========================================= */
+
+function setupServiceMemberAutocomplete(inputId) {
+
+    const input = document.getElementById(inputId);
+
+    if (!input) return;
+
+
+    // Prevent duplicate initialization
+    if (input.dataset.autocompleteReady === "true") {
+        return;
+    }
+
+    input.dataset.autocompleteReady = "true";
+
+
+    // Create wrapper
+    const wrapper = document.createElement("div");
+
+    wrapper.className = "member-autocomplete-wrapper";
+
+
+    // Insert wrapper before input
+    input.parentNode.insertBefore(wrapper, input);
+
+    // Move input inside wrapper
+    wrapper.appendChild(input);
+
+
+    // Suggestion container
+    const suggestionBox =
+        document.createElement("div");
+
+    suggestionBox.className =
+        "member-autocomplete-list";
+
+    suggestionBox.style.display = "none";
+
+    wrapper.appendChild(suggestionBox);
+
+
+    // =====================================
+    // SEARCH MEMBERS
+    // =====================================
+
+    input.addEventListener("input", function () {
+
+        const search =
+            input.value
+                .trim()
+                .toLowerCase();
+
+
+        suggestionBox.innerHTML = "";
+
+
+        if (!search) {
+
+            suggestionBox.style.display =
+                "none";
+
+            return;
+
+        }
+
+
+        const filteredMembers =
+            members
+                .filter(member => {
+
+                    const name =
+                        (member.name || "")
+                            .toLowerCase();
+
+                    return name.includes(search);
+
+                })
+                .sort((a, b) =>
+                    (a.name || "").localeCompare(
+                        b.name || ""
+                    )
+                )
+                .slice(0, 8);
+
+
+        if (filteredMembers.length === 0) {
+
+            suggestionBox.innerHTML = `
+                <div class="member-autocomplete-empty">
+                    No member found.
+                </div>
+            `;
+
+            suggestionBox.style.display =
+                "block";
+
+            return;
+        }
+
+
+        filteredMembers.forEach(member => {
+
+            const item =
+                document.createElement("div");
+
+            item.className =
+                "member-autocomplete-item";
+
+
+            const ministryText =
+                Array.isArray(member.ministries) &&
+                member.ministries.length > 0
+
+                    ? member.ministries.join(", ")
+
+                    : member.ministry ||
+                      "No Ministry";
+
+
+            item.innerHTML = `
+
+                <div class="member-autocomplete-name">
+                    ${member.name || ""}
+                </div>
+
+                <div class="member-autocomplete-meta">
+
+                    ${ministryText}
+
+                    ${
+                        member.role
+                            ? " • " + member.role
+                            : ""
+                    }
+
+                </div>
+
+            `;
+
+
+            item.addEventListener(
+                "mousedown",
+                function (event) {
+
+                    event.preventDefault();
+
+                    input.value =
+                        member.name || "";
+
+                    suggestionBox.style.display =
+                        "none";
+
+                }
+            );
+
+
+            suggestionBox.appendChild(item);
+
+        });
+
+
+        suggestionBox.style.display =
+            "block";
+
+    });
+
+
+    // =====================================
+    // SHOW AGAIN ON FOCUS
+    // =====================================
+
+    input.addEventListener(
+        "focus",
+        function () {
+
+            if (
+                input.value.trim() !== ""
+            ) {
+
+                input.dispatchEvent(
+                    new Event("input")
+                );
+
+            }
+
+        }
+    );
+
+
+    // =====================================
+    // CLOSE SUGGESTIONS
+    // =====================================
+
+    input.addEventListener(
+        "blur",
+        function () {
+
+            setTimeout(() => {
+
+                suggestionBox.style.display =
+                    "none";
+
+            }, 150);
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   INITIALIZE SERVICE MEMBER AUTOCOMPLETE
+========================================= */
+
+function initializeServiceMemberAutocomplete() {
+
+    const servicePrefixes = [
+        "sun",
+        "mid"
+    ];
+
+
+    const memberFields = [
+
+        "worshipLeader",
+        "keys",
+        "guitar",
+        "bass",
+        "drums",
+        "pptOperator",
+        "soundEngineer",
+        "liveStream",
+        "preacher"
+
+    ];
+
+
+    servicePrefixes.forEach(prefix => {
+
+        memberFields.forEach(field => {
+
+            setupServiceMemberAutocomplete(
+                `${prefix}_${field}`
+            );
+
+        });
+
+    });
+
+}
+
+/* =========================================
+   BACKING VOCALS MULTI-MEMBER AUTOCOMPLETE
+   SUNDAY + MIDWEEK
+========================================= */
+
+function setupBackingVocalsAutocomplete(inputId) {
+
+    const input = document.getElementById(inputId);
+
+    if (!input) return;
+
+    if (input.dataset.multiAutocompleteReady === "true") {
+        return;
+    }
+
+    input.dataset.multiAutocompleteReady = "true";
+
+
+    // Create wrapper
+    const wrapper = document.createElement("div");
+
+    wrapper.className = "member-autocomplete-wrapper";
+
+    input.parentNode.insertBefore(wrapper, input);
+
+    wrapper.appendChild(input);
+
+
+    // Suggestion box
+    const suggestionBox =
+        document.createElement("div");
+
+    suggestionBox.className =
+        "member-autocomplete-list";
+
+    suggestionBox.style.display = "none";
+
+    wrapper.appendChild(suggestionBox);
+
+
+    // =====================================
+    // SEARCH
+    // =====================================
+
+    input.addEventListener("input", function () {
+
+        const fullValue =
+            input.value || "";
+
+
+        // Split existing selected names
+        const parts =
+            fullValue.split(",");
+
+
+        // Current text after last comma
+        const currentSearch =
+            parts[parts.length - 1]
+                .trim()
+                .toLowerCase();
+
+
+        suggestionBox.innerHTML = "";
+
+
+        if (!currentSearch) {
+
+            suggestionBox.style.display =
+                "none";
+
+            return;
+        }
+
+
+        // Already selected names
+        const selectedNames =
+            parts
+                .slice(0, -1)
+                .map(name =>
+                    name.trim().toLowerCase()
+                )
+                .filter(Boolean);
+
+
+        const filteredMembers =
+            members
+                .filter(member => {
+
+                    const memberName =
+                        (member.name || "")
+                            .toLowerCase();
+
+
+                    const matchesSearch =
+                        memberName.includes(
+                            currentSearch
+                        );
+
+
+                    const alreadySelected =
+                        selectedNames.includes(
+                            memberName
+                        );
+
+
+                    return (
+                        matchesSearch &&
+                        !alreadySelected
+                    );
+
+                })
+                .sort((a, b) =>
+                    (a.name || "").localeCompare(
+                        b.name || ""
+                    )
+                )
+                .slice(0, 8);
+
+
+        if (filteredMembers.length === 0) {
+
+            suggestionBox.innerHTML = `
+                <div class="member-autocomplete-empty">
+                    No member found.
+                </div>
+            `;
+
+            suggestionBox.style.display =
+                "block";
+
+            return;
+        }
+
+
+        filteredMembers.forEach(member => {
+
+            const item =
+                document.createElement("div");
+
+            item.className =
+                "member-autocomplete-item";
+
+
+            const ministryText =
+                Array.isArray(member.ministries) &&
+                member.ministries.length > 0
+                    ? member.ministries.join(", ")
+                    : member.ministry ||
+                      "No Ministry";
+
+
+            item.innerHTML = `
+
+                <div class="member-autocomplete-name">
+                    ${member.name || ""}
+                </div>
+
+                <div class="member-autocomplete-meta">
+
+                    ${ministryText}
+
+                    ${
+                        member.role
+                            ? " • " + member.role
+                            : ""
+                    }
+
+                </div>
+
+            `;
+
+
+            item.addEventListener(
+                "mousedown",
+                function (event) {
+
+                    event.preventDefault();
+
+
+                    // Existing completed selections
+                    const existing =
+                        parts
+                            .slice(0, -1)
+                            .map(name =>
+                                name.trim()
+                            )
+                            .filter(Boolean);
+
+
+                    // Add selected member
+                    existing.push(
+                        member.name
+                    );
+
+
+                    input.value =
+                        existing.join(", ") + ", ";
+
+
+                    suggestionBox.style.display =
+                        "none";
+
+
+                    // Put cursor back into input
+                    input.focus();
+
+                }
+            );
+
+
+            suggestionBox.appendChild(item);
+
+        });
+
+
+        suggestionBox.style.display =
+            "block";
+
+    });
+
+
+    // =====================================
+    // CLOSE ON BLUR
+    // =====================================
+
+    input.addEventListener(
+        "blur",
+        function () {
+
+            setTimeout(() => {
+
+                suggestionBox.style.display =
+                    "none";
+
+            }, 150);
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   INITIALIZE BACKING VOCALS AUTOCOMPLETE
+========================================= */
+
+function initializeBackingVocalsAutocomplete() {
+
+    setupBackingVocalsAutocomplete(
+        "sun_backingVocals"
+    );
+
+    setupBackingVocalsAutocomplete(
+        "mid_backingVocals"
+    );
+
+}
+
+function populateMemberMinistryFilter() {
+
+    const filter =
+        document.getElementById("memberMinistryFilter");
+
+    if (!filter) return;
+
+    // Clear existing options
+    filter.innerHTML = "";
+
+    // Default option
+    const allOption = document.createElement("option");
+
+    allOption.value = "";
+    allOption.textContent = "All Ministries";
+
+    filter.appendChild(allOption);
+
+    // Store unique ministries
+    const ministries = new Set();
+
+    members.forEach(member => {
+
+        // New multiple-ministry format
+        if (
+            Array.isArray(member.ministries)
+        ) {
+
+            member.ministries.forEach(ministry => {
+
+                if (
+                    typeof ministry === "string" &&
+                    ministry.trim() !== ""
+                ) {
+                    ministries.add(
+                        ministry.trim()
+                    );
+                }
+
+            });
+
+        }
+
+        // Support old single-ministry data
+        else if (
+            typeof member.ministry === "string" &&
+            member.ministry.trim() !== ""
+        ) {
+
+            ministries.add(
+                member.ministry.trim()
+            );
+
+        }
+
+    });
+
+    // Sort ministries alphabetically
+    const sortedMinistries =
+        Array.from(ministries).sort((a, b) =>
+            a.localeCompare(
+                b,
+                undefined,
+                { sensitivity: "base" }
+            )
+        );
+
+    // Add ministries to dropdown
+    sortedMinistries.forEach(ministry => {
+
+        const option =
+            document.createElement("option");
+
+        option.value = ministry;
+        option.textContent = ministry;
+
+        filter.appendChild(option);
+    });
+}
+
+function filterMembers() {
+
+    const searchInput =
+        document.getElementById("memberSearch");
+
+    const ministryFilter =
+        document.getElementById("memberMinistryFilter");
+
+    const membersGrid =
+        document.getElementById("membersGrid");
+
+    if (!membersGrid) return;
+
+    const searchQuery =
+        searchInput
+            ? searchInput.value.trim().toLowerCase()
+            : "";
+
+    const selectedMinistry =
+        ministryFilter
+            ? ministryFilter.value
+            : "";
+
+    // =====================================
+    // FILTER MEMBERS
+    // =====================================
+
+    const filteredMembers = members.filter(member => {
+
+        // -------------------------------
+        // SEARCH
+        // -------------------------------
+
+        const ministries = Array.isArray(member.ministries)
+            ? member.ministries
+            : (
+                member.ministry
+                    ? [member.ministry]
+                    : []
+            );
+
+        const searchText = [
+            member.name || "",
+            member.contact || "",
+            member.status || "",
+            member.role || "",
+            ...ministries
+        ]
+            .join(" ")
+            .toLowerCase();
+
+        const matchesSearch =
+            searchQuery === "" ||
+            searchText.includes(searchQuery);
+
+        // -------------------------------
+        // MINISTRY FILTER
+        // -------------------------------
+
+        const matchesMinistry =
+            selectedMinistry === "" ||
+            ministries.includes(selectedMinistry);
+
+        return matchesSearch && matchesMinistry;
+    });
+
+    // =====================================
+    // SORT ALPHABETICALLY
+    // =====================================
+
+    filteredMembers.sort((a, b) =>
+        (a.name || "").localeCompare(
+            (b.name || ""),
+            undefined,
+            { sensitivity: "base" }
+        )
+    );
+
+    // =====================================
+    // RENDER RESULTS
+    // =====================================
+
+    membersGrid.innerHTML = "";
+
+    filteredMembers.forEach(member => {
+        renderMemberCard(member);
+    });
+}
+
+const memberSearch =
+    document.getElementById("memberSearch");
+
+if (memberSearch) {
+
+    memberSearch.addEventListener("input", () => {
+        filterMembers();
+    });
+
+}
+
+const memberMinistryFilter =
+    document.getElementById("memberMinistryFilter");
+
+if (memberMinistryFilter) {
+
+    memberMinistryFilter.addEventListener("change", () => {
+        filterMembers();
+    });
+
 }
 
 function renderMemberCard(member) {
@@ -2523,20 +3415,44 @@ function renderMemberCard(member) {
     const card = document.createElement("div");
     card.className = "song-card";
 
+    const ministries = Array.isArray(member.ministries) && member.ministries.length > 0
+        ? member.ministries
+        : (member.ministry ? [member.ministry] : []);
+
+    const ministryText = ministries.join(", ");
+
     card.innerHTML = `
         <div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                 <h3 style="margin: 0;">${member.name}</h3>
                 <span class="status-badge" style="background:#e2e8f0; padding:2px 6px; border-radius:4px; font-size:12px;">${member.status}</span>
             </div>
+
             <p class="artist">📞 ${member.contact}</p>
+
             <div style="margin-top: 10px; font-size: 12px; color:#64748b;">
-                <span>🏛️ ${member.ministry}</span> | <span>💼 ${member.role}</span>
+                <span>🏛️ ${ministryText}</span> |
+                <span>💼 ${member.role}</span>
             </div>
         </div>
+
         <div style="display:flex; justify-content:space-between; margin-top:15px;">
-            <button type="button" class="secondary-btn" style="padding: 4px 10px; font-size: 12px;" onclick="editMember(${member.id})">✏️ Edit</button>
-            <button type="button" onclick="deleteMember(${member.id})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size: 16px; font-weight:bold;">&times;</button>
+            <button
+                type="button"
+                class="secondary-btn"
+                style="padding: 4px 10px; font-size: 12px;"
+                onclick="editMember(${member.id})"
+            >
+                ✏️ Edit
+            </button>
+
+            <button
+                type="button"
+                onclick="deleteMember(${member.id})"
+                style="background:none; border:none; color:#ef4444; cursor:pointer; font-size: 16px; font-weight:bold;"
+            >
+                &times;
+            </button>
         </div>
     `;
 
@@ -2544,6 +3460,11 @@ function renderMemberCard(member) {
 }
 
 function editMember(id) {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
     const member = members.find(m => m.id === id);
     if (!member) return;
 
@@ -2561,37 +3482,97 @@ function editMember(id) {
     if (mName) mName.value = member.name;
     if (mContact) mContact.value = member.contact;
     if (mStatus) mStatus.value = member.status;
-    
+
+    // =====================================
+    // LOAD MEMBER MINISTRIES
+    // =====================================
+
     if (ministrySelect) {
-        let hasOption = Array.from(ministrySelect.options).some(opt => opt.value === member.ministry);
-        if (!hasOption) {
-            const newOpt = new Option(member.ministry, member.ministry);
-            ministrySelect.add(newOpt);
-        }
-        ministrySelect.value = member.ministry;
+
+        const selectedMinistries =
+            Array.isArray(member.ministries) &&
+            member.ministries.length > 0
+                ? member.ministries
+                : (member.ministry ? [member.ministry] : []);
+
+        const checkboxes =
+            ministrySelect.querySelectorAll(
+                'input[type="checkbox"]'
+            );
+
+        checkboxes.forEach(checkbox => {
+            checkbox.checked =
+                selectedMinistries.includes(checkbox.value);
+        });
     }
 
     if (mRole) mRole.value = member.role;
+
     if (mBirthday) {
-    mBirthday.value = member.birthday || "";
-}
-    if (memberModal) memberModal.classList.remove("hidden");
+        mBirthday.value = member.birthday || "";
+    }
+
+    if (memberModal) {
+        memberModal.classList.remove("hidden");
+    }
 }
 
 function addCustomMinistry() {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
     const newMinistry = prompt("Enter new Ministry Group name:");
+
     if (newMinistry && newMinistry.trim() !== "") {
-        const select = document.getElementById("memberMinistry");
-        if (select) {
-            const option = new Option(newMinistry.trim(), newMinistry.trim());
-            select.add(option);
-            select.value = newMinistry.trim();
-            alert(`Added "${newMinistry.trim()}" to Ministry list!`);
+
+        const container = document.getElementById("memberMinistry");
+
+        if (container) {
+
+            const ministryName = newMinistry.trim();
+
+            // Prevent duplicate ministry
+            const existingCheckboxes =
+                container.querySelectorAll('input[type="checkbox"]');
+
+            const alreadyExists = Array.from(existingCheckboxes)
+                .some(checkbox => checkbox.value === ministryName);
+
+            if (alreadyExists) {
+                alert(`"${ministryName}" already exists.`);
+                return;
+            }
+
+            // Create checkbox
+            const label = document.createElement("label");
+
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.value = ministryName;
+
+            const span = document.createElement("span");
+            span.textContent = ministryName;
+
+            label.appendChild(checkbox);
+            label.appendChild(span);
+
+            container.appendChild(label);
+
+            // Automatically select newly added ministry
+            checkbox.checked = true;
+
+            alert(`Added "${ministryName}" to Ministry list!`);
         }
     }
 }
 
 async function deleteMember(id) {
+
+    if (!requireAdmin()) {
+        return;
+    }
 
     if (!confirm("Are you sure you want to delete this member?")) {
         return;
@@ -2628,26 +3609,22 @@ function clearMemberForm() {
     const mRole = document.getElementById("memberRole");
     const mBirthday = document.getElementById("memberBirthday");
 
-
     if (editId) editId.value = "";
     if (mName) mName.value = "";
     if (mContact) mContact.value = "";
     if (mStatus) mStatus.selectedIndex = 0;
-    if (ministrySelect) ministrySelect.selectedIndex = 0;
+
+    if (ministrySelect) {
+        const checkboxes =
+            ministrySelect.querySelectorAll('input[type="checkbox"]');
+
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+    }
+
     if (mRole) mRole.value = "";
     if (mBirthday) mBirthday.value = "";
-
-}
-
-const memberSearch = document.getElementById("memberSearch");
-if (memberSearch) {
-    memberSearch.addEventListener("input", (e) => {
-        const query = e.target.value.toLowerCase();
-        document.querySelectorAll("#membersGrid .song-card").forEach(card => {
-            const text = card.textContent.toLowerCase();
-            card.style.display = text.includes(query) ? "flex" : "none";
-        });
-    });
 }
 
 /* =========================================
@@ -2885,52 +3862,216 @@ function renderAttendanceList() {
     listEl.innerHTML = "";
 
     if (members.length === 0) {
-        listEl.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #6b7280; padding: 20px;">No members found. Please add members in the <b>Members Tab</b> first.</p>`;
+        listEl.innerHTML = `
+            <p style="grid-column: 1/-1; text-align: center; color: #6b7280; padding: 20px;">
+                No members found. Please add members in the <b>Members Tab</b> first.
+            </p>
+        `;
         return;
     }
 
-    members.forEach(member => {
-        const isChecked = !!currentCheckIns[member.id];
+    // =====================================
+    // GET SEARCH QUERY
+    // =====================================
 
-        const card = document.createElement("div");
-        card.className = `att-card ${isChecked ? "checked" : ""}`;
+    const searchInput =
+        document.getElementById("attendanceSearch");
+
+    const searchQuery = searchInput
+        ? searchInput.value.trim().toLowerCase()
+        : "";
+
+    // =====================================
+    // SORT MEMBERS A-Z
+    // =====================================
+
+    const sortedMembers = [...members].sort((a, b) =>
+        (a.name || "").localeCompare(
+            (b.name || ""),
+            undefined,
+            { sensitivity: "base" }
+        )
+    );
+
+    // =====================================
+    // SEARCH
+    // =====================================
+
+    let visibleMembers;
+
+    if (searchQuery !== "") {
+
+        visibleMembers = sortedMembers.filter(member => {
+
+            const ministries =
+                Array.isArray(member.ministries)
+                    ? member.ministries
+                    : (
+                        member.ministry
+                            ? [member.ministry]
+                            : []
+                    );
+
+            const searchableText = [
+                member.name || "",
+                member.contact || "",
+                member.status || "",
+                member.role || "",
+                ...ministries
+            ]
+                .join(" ")
+                .toLowerCase();
+
+            return searchableText.includes(searchQuery);
+        });
+
+    } else {
+
+        // =====================================
+        // SHOW ONLY FIRST 15 MEMBERS
+        // =====================================
+
+        visibleMembers = sortedMembers.slice(0, 15);
+    }
+
+    // =====================================
+    // DISPLAY MEMBERS
+    // =====================================
+
+    visibleMembers.forEach(member => {
+
+        const isChecked =
+            !!currentCheckIns[member.id];
+
+        const card =
+            document.createElement("div");
+
+        card.className =
+            `att-card ${isChecked ? "checked" : ""}`;
+
         card.onclick = (e) => {
+
             if (e.target.tagName !== "INPUT") {
                 toggleCheckIn(member.id);
             }
+
         };
+
+        const ministries =
+            Array.isArray(member.ministries) &&
+            member.ministries.length > 0
+                ? member.ministries
+                : (
+                    member.ministry
+                        ? [member.ministry]
+                        : []
+                );
+
+        const ministryText =
+            ministries.join(", ");
 
         card.innerHTML = `
             <div>
-                <h4 style="margin: 0; font-size: 15px;">${member.name}</h4>
-                <p style="margin: 2px 0 0 0; font-size: 12px; color: #6b7280;">🏛️ ${member.ministry}</p>
+                <h4 style="margin: 0; font-size: 15px;">
+                    ${member.name}
+                </h4>
+
+                <p style="margin: 2px 0 0 0; font-size: 12px; color: #6b7280;">
+                    🏛️ ${ministryText}
+                </p>
             </div>
-            <input type="checkbox" ${isChecked ? "checked" : ""} onchange="toggleCheckIn(${member.id})">
+
+            <input
+                type="checkbox"
+                ${isChecked ? "checked" : ""}
+                onchange="toggleCheckIn(${member.id})"
+            >
         `;
 
         listEl.appendChild(card);
     });
 
-    const totalCount = members.length;
-    const presentCount = Object.values(currentCheckIns).filter(Boolean).length;
-    const absentCount = totalCount - presentCount;
+    // =====================================
+    // NO SEARCH RESULTS
+    // =====================================
 
-    if (document.getElementById("attTotalCount")) document.getElementById("attTotalCount").textContent = totalCount;
-    if (document.getElementById("attPresentCount")) document.getElementById("attPresentCount").textContent = presentCount;
-    if (document.getElementById("attAbsentCount")) document.getElementById("attAbsentCount").textContent = absentCount;
+    if (
+        searchQuery !== "" &&
+        visibleMembers.length === 0
+    ) {
+
+        listEl.innerHTML = `
+            <p style="grid-column: 1/-1; text-align: center; color: #6b7280; padding: 20px;">
+                No members found matching
+                "<b>${searchQuery}</b>".
+            </p>
+        `;
+    }
+
+    // =====================================
+    // ATTENDANCE COUNTS
+    // =====================================
+
+    const totalCount =
+        members.length;
+
+    const presentCount =
+        Object.values(currentCheckIns)
+            .filter(Boolean)
+            .length;
+
+    const absentCount =
+        totalCount - presentCount;
+
+    if (document.getElementById("attTotalCount")) {
+        document.getElementById("attTotalCount").textContent =
+            totalCount;
+    }
+
+    if (document.getElementById("attPresentCount")) {
+        document.getElementById("attPresentCount").textContent =
+            presentCount;
+    }
+
+    if (document.getElementById("attAbsentCount")) {
+        document.getElementById("attAbsentCount").textContent =
+            absentCount;
+    }
+}
+
+const attendanceSearch =
+    document.getElementById("attendanceSearch");
+
+if (attendanceSearch) {
+    attendanceSearch.addEventListener("input", () => {
+        renderAttendanceList();
+    });
 }
 
 function toggleCheckIn(memberId) {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
     currentCheckIns[memberId] = !currentCheckIns[memberId];
     renderAttendanceList();
+
 }
 
 function markAllAttendance(status) {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
     members.forEach(member => {
         currentCheckIns[member.id] = status;
     });
+
     renderAttendanceList();
 }
+
 
 async function saveAttendance() {
 
@@ -3440,6 +4581,590 @@ function calculateMemberAttendanceSummary() {
 
 }
 
+/* =========================================
+   MEMBER ATTENDANCE ANALYTICS
+   STEP 4A
+========================================= */
+
+function calculateMemberAttendanceAnalytics() {
+
+    const year =
+        Number(selectedAttendanceYear);
+
+
+    // =====================================
+    // RECORDS FOR SELECTED YEAR
+    // =====================================
+
+    const yearRecords =
+        attendanceRecords.filter(record => {
+
+            if (!record.date) {
+                return false;
+            }
+
+            const recordYear =
+                new Date(
+                    record.date
+                ).getFullYear();
+
+            return recordYear === year;
+
+        });
+
+
+    // =====================================
+    // TOTAL SERVICES
+    // =====================================
+
+    const sundayRecords =
+        yearRecords.filter(record =>
+            (record.serviceType || "sunday") ===
+            "sunday"
+        );
+
+
+    const midweekRecords =
+        yearRecords.filter(record =>
+            record.serviceType ===
+            "midweek"
+        );
+
+
+    const totalSundayServices =
+        sundayRecords.length;
+
+    const totalMidweekServices =
+        midweekRecords.length;
+
+    const totalServices =
+        totalSundayServices +
+        totalMidweekServices;
+
+
+    // =====================================
+    // ANALYTICS PER MEMBER
+    // =====================================
+
+    const analytics =
+        members.map(member => {
+
+            let sundayPresent = 0;
+            let midweekPresent = 0;
+
+            let lastAttendedDate = null;
+
+
+            yearRecords.forEach(record => {
+
+                const checkIns =
+                    record.checkIns || {};
+
+
+                if (!checkIns[member.id]) {
+                    return;
+                }
+
+
+                const serviceType =
+                    record.serviceType ||
+                    "sunday";
+
+
+                if (
+                    serviceType ===
+                    "sunday"
+                ) {
+
+                    sundayPresent++;
+
+                } else if (
+                    serviceType ===
+                    "midweek"
+                ) {
+
+                    midweekPresent++;
+
+                }
+
+
+                const attendanceDate =
+                    new Date(record.date);
+
+
+                if (
+                    !lastAttendedDate ||
+                    attendanceDate >
+                    lastAttendedDate
+                ) {
+
+                    lastAttendedDate =
+                        attendanceDate;
+
+                }
+
+            });
+
+
+            const totalPresent =
+                sundayPresent +
+                midweekPresent;
+
+
+            const sundayRate =
+                totalSundayServices > 0
+                    ? Math.round(
+                        (
+                            sundayPresent /
+                            totalSundayServices
+                        ) * 100
+                    )
+                    : 0;
+
+
+            const midweekRate =
+                totalMidweekServices > 0
+                    ? Math.round(
+                        (
+                            midweekPresent /
+                            totalMidweekServices
+                        ) * 100
+                    )
+                    : 0;
+
+
+            const overallRate =
+                totalServices > 0
+                    ? Math.round(
+                        (
+                            totalPresent /
+                            totalServices
+                        ) * 100
+                    )
+                    : 0;
+
+
+            const lastAttended =
+                lastAttendedDate
+                    ? lastAttendedDate
+                        .toLocaleDateString(
+                            "en-US",
+                            {
+                                month:
+                                    "long",
+
+                                day:
+                                    "numeric",
+
+                                year:
+                                    "numeric"
+                            }
+                        )
+
+                    : "No attendance yet";
+
+
+            return {
+
+                id:
+                    member.id,
+
+                name:
+                    member.name || "",
+
+                status:
+                    member.status || "",
+
+                ministry:
+                    member.ministry || "",
+
+                ministries:
+                    Array.isArray(
+                        member.ministries
+                    )
+                        ? member.ministries
+                        : [],
+
+
+                sundayPresent,
+                totalSundayServices,
+                sundayRate,
+
+
+                midweekPresent,
+                totalMidweekServices,
+                midweekRate,
+
+
+                totalPresent,
+                totalServices,
+                overallRate,
+
+
+                lastAttended,
+
+                lastAttendedRaw:
+                    lastAttendedDate
+                        ? lastAttendedDate
+                            .toISOString()
+                            .split("T")[0]
+                        : null
+
+            };
+
+        });
+
+
+    return analytics;
+
+}
+
+
+/* =========================================
+   MEMBER ATTENDANCE ANALYTICS UI
+   STEP 4B
+========================================= */
+
+function renderMemberAttendanceAnalytics(
+    searchText = ""
+) {
+
+    const container =
+        document.getElementById(
+            "attendanceAnalyticsGrid"
+        );
+
+    if (!container) {
+        return;
+    }
+
+
+    const analytics =
+        calculateMemberAttendanceAnalytics();
+
+
+    const search =
+    String(searchText || "")
+        .trim()
+        .toLowerCase();
+
+
+// =====================================
+// NO SEARCH = SHOW NOTHING
+// =====================================
+
+if (!search) {
+
+    container.innerHTML = `
+        <div class="attendance-analytics-empty">
+            Search for a member to view attendance analytics.
+        </div>
+    `;
+
+    return;
+}
+
+
+// =====================================
+// SEARCH MEMBER
+// =====================================
+
+let filtered =
+    analytics.filter(member => {
+
+        const memberName =
+            String(member.name || "")
+                .toLowerCase();
+
+        return memberName.includes(search);
+
+    });
+
+
+// =====================================
+// SHOW ONLY ONE RESULT
+// =====================================
+
+filtered = filtered.slice(0, 1);
+
+
+    container.innerHTML = "";
+
+
+if (filtered.length === 0) {
+
+    container.innerHTML = `
+        <div class="attendance-analytics-empty">
+            No member found.
+        </div>
+    `;
+
+    return;
+}
+
+
+    filtered.forEach(member => {
+
+        let attendanceLevel =
+            "No Attendance";
+
+        let levelClass =
+            "analytics-none";
+
+
+        if (member.totalServices > 0) {
+
+            if (
+                member.overallRate >= 80
+            ) {
+
+                attendanceLevel =
+                    "Excellent";
+
+                levelClass =
+                    "analytics-excellent";
+
+            } else if (
+                member.overallRate >= 60
+            ) {
+
+                attendanceLevel =
+                    "Good";
+
+                levelClass =
+                    "analytics-good";
+
+            } else if (
+                member.overallRate >= 40
+            ) {
+
+                attendanceLevel =
+                    "Needs Attention";
+
+                levelClass =
+                    "analytics-warning";
+
+            } else {
+
+                attendanceLevel =
+                    "Low Attendance";
+
+                levelClass =
+                    "analytics-low";
+
+            }
+
+        }
+
+
+        const ministries =
+            Array.isArray(
+                member.ministries
+            ) &&
+            member.ministries.length > 0
+
+                ? member.ministries
+
+                : (
+                    member.ministry
+                        ? [
+                            member.ministry
+                        ]
+                        : []
+                );
+
+
+        const ministryText =
+            ministries.length > 0
+                ? ministries.join(", ")
+                : "No Ministry";
+
+
+        const card =
+            document.createElement(
+                "div"
+            );
+
+
+        card.className =
+            "attendance-analytics-card";
+
+
+        card.innerHTML = `
+
+            <div class="analytics-member-header">
+
+                <div>
+
+                    <h4>
+                        ${member.name}
+                    </h4>
+
+                    <p>
+                        ${ministryText}
+                    </p>
+
+                </div>
+
+
+                <span
+                    class="
+                        analytics-status
+                        ${levelClass}
+                    "
+                >
+                    ${attendanceLevel}
+                </span>
+
+            </div>
+
+
+            <div class="analytics-overall">
+
+                <div>
+
+                    <span class="analytics-label">
+                        Overall Attendance
+                    </span>
+
+                    <strong>
+                        ${member.overallRate}%
+                    </strong>
+
+                </div>
+
+
+                <div class="analytics-progress">
+
+                    <div
+                        class="
+                            analytics-progress-fill
+                        "
+                        style="
+                            width:
+                            ${Math.min(
+                                member.overallRate,
+                                100
+                            )}%;
+                        "
+                    ></div>
+
+                </div>
+
+            </div>
+
+
+            <div class="analytics-stats">
+
+                <div class="analytics-stat">
+
+                    <span>
+                        Sunday
+                    </span>
+
+                    <strong>
+                        ${member.sundayPresent}
+                        /
+                        ${member.totalSundayServices}
+                    </strong>
+
+                    <small>
+                        ${member.sundayRate}%
+                    </small>
+
+                </div>
+
+
+                <div class="analytics-stat">
+
+                    <span>
+                        Midweek
+                    </span>
+
+                    <strong>
+                        ${member.midweekPresent}
+                        /
+                        ${member.totalMidweekServices}
+                    </strong>
+
+                    <small>
+                        ${member.midweekRate}%
+                    </small>
+
+                </div>
+
+
+                <div class="analytics-stat">
+
+                    <span>
+                        Total
+                    </span>
+
+                    <strong>
+                        ${member.totalPresent}
+                        /
+                        ${member.totalServices}
+                    </strong>
+
+                    <small>
+                        Present
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <div class="analytics-last-attended">
+
+                <span>
+                    Last Attended
+                </span>
+
+                <strong>
+                    ${member.lastAttended}
+                </strong>
+
+            </div>
+
+        `;
+
+
+        container.appendChild(
+            card
+        );
+
+    });
+
+}
+
+
+/* =========================================
+   ATTENDANCE ANALYTICS SEARCH
+========================================= */
+
+const attendanceAnalyticsSearch =
+    document.getElementById(
+        "attendanceAnalyticsSearch"
+    );
+
+
+if (attendanceAnalyticsSearch) {
+
+    attendanceAnalyticsSearch
+        .addEventListener(
+            "input",
+            function () {
+
+                renderMemberAttendanceAnalytics(
+                    this.value
+                );
+
+            }
+        );
+
+}
+
 
 
 function renderAttendanceSummary(searchText = "") {
@@ -3657,11 +5382,1054 @@ function renderAttendanceSummary(searchText = "") {
     });
 }
 
+/* =========================================
+   MEMBER STATUS ALERTS
+   STEP 5A
+========================================= */
+
+function calculateMemberStatusAlerts() {
+
+    const analytics =
+        calculateMemberAttendanceAnalytics();
+
+    const alerts = [];
+
+    const today = new Date();
+
+    analytics.forEach(member => {
+
+        const originalMember =
+            members.find(
+                m => m.id == member.id
+            );
+
+        if (!originalMember) {
+            return;
+        }
+
+
+        // =====================================
+        // NO ATTENDANCE
+        // =====================================
+
+        if (
+            member.totalServices > 0 &&
+            member.totalPresent === 0
+        ) {
+
+            alerts.push({
+                memberId: member.id,
+                memberName: member.name,
+                type: "no-attendance",
+                level: "warning",
+                message:
+                    `No attendance recorded for ${selectedAttendanceYear}.`
+            });
+
+        }
+
+
+        // =====================================
+        // LOW ATTENDANCE
+        // =====================================
+
+        else if (
+            member.totalServices > 0 &&
+            member.overallRate < 40
+        ) {
+
+            alerts.push({
+                memberId: member.id,
+                memberName: member.name,
+                type: "low-attendance",
+                level: "warning",
+                message:
+                    `Attendance is only ${member.overallRate}% for ${selectedAttendanceYear}.`
+            });
+
+        }
+
+
+        // =====================================
+        // INACTIVE MEMBER
+        // =====================================
+
+        const status =
+            String(
+                originalMember.status || ""
+            )
+                .trim()
+                .toLowerCase();
+
+        if (status === "inactive") {
+
+            alerts.push({
+                memberId: member.id,
+                memberName: member.name,
+                type: "inactive",
+                level: "info",
+                message:
+                    "Member is currently marked as inactive."
+            });
+
+        }
+
+
+        // =====================================
+        // MISSING CONTACT
+        // =====================================
+
+        const contact =
+            String(
+                originalMember.contact || ""
+            )
+                .trim()
+                .toLowerCase();
+
+        if (
+            !contact ||
+            contact === "no contact" ||
+            contact === "n/a"
+        ) {
+
+            alerts.push({
+                memberId: member.id,
+                memberName: member.name,
+                type: "missing-contact",
+                level: "info",
+                message:
+                    "No contact number recorded."
+            });
+
+        }
+
+
+        // =====================================
+        // NO MINISTRY
+        // =====================================
+
+        const ministries =
+            Array.isArray(
+                originalMember.ministries
+            )
+                ? originalMember.ministries
+                    .filter(Boolean)
+                : [];
+
+
+        const primaryMinistry =
+            String(
+                originalMember.ministry || ""
+            ).trim();
+
+
+        if (
+            ministries.length === 0 &&
+            !primaryMinistry
+        ) {
+
+            alerts.push({
+                memberId: member.id,
+                memberName: member.name,
+                type: "no-ministry",
+                level: "info",
+                message:
+                    "No ministry assigned."
+            });
+
+        }
+
+
+        // =====================================
+        // BIRTHDAY THIS WEEK
+        // =====================================
+
+        if (originalMember.birthday) {
+
+            const birthday =
+                new Date(
+                    originalMember.birthday
+                );
+
+
+            if (
+                !isNaN(
+                    birthday.getTime()
+                )
+            ) {
+
+                const birthdayThisYear =
+                    new Date(
+                        today.getFullYear(),
+                        birthday.getMonth(),
+                        birthday.getDate()
+                    );
+
+
+                // If birthday already passed,
+                // check next year
+                if (
+                    birthdayThisYear <
+                    new Date(
+                        today.getFullYear(),
+                        today.getMonth(),
+                        today.getDate()
+                    )
+                ) {
+
+                    birthdayThisYear
+                        .setFullYear(
+                            today.getFullYear() + 1
+                        );
+
+                }
+
+
+                const todayOnly =
+                    new Date(
+                        today.getFullYear(),
+                        today.getMonth(),
+                        today.getDate()
+                    );
+
+
+                const diffTime =
+                    birthdayThisYear -
+                    todayOnly;
+
+
+                const daysUntilBirthday =
+                    Math.round(
+                        diffTime /
+                        (
+                            1000 *
+                            60 *
+                            60 *
+                            24
+                        )
+                    );
+
+
+                if (
+                    daysUntilBirthday >= 0 &&
+                    daysUntilBirthday <= 7
+                ) {
+
+                    let birthdayMessage;
+
+                    if (
+                        daysUntilBirthday === 0
+                    ) {
+
+                        birthdayMessage =
+                            "Birthday today! 🎂";
+
+                    } else {
+
+                        birthdayMessage =
+                            `Birthday in ${daysUntilBirthday} day${daysUntilBirthday === 1 ? "" : "s"}.`;
+
+                    }
+
+
+                    alerts.push({
+                        memberId: member.id,
+                        memberName: member.name,
+                        type: "birthday",
+                        level: "birthday",
+                        message:
+                            birthdayMessage
+                    });
+
+                }
+
+            }
+
+        }
+
+    });
+
+
+    return alerts;
+
+}
+
+
+
+/* =========================================
+   MEMBER STATUS ALERTS UI
+   STEP 5B
+========================================= */
+
+function renderMemberStatusAlerts() {
+
+    const container =
+        document.getElementById(
+            "memberStatusAlertsList"
+        );
+
+    const countEl =
+        document.getElementById(
+            "memberAlertCount"
+        );
+
+    if (!container) {
+        return;
+    }
+
+
+    const alerts =
+        calculateMemberStatusAlerts();
+
+
+    if (countEl) {
+        countEl.textContent =
+            alerts.length;
+    }
+
+
+container.innerHTML = "";
+
+if (alerts.length === 0) {
+
+    container.innerHTML = `
+        <div class="member-alert-all-good">
+
+            <div class="member-alert-good-icon">
+                ✓
+            </div>
+
+            <div class="member-alert-good-content">
+
+                <strong>
+                    All Members Look Good
+                </strong>
+
+                <span>
+                    No member status alerts require attention at this time.
+                </span>
+
+            </div>
+
+        </div>
+    `;
+
+    return;
+}
+
+    const visibleAlerts =
+        alerts.slice(0, 5);
+
+
+    visibleAlerts.forEach(alert => {
+
+        let icon = "ℹ️";
+        let className = "member-alert-info";
+
+
+        if (
+            alert.level === "warning"
+        ) {
+
+            icon = "⚠️";
+            className =
+                "member-alert-warning";
+
+        }
+
+
+        if (
+            alert.level === "birthday"
+        ) {
+
+            icon = "🎂";
+            className =
+                "member-alert-birthday";
+
+        }
+
+
+        const item =
+            document.createElement("div");
+
+
+        item.className =
+            `member-alert-item ${className}`;
+
+
+        item.innerHTML = `
+
+            <div class="member-alert-icon">
+                ${icon}
+            </div>
+
+            <div class="member-alert-content">
+
+                <strong>
+                    ${alert.memberName}
+                </strong>
+
+                <span>
+                    ${alert.message}
+                </span>
+
+            </div>
+
+        `;
+
+
+        container.appendChild(
+            item
+        );
+
+    });
+
+}
+
+/* =========================================
+   MINISTRY DASHBOARD ENGINE
+   STEP 6A
+========================================= */
+
+function getAvailableMinistries() {
+
+    const ministrySet = new Set();
+
+
+    members.forEach(member => {
+
+        // Multiple ministries
+        if (Array.isArray(member.ministries)) {
+
+            member.ministries.forEach(ministry => {
+
+                const name =
+                    String(ministry || "").trim();
+
+                if (name) {
+                    ministrySet.add(name);
+                }
+
+            });
+
+        }
+
+
+        // Legacy / primary ministry
+        const primaryMinistry =
+            String(
+                member.ministry || ""
+            ).trim();
+
+
+        if (primaryMinistry) {
+            ministrySet.add(primaryMinistry);
+        }
+
+    });
+
+
+    return Array.from(ministrySet)
+        .sort((a, b) =>
+            a.localeCompare(
+                b,
+                undefined,
+                {
+                    sensitivity: "base"
+                }
+            )
+        );
+
+}
+
+/* =========================================
+   MINISTRY DASHBOARD UI
+   STEP 6B
+========================================= */
+
+function populateMinistryDashboardSelect() {
+
+    const select =
+        document.getElementById(
+            "ministryDashboardSelect"
+        );
+
+    if (!select) return;
+
+
+    const ministries =
+        getAvailableMinistries();
+
+
+    select.innerHTML = `
+        <option value="">
+            Select Ministry
+        </option>
+    `;
+
+
+    ministries.forEach(ministry => {
+
+        const option =
+            document.createElement("option");
+
+        option.value =
+            ministry;
+
+        option.textContent =
+            ministry;
+
+        select.appendChild(
+            option
+        );
+
+    });
+
+}
+
+
+function renderMinistryDashboard(
+    ministryName
+) {
+
+    const container =
+        document.getElementById(
+            "ministryDashboardContent"
+        );
+
+    if (!container) return;
+
+
+    if (!ministryName) {
+
+        container.innerHTML = `
+            <div class="ministry-dashboard-empty">
+                Select a ministry to view details.
+            </div>
+        `;
+
+        return;
+    }
+
+
+    const data =
+        calculateMinistryDashboard(
+            ministryName
+        );
+
+
+    if (!data) {
+        return;
+    }
+
+
+    let membersHTML = "";
+
+
+    if (data.members.length === 0) {
+
+        membersHTML = `
+            <div class="ministry-dashboard-empty">
+                No members found.
+            </div>
+        `;
+
+    } else {
+
+        data.members.forEach(member => {
+
+            const status =
+                member.status ||
+                "Active";
+
+            membersHTML += `
+
+                <div class="ministry-member-row">
+
+                    <div>
+
+                        <strong>
+                            ${member.name || ""}
+                        </strong>
+
+                        <span>
+                            ${member.role || "Member"}
+                        </span>
+
+                    </div>
+
+                    <span class="ministry-member-status">
+                        ${status}
+                    </span>
+
+                </div>
+
+            `;
+
+        });
+
+    }
+
+
+    container.innerHTML = `
+
+        <div class="ministry-dashboard-title">
+
+            <h4>
+                ${data.ministry}
+            </h4>
+
+            <span>
+                ${selectedAttendanceYear}
+            </span>
+
+        </div>
+
+
+        <div class="ministry-stat-grid">
+
+            <div class="ministry-stat-box">
+
+                <span>
+                    Total Members
+                </span>
+
+                <strong>
+                    ${data.totalMembers}
+                </strong>
+
+            </div>
+
+
+            <div class="ministry-stat-box">
+
+                <span>
+                    Active Members
+                </span>
+
+                <strong>
+                    ${data.activeMembers}
+                </strong>
+
+            </div>
+
+
+            <div class="ministry-stat-box">
+
+                <span>
+                    Leaders
+                </span>
+
+                <strong>
+                    ${data.leaders}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="ministry-attendance-section">
+
+            <h5>
+                Attendance
+            </h5>
+
+
+            <div class="ministry-attendance-grid">
+
+                <div class="ministry-attendance-box">
+
+                    <span>
+                        Sunday
+                    </span>
+
+                    <strong>
+                        ${data.attendance.sundayRate}%
+                    </strong>
+
+                    <small>
+                        ${data.attendance.sundayPresent}
+                        /
+                        ${data.attendance.sundayPossible}
+                    </small>
+
+                </div>
+
+
+                <div class="ministry-attendance-box">
+
+                    <span>
+                        Midweek
+                    </span>
+
+                    <strong>
+                        ${data.attendance.midweekRate}%
+                    </strong>
+
+                    <small>
+                        ${data.attendance.midweekPresent}
+                        /
+                        ${data.attendance.midweekPossible}
+                    </small>
+
+                </div>
+
+
+                <div class="ministry-attendance-box">
+
+                    <span>
+                        Overall
+                    </span>
+
+                    <strong>
+                        ${data.attendance.overallRate}%
+                    </strong>
+
+                    <small>
+                        ${data.attendance.totalPresent}
+                        /
+                        ${data.attendance.totalPossible}
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="ministry-members-section">
+
+            <h5>
+                Members
+            </h5>
+
+            <div class="ministry-members-list">
+                ${membersHTML}
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+const ministryDashboardSelect =
+    document.getElementById(
+        "ministryDashboardSelect"
+    );
+
+
+if (ministryDashboardSelect) {
+
+    ministryDashboardSelect
+        .addEventListener(
+            "change",
+            function () {
+
+                renderMinistryDashboard(
+                    this.value
+                );
+
+            }
+        );
+
+}
+
+
+/* =========================================
+   CALCULATE MINISTRY DASHBOARD
+========================================= */
+
+function calculateMinistryDashboard(
+    selectedMinistry
+) {
+
+    const ministryName =
+        String(
+            selectedMinistry || ""
+        ).trim();
+
+
+    if (!ministryName) {
+        return null;
+    }
+
+
+    const normalizedMinistry =
+        ministryName.toLowerCase();
+
+
+    // =====================================
+    // MEMBERS OF SELECTED MINISTRY
+    // =====================================
+
+    const ministryMembers =
+        members.filter(member => {
+
+            const memberMinistries = [];
+
+
+            if (
+                Array.isArray(
+                    member.ministries
+                )
+            ) {
+
+                member.ministries
+                    .forEach(ministry => {
+
+                        const name =
+                            String(
+                                ministry || ""
+                            )
+                                .trim()
+                                .toLowerCase();
+
+                        if (name) {
+                            memberMinistries.push(
+                                name
+                            );
+                        }
+
+                    });
+
+            }
+
+
+            const primary =
+                String(
+                    member.ministry || ""
+                )
+                    .trim()
+                    .toLowerCase();
+
+
+            if (primary) {
+                memberMinistries.push(
+                    primary
+                );
+            }
+
+
+            return memberMinistries.includes(
+                normalizedMinistry
+            );
+
+        });
+
+
+    // =====================================
+    // ACTIVE MEMBERS
+    // =====================================
+
+    const activeMembers =
+        ministryMembers.filter(member => {
+
+            const status =
+                String(
+                    member.status || ""
+                )
+                    .trim()
+                    .toLowerCase();
+
+            return status !== "inactive";
+
+        });
+
+
+    // =====================================
+    // LEADERS
+    // =====================================
+
+    const leaders =
+        ministryMembers.filter(member => {
+
+            const role =
+                String(
+                    member.role || ""
+                )
+                    .trim()
+                    .toLowerCase();
+
+            return (
+                role.includes("leader") ||
+                role.includes("head") ||
+                role.includes("pastor")
+            );
+
+        });
+
+
+    // =====================================
+    // ATTENDANCE ANALYTICS
+    // =====================================
+
+    const attendanceAnalytics =
+        calculateMemberAttendanceAnalytics();
+
+
+    const memberIds =
+        new Set(
+            ministryMembers.map(member =>
+                String(member.id)
+            )
+        );
+
+
+    const ministryAnalytics =
+        attendanceAnalytics.filter(
+            analytics =>
+                memberIds.has(
+                    String(analytics.id)
+                )
+        );
+
+
+    // =====================================
+    // ATTENDANCE TOTALS
+    // =====================================
+
+    let sundayPresent = 0;
+    let sundayPossible = 0;
+
+    let midweekPresent = 0;
+    let midweekPossible = 0;
+
+
+    ministryAnalytics.forEach(member => {
+
+        sundayPresent +=
+            member.sundayPresent || 0;
+
+        sundayPossible +=
+            member.totalSundayServices || 0;
+
+
+        midweekPresent +=
+            member.midweekPresent || 0;
+
+        midweekPossible +=
+            member.totalMidweekServices || 0;
+
+    });
+
+
+    const totalPresent =
+        sundayPresent +
+        midweekPresent;
+
+
+    const totalPossible =
+        sundayPossible +
+        midweekPossible;
+
+
+    // =====================================
+    // ATTENDANCE RATES
+    // =====================================
+
+    const sundayRate =
+        sundayPossible > 0
+            ? Math.round(
+                (
+                    sundayPresent /
+                    sundayPossible
+                ) * 100
+            )
+            : 0;
+
+
+    const midweekRate =
+        midweekPossible > 0
+            ? Math.round(
+                (
+                    midweekPresent /
+                    midweekPossible
+                ) * 100
+            )
+            : 0;
+
+
+    const overallRate =
+        totalPossible > 0
+            ? Math.round(
+                (
+                    totalPresent /
+                    totalPossible
+                ) * 100
+            )
+            : 0;
+
+
+    // =====================================
+    // SORT MEMBER LIST
+    // =====================================
+
+    const sortedMembers =
+        [...ministryMembers]
+            .sort((a, b) =>
+                String(a.name || "")
+                    .localeCompare(
+                        String(b.name || ""),
+                        undefined,
+                        {
+                            sensitivity:
+                                "base"
+                        }
+                    )
+            );
+
+
+    return {
+
+        ministry:
+            ministryName,
+
+        totalMembers:
+            ministryMembers.length,
+
+        activeMembers:
+            activeMembers.length,
+
+        leaders:
+            leaders.length,
+
+
+        attendance: {
+
+            sundayPresent,
+            sundayPossible,
+            sundayRate,
+
+            midweekPresent,
+            midweekPossible,
+            midweekRate,
+
+            totalPresent,
+            totalPossible,
+            overallRate
+
+        },
+
+
+        members:
+            sortedMembers
+
+    };
+
+}
+
 // =====================================
 // ATTENDANCE - UI & LOCALSTORAGE DELETE WRAPPER
 // =====================================
 
 async function deleteAttendance(date, serviceType) {
+
+    if (!requireAdmin()) {
+        return;
+    }
 
     if (!confirm(
         `Are you sure you want to delete the attendance record for ${date}?`
@@ -3817,20 +6585,22 @@ function renderAttendanceHistory() {
             <td style="padding: 10px; text-align: center;">
 
                 <button
-                    type="button"
-                    class="secondary-btn"
-                    style="padding: 4px 8px; font-size: 12px;"
-                    onclick="loadAttendanceRecord('${record.date}', '${record.serviceType || "sunday"}')">
-                    ✏️ Load
-                </button>
+    type="button"
+    class="secondary-btn"
+    data-admin-only="true"
+    style="padding: 4px 8px; font-size: 12px;"
+    onclick="loadAttendanceRecord('${record.date}', '${record.serviceType || "sunday"}')">
+    ✏️ Load
+</button>
 
-                <button
-                    type="button"
-                    class="secondary-btn"
-                    style="padding: 4px 8px; font-size: 12px; color:#ef4444; border-color:#fca5a5;"
-                    onclick="deleteAttendance('${record.date}', '${record.serviceType || "sunday"}')">
-                    ✖ Delete
-                </button>
+<button
+    type="button"
+    class="secondary-btn"
+    data-admin-only="true"
+    style="padding: 4px 8px; font-size: 12px; color:#ef4444; border-color:#fca5a5;"
+    onclick="deleteAttendance('${record.date}', '${record.serviceType || "sunday"}')">
+    ✖ Delete
+</button>
 
             </td>
         `;
@@ -3845,7 +6615,12 @@ function renderAttendanceHistory() {
 
 function loadAttendanceRecord(date, serviceType) {
 
-    const actualServiceType = serviceType || "sunday";
+    if (!requireAdmin()) {
+        return;
+    }
+
+    const actualServiceType =
+        serviceType || "sunday";
 
     const record = attendanceRecords.find(
         r =>
@@ -3890,90 +6665,761 @@ function loadAttendanceRecord(date, serviceType) {
 
 /* =========================================
    SETTINGS & BACKUP ENGINE
+   SUPABASE EXPORT BACKUP
 ========================================= */
-function exportChurchData() {
-    const backupData = {
-        app: "ChurchHQ",
-        version: "2.1",
-        exportDate: new Date().toISOString(),
-        data: {
-            tasks: JSON.parse(localStorage.getItem("churchhq_tasks") || "[]"),
-            songs: JSON.parse(localStorage.getItem("churchhq_songs") || "[]"),
-            members: JSON.parse(localStorage.getItem("churchhq_members") || "[]"),
-            attendance: JSON.parse(localStorage.getItem("churchhq_attendance") || "[]"),
-            activities: JSON.parse(localStorage.getItem("churchhq_activities") || "[]"),
-            announcements: JSON.parse(localStorage.getItem("churchhq_announcements") || "[]"),
-            sundayServices: JSON.parse(localStorage.getItem("churchhq_sunday_services") || "[]"),
-            midweekServices: JSON.parse(localStorage.getItem("churchhq_midweek_services") || "[]"),
-            sundayLineup: JSON.parse(localStorage.getItem("churchhq_sunday_lineup") || "[]")
-        }
-    };
 
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
-    const downloadAnchor = document.createElement("a");
-    const today = new Date().toISOString().split("T")[0];
-    
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `churchhq_backup_${today}.json`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
+async function exportChurchData() {
 
-    alert("🎉 Backup file generated and downloaded successfully!");
-}
-
-function importChurchData(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const importedJSON = JSON.parse(e.target.result);
-
-            if (!importedJSON.data) {
-                alert("❌ Invalid backup file format!");
-                return;
-            }
-
-            if (!confirm("⚠️ Warning: Importing backup will replace your current data. Do you want to proceed?")) {
-                return;
-            }
-
-            if (importedJSON.data.tasks) localStorage.setItem("churchhq_tasks", JSON.stringify(importedJSON.data.tasks));
-            if (importedJSON.data.songs) localStorage.setItem("churchhq_songs", JSON.stringify(importedJSON.data.songs));
-            if (importedJSON.data.members) localStorage.setItem("churchhq_members", JSON.stringify(importedJSON.data.members));
-            if (importedJSON.data.attendance) localStorage.setItem("churchhq_attendance", JSON.stringify(importedJSON.data.attendance));
-            if (importedJSON.data.activities) localStorage.setItem("churchhq_activities", JSON.stringify(importedJSON.data.activities));
-            if (importedJSON.data.announcements) localStorage.setItem("churchhq_announcements", JSON.stringify(importedJSON.data.announcements));
-            if (importedJSON.data.sundayServices) localStorage.setItem("churchhq_sunday_services", JSON.stringify(importedJSON.data.sundayServices));
-            if (importedJSON.data.midweekServices) localStorage.setItem("churchhq_midweek_services", JSON.stringify(importedJSON.data.midweekServices));
-            if (importedJSON.data.sundayLineup) localStorage.setItem("churchhq_sunday_lineup", JSON.stringify(importedJSON.data.sundayLineup));
-
-            alert("✅ Data restored successfully! Reloading system...");
-            location.reload();
-
-        } catch (err) {
-            alert("❌ Failed to parse the file. Make sure it's a valid JSON backup file.");
-        }
-    };
-
-    reader.readAsText(file);
-}
-
-function clearAllChurchData() {
-    if (confirm("🚨 ARE YOU SURE?\n\nThis will permanently delete all saved tasks, songs, members, service plans, and attendance records!")) {
-        if (confirm("Final Check: Are you 100% sure you want to reset everything?")) {
-            localStorage.clear();
-            alert("🗑️ System reset complete. Reloading...");
-            location.reload();
-        }
+    if (!requireAdmin()) {
+        return;
     }
+
+    try {
+
+        console.log("📦 Creating Supabase backup...");
+
+
+        const [
+            membersResult,
+            tasksResult,
+            songsResult,
+            servicesResult,
+            attendanceResult,
+            activitiesResult,
+            announcementsResult
+        ] = await Promise.all([
+
+            churchSupabase
+                .from("members")
+                .select("*"),
+
+            churchSupabase
+                .from("planner_tasks")
+                .select("*"),
+
+            churchSupabase
+                .from("songs")
+                .select("*"),
+
+            churchSupabase
+                .from("service_records")
+                .select("*"),
+
+            churchSupabase
+                .from("attendance_records")
+                .select("*"),
+
+            churchSupabase
+                .from("activities")
+                .select("*"),
+
+            churchSupabase
+                .from("announcements")
+                .select("*")
+
+        ]);
+
+
+        const results = [
+            ["members", membersResult],
+            ["planner_tasks", tasksResult],
+            ["songs", songsResult],
+            ["service_records", servicesResult],
+            ["attendance_records", attendanceResult],
+            ["activities", activitiesResult],
+            ["announcements", announcementsResult]
+        ];
+
+
+        // Check Supabase errors
+        for (const [tableName, result] of results) {
+
+            if (result.error) {
+
+                console.error(
+                    `❌ Failed to export ${tableName}:`,
+                    result.error
+                );
+
+                alert(
+                    `❌ Backup failed while reading ${tableName}.`
+                );
+
+                return;
+            }
+
+        }
+
+
+        const backupData = {
+
+            app: "ChurchHQ",
+
+            version: "3.0",
+
+            source: "Supabase",
+
+            exportDate:
+                new Date().toISOString(),
+
+            data: {
+
+                members:
+                    membersResult.data || [],
+
+                planner_tasks:
+                    tasksResult.data || [],
+
+                songs:
+                    songsResult.data || [],
+
+                service_records:
+                    servicesResult.data || [],
+
+                attendance_records:
+                    attendanceResult.data || [],
+
+                activities:
+                    activitiesResult.data || [],
+
+                announcements:
+                    announcementsResult.data || []
+
+            }
+
+        };
+
+
+        // Convert backup to JSON
+        const jsonData =
+            JSON.stringify(
+                backupData,
+                null,
+                2
+            );
+
+
+        const blob =
+            new Blob(
+                [jsonData],
+                {
+                    type: "application/json"
+                }
+            );
+
+
+        const url =
+            URL.createObjectURL(blob);
+
+
+        const downloadAnchor =
+            document.createElement("a");
+
+
+        const today =
+            new Date()
+                .toISOString()
+                .slice(0, 10);
+
+
+        downloadAnchor.href =
+            url;
+
+        downloadAnchor.download =
+            `churchhq_supabase_backup_${today}.json`;
+
+
+        document.body.appendChild(
+            downloadAnchor
+        );
+
+
+        downloadAnchor.click();
+
+
+        downloadAnchor.remove();
+
+        URL.revokeObjectURL(url);
+
+
+        console.log(
+            "✅ Supabase backup created:",
+            {
+                members:
+                    backupData.data.members.length,
+
+                planner_tasks:
+                    backupData.data.planner_tasks.length,
+
+                songs:
+                    backupData.data.songs.length,
+
+                service_records:
+                    backupData.data.service_records.length,
+
+                attendance_records:
+                    backupData.data.attendance_records.length,
+
+                activities:
+                    backupData.data.activities.length,
+
+                announcements:
+                    backupData.data.announcements.length
+            }
+        );
+
+        const backupTime =
+    new Date().toISOString();
+
+localStorage.setItem(
+    "churchhq_last_backup",
+    backupTime
+);
+
+updateLastBackupDisplay();
+
+        alert(
+            "✅ Supabase backup downloaded successfully!"
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "❌ Supabase backup error:",
+            error
+        );
+
+        alert(
+            "❌ Failed to create Supabase backup."
+        );
+
+    }
+
 }
 
 /* =========================================
-   REPORTS & ANALYTICS ENGINE
+   SETTINGS & BACKUP ENGINE
+   SUPABASE IMPORT / RESTORE
 ========================================= */
+
+async function importChurchData(event) {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
+    const file = event.target.files[0];
+
+    if (!file) return;
+
+
+    const reader = new FileReader();
+
+
+    reader.onload = async function(e) {
+
+        try {
+
+            const importedJSON =
+                JSON.parse(e.target.result);
+
+
+            // =====================================
+            // VALIDATE BACKUP FORMAT
+            // =====================================
+
+            if (
+                !importedJSON ||
+                importedJSON.app !== "ChurchHQ" ||
+                !importedJSON.data
+            ) {
+
+                alert(
+                    "❌ Invalid ChurchHQ backup file."
+                );
+
+                event.target.value = "";
+
+                return;
+            }
+
+
+            const backup =
+                importedJSON.data;
+
+
+            const validSupabaseBackup =
+                Array.isArray(backup.members) &&
+                Array.isArray(backup.planner_tasks) &&
+                Array.isArray(backup.songs) &&
+                Array.isArray(backup.service_records) &&
+                Array.isArray(backup.attendance_records) &&
+                Array.isArray(backup.activities) &&
+                Array.isArray(backup.announcements);
+
+
+            if (!validSupabaseBackup) {
+
+                alert(
+                    "❌ This is not a valid Supabase ChurchHQ backup."
+                );
+
+                event.target.value = "";
+
+                return;
+            }
+
+
+            const confirmed = confirm(
+                "⚠️ Restore this backup to the ChurchHQ Supabase database?\n\n" +
+                "Existing records with the same IDs will be updated.\n" +
+                "New records will be added.\n\n" +
+                "Continue?"
+            );
+
+
+            if (!confirmed) {
+
+                event.target.value = "";
+
+                return;
+            }
+
+
+            console.log(
+                "📤 Starting Supabase restore..."
+            );
+
+
+            // =====================================
+            // RESTORE MEMBERS
+            // =====================================
+
+            if (backup.members.length > 0) {
+
+                const {
+                    error: membersError
+                } = await churchSupabase
+                    .from("members")
+                    .upsert(
+                        backup.members,
+                        {
+                            onConflict: "id"
+                        }
+                    );
+
+                if (membersError) {
+                    throw new Error(
+                        "Members restore failed: " +
+                        membersError.message
+                    );
+                }
+
+            }
+
+
+            // =====================================
+            // RESTORE PLANNER TASKS
+            // =====================================
+
+            if (backup.planner_tasks.length > 0) {
+
+                const {
+                    error: tasksError
+                } = await churchSupabase
+                    .from("planner_tasks")
+                    .upsert(
+                        backup.planner_tasks,
+                        {
+                            onConflict: "id"
+                        }
+                    );
+
+                if (tasksError) {
+                    throw new Error(
+                        "Planner tasks restore failed: " +
+                        tasksError.message
+                    );
+                }
+
+            }
+
+
+            // =====================================
+            // RESTORE SONGS
+            // =====================================
+
+            if (backup.songs.length > 0) {
+
+                const {
+                    error: songsError
+                } = await churchSupabase
+                    .from("songs")
+                    .upsert(
+                        backup.songs,
+                        {
+                            onConflict: "id"
+                        }
+                    );
+
+                if (songsError) {
+                    throw new Error(
+                        "Songs restore failed: " +
+                        songsError.message
+                    );
+                }
+
+            }
+
+
+            // =====================================
+            // RESTORE SERVICE RECORDS
+            // =====================================
+
+            if (backup.service_records.length > 0) {
+
+                const {
+                    error: servicesError
+                } = await churchSupabase
+                    .from("service_records")
+                    .upsert(
+                        backup.service_records,
+                        {
+                            onConflict: "id"
+                        }
+                    );
+
+                if (servicesError) {
+                    throw new Error(
+                        "Service records restore failed: " +
+                        servicesError.message
+                    );
+                }
+
+            }
+
+
+            // =====================================
+            // RESTORE ATTENDANCE
+            // =====================================
+
+            if (backup.attendance_records.length > 0) {
+
+                const {
+                    error: attendanceError
+                } = await churchSupabase
+                    .from("attendance_records")
+                    .upsert(
+                        backup.attendance_records,
+                        {
+                            onConflict: "id"
+                        }
+                    );
+
+                if (attendanceError) {
+                    throw new Error(
+                        "Attendance restore failed: " +
+                        attendanceError.message
+                    );
+                }
+
+            }
+
+
+            // =====================================
+            // RESTORE ACTIVITIES
+            // =====================================
+
+            if (backup.activities.length > 0) {
+
+                const {
+                    error: activitiesError
+                } = await churchSupabase
+                    .from("activities")
+                    .upsert(
+                        backup.activities,
+                        {
+                            onConflict: "id"
+                        }
+                    );
+
+                if (activitiesError) {
+                    throw new Error(
+                        "Activities restore failed: " +
+                        activitiesError.message
+                    );
+                }
+
+            }
+
+
+            // =====================================
+            // RESTORE ANNOUNCEMENTS
+            // =====================================
+
+            if (backup.announcements.length > 0) {
+
+                const {
+                    error: announcementsError
+                } = await churchSupabase
+                    .from("announcements")
+                    .upsert(
+                        backup.announcements,
+                        {
+                            onConflict: "id"
+                        }
+                    );
+
+                if (announcementsError) {
+                    throw new Error(
+                        "Announcements restore failed: " +
+                        announcementsError.message
+                    );
+                }
+
+            }
+
+
+            console.log(
+                "✅ Supabase restore completed successfully."
+            );
+
+
+            alert(
+                "✅ ChurchHQ backup restored to Supabase successfully!"
+            );
+
+
+            event.target.value = "";
+
+
+            // Reload latest data from Supabase
+            await initializeChurchHQ();
+
+
+        } catch (error) {
+
+            console.error(
+                "❌ Supabase restore error:",
+                error
+            );
+
+
+            alert(
+                "❌ Restore failed:\n\n" +
+                error.message
+            );
+
+
+            event.target.value = "";
+
+        }
+
+    };
+
+
+    reader.readAsText(file);
+
+}
+
+/* =========================================
+   BACKUP DATE STATUS
+========================================= */
+
+function updateLastBackupDisplay() {
+
+    const display =
+        document.getElementById("lastBackupDate");
+
+    if (!display) return;
+
+
+    const savedDate =
+        localStorage.getItem(
+            "churchhq_last_backup"
+        );
+
+
+    if (!savedDate) {
+
+        display.textContent =
+            "No backup recorded yet";
+
+        return;
+
+    }
+
+
+    const date =
+        new Date(savedDate);
+
+
+    display.textContent =
+        date.toLocaleString();
+
+}
+
+/* =========================================
+   CLEAR ALL CHURCH DATA
+   SUPABASE DATABASE RESET
+========================================= */
+
+async function clearAllChurchData() {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
+    const firstConfirm = confirm(
+        "🚨 WARNING!\n\n" +
+        "This will permanently delete ALL ChurchHQ records from the Supabase database.\n\n" +
+        "This includes:\n" +
+        "• Members\n" +
+        "• Planner Tasks\n" +
+        "• Songs\n" +
+        "• Sunday & Midweek Services\n" +
+        "• Attendance\n" +
+        "• Activities\n" +
+        "• Announcements\n\n" +
+        "Your login account will NOT be deleted.\n\n" +
+        "Continue?"
+    );
+
+    if (!firstConfirm) {
+        return;
+    }
+
+
+    const secondConfirm = confirm(
+        "⚠️ FINAL WARNING\n\n" +
+        "This action cannot be undone unless you have a backup.\n\n" +
+        "Are you absolutely sure?"
+    );
+
+    if (!secondConfirm) {
+        return;
+    }
+
+
+    const confirmationText = prompt(
+        'Type DELETE ALL DATA to confirm:'
+    );
+
+    if (confirmationText !== "DELETE ALL DATA") {
+
+        alert(
+            "❌ Database reset cancelled."
+        );
+
+        return;
+    }
+
+
+    try {
+
+        console.log(
+            "🗑️ Clearing ChurchHQ Supabase database..."
+        );
+
+
+        const tables = [
+
+            "attendance_records",
+            "service_records",
+            "planner_tasks",
+            "songs",
+            "activities",
+            "announcements",
+            "members"
+
+        ];
+
+
+        for (const tableName of tables) {
+
+            console.log(
+                `Deleting ${tableName}...`
+            );
+
+
+            const { error } =
+                await churchSupabase
+                    .from(tableName)
+                    .delete()
+                    .not("id", "is", null);
+
+
+            if (error) {
+
+                console.error(
+                    `❌ Failed to clear ${tableName}:`,
+                    error
+                );
+
+                throw new Error(
+                    `Failed to clear ${tableName}: ${error.message}`
+                );
+            }
+
+
+            console.log(
+                `✅ Cleared ${tableName}`
+            );
+        }
+
+
+        // Clear only ChurchHQ cache
+        const localKeys = [
+
+            "churchhq_tasks",
+            "churchhq_songs",
+            "churchhq_members",
+            "churchhq_attendance",
+            "churchhq_activities",
+            "churchhq_announcements",
+            "churchhq_sunday_services",
+            "churchhq_midweek_services",
+            "churchhq_sunday_lineup"
+
+        ];
+
+
+        localKeys.forEach(key => {
+            localStorage.removeItem(key);
+        });
+
+
+        console.log(
+            "✅ ChurchHQ local cache cleared."
+        );
+
+
+        alert(
+            "✅ ChurchHQ database has been completely cleared.\n\n" +
+            "Your login account was not deleted."
+        );
+
+
+        location.reload();
+
+
+    } catch (error) {
+
+        console.error(
+            "❌ Database reset failed:",
+            error
+        );
+
+
+        alert(
+            "❌ Database reset failed.\n\n" +
+            error.message +
+            "\n\nSome tables may not have been cleared."
+        );
+    }
+}
+
 /* =========================================
    REPORTS & ANALYTICS ENGINE
    SUPABASE SOURCE OF TRUTH
@@ -4422,7 +7868,13 @@ function renderManageModalContent() {
                 <h4 style="margin: 0 0 10px 0;">Add New Activity</h4>
                 <input type="text" id="newActTitle" placeholder="Title (Example: Youth Fellowship)" style="width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
                 <input type="text" id="newActDate" placeholder="Date (Example: August 5, 2026)" style="width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
-                <button type="button" class="secondary-btn" onclick="addNewActivityItem()" style="background: #2563eb; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px;">➕ Add</button>
+                <button type="button"
+    class="secondary-btn"
+    data-admin-only="true"
+    onclick="addNewActivityItem()"
+    style="background: #2563eb; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px;">
+    ➕ Add
+</button>
             </div>
             <h4 style="margin-bottom: 10px;">List of Activity/ies):</h4>
             <div style="max-height: 250px; overflow-y: auto;">
@@ -4439,9 +7891,20 @@ function renderManageModalContent() {
                             <small style="color: #64748b;">📅 ${act.date}</small>
                         </div>
                         <div style="display: flex; gap: 5px;">
-                            <button type="button" onclick="editActivityItem(${act.id})" style="background:none; border:none; color:#2563eb; cursor:pointer;" title="Edit">✏️</button>
-                            <button type="button" onclick="deleteActivityItem(${act.id})" style="background:none; border:none; color:#ef4444; cursor:pointer;" title="Delete">❌</button>
-                        </div>
+                            <button type="button"
+    data-admin-only="true"
+    onclick="editActivityItem(${act.id})"
+    style="background:none; border:none; color:#2563eb; cursor:pointer;"
+    title="Edit">
+    ✏️
+</button>
+                            <button type="button"
+    data-admin-only="true"
+    onclick="deleteActivityItem(${act.id})"
+    style="background:none; border:none; color:#ef4444; cursor:pointer;"
+    title="Delete">
+    ❌
+</button>
                     </div>
                 `;
             });
@@ -4457,7 +7920,15 @@ function renderManageModalContent() {
             <div style="margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 6px;">
                 <h4 style="margin: 0 0 10px 0;">Add New Announcement</h4>
                 <input type="text" id="newAnnText" placeholder="Place announcemt here" style="width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
-                <button type="button" class="secondary-btn" onclick="addNewAnnouncementItem()" style="background: #2563eb; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px;">➕ Add</button>
+                <button
+    type="button"
+    class="secondary-btn"
+    data-admin-only="true"
+    onclick="addNewAnnouncementItem()"
+    style="background: #2563eb; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px;"
+>
+    ➕ Add
+</button>
             </div>
             <h4 style="margin-bottom: 10px;">Announcement List</h4>
             <div style="max-height: 250px; overflow-y: auto;">
@@ -4471,9 +7942,24 @@ function renderManageModalContent() {
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #e2e8f0; gap: 10px;">
                         <span style="font-size: 14px;">${ann.text}</span>
                         <div style="display: flex; gap: 5px;">
-                            <button type="button" onclick="editAnnouncementItem(${ann.id})" style="background:none; border:none; color:#2563eb; cursor:pointer;" title="Edit">✏️</button>
-                            <button type="button" onclick="deleteAnnouncementItem(${ann.id})" style="background:none; border:none; color:#ef4444; cursor:pointer;" title="Delete">❌</button>
-                        </div>
+                            <button
+    type="button"
+    data-admin-only="true"
+    onclick="editAnnouncementItem(${ann.id})"
+    style="background:none; border:none; color:#2563eb; cursor:pointer;"
+    title="Edit"
+>
+    ✏️
+</button>
+                            <button
+    type="button"
+    data-admin-only="true"
+    onclick="deleteAnnouncementItem(${ann.id})"
+    style="background:none; border:none; color:#ef4444; cursor:pointer;"
+    title="Delete"
+>
+    ❌
+</button>
                     </div>
                 `;
             });
@@ -4484,6 +7970,11 @@ function renderManageModalContent() {
 }
 
 function addNewActivityItem() {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
     let titleEl = document.getElementById("newActTitle");
     let dateEl = document.getElementById("newActDate");
     let title = titleEl ? titleEl.value.trim() : "";
@@ -4523,9 +8014,15 @@ function addNewActivityItem() {
 
     renderManageModalContent();
     renderDashboardLists();
+
 }
 
 function editActivityItem(id) {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
     let activities = [];
     try { activities = JSON.parse(localStorage.getItem("churchhq_activities")) || []; } catch(e){}
     let act = activities.find(a => a.id === id);
@@ -4588,6 +8085,11 @@ function editActivityItem(id) {
 
 
 async function deleteActivityItem(id) {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
     if (!confirm("Are you sure you want to delete this?")) return;
 
     const deletedFromSupabase =
@@ -4617,9 +8119,14 @@ async function deleteActivityItem(id) {
 
     renderManageModalContent();
     renderDashboardLists();
+    applyRoleBasedUI();
 }
 
 function addNewAnnouncementItem() {
+    if (!requireAdmin()) {
+    return;
+}
+
     let annTextEl = document.getElementById("newAnnText");
     let text = annTextEl ? annTextEl.value.trim() : "";
     if (!text) {
@@ -4645,6 +8152,10 @@ saveAnnouncementToSupabase(newAnnouncement);
 }
 
 function editAnnouncementItem(id) {
+    if (!requireAdmin()) {
+    return;
+}
+
     let announcements = [];
 
     try {
@@ -4760,6 +8271,9 @@ function editAnnouncementItem(id) {
 }
 
 async function deleteAnnouncementItem(id) {
+    if (!requireAdmin()) {
+    return;
+}
     if (!confirm("Are you sure you want to delete this")) return;
 
     // SUPABASE DELETE
@@ -5098,6 +8612,157 @@ function populateMidweekGeneratorFields() {
     }
 }
 
+// =====================================
+// FILE FOLDERS - SUPABASE READ
+// =====================================
+
+let fileFolders = [];
+
+
+async function loadFileFoldersFromSupabase() {
+
+    try {
+
+        const { data, error } =
+            await churchSupabase
+                .from("file_folders")
+                .select("*")
+                .order(
+                    "id",
+                    {
+                        ascending: true
+                    }
+                );
+
+
+        if (error) {
+
+            console.error(
+                "❌ Failed to load file folders:",
+                error
+            );
+
+            return false;
+
+        }
+
+
+        fileFolders = data || [];
+
+
+        renderFileFolders();
+
+
+        console.log(
+            "✅ File folders loaded:",
+            fileFolders
+        );
+
+
+        return true;
+
+
+    } catch (error) {
+
+        console.error(
+            "❌ File folder loading error:",
+            error
+        );
+
+        return false;
+
+    }
+
+}
+
+function renderFileFolders() {
+
+
+    const container =
+        document.getElementById(
+            "filesGrid"
+        );
+
+
+    if (!container) {
+
+        return;
+
+    }
+
+
+    container.innerHTML = "";
+
+
+    fileFolders.forEach(folder => {
+
+
+        const card =
+            document.createElement(
+                "div"
+            );
+
+
+        card.className =
+            "file-folder-card";
+
+
+        card.innerHTML = `
+
+            <div class="file-icon">
+                ${folder.icon || "📁"}
+            </div>
+
+
+            <h3>
+                ${folder.name}
+            </h3>
+
+
+            <p>
+                ${folder.description || ""}
+            </p>
+
+
+            <button
+                class="primary-btn"
+                onclick="openDriveFolder('${folder.drive_link}')"
+            >
+                Open Folder
+            </button>
+
+        `;
+
+
+        container.appendChild(card);
+
+
+    });
+
+}
+
+function openDriveFolder(link) {
+
+
+    if (!link) {
+
+        alert(
+            "Google Drive link is not available yet."
+        );
+
+        return;
+
+    }
+
+
+    window.open(
+        link,
+        "_blank"
+    );
+
+
+}
+
 async function initializeChurchHQ() {
 
     console.log("🚀 Initializing ChurchHQ from Supabase...");
@@ -5113,6 +8778,15 @@ async function initializeChurchHQ() {
         await loadActivitiesFromSupabase();
         await loadAnnouncementsFromSupabase();
         await loadAttendanceFromSupabase();
+        await loadFileFoldersFromSupabase();
+
+        // =====================================
+        // REFRESH DASHBOARD DATA
+        // =====================================
+
+        renderMemberStatusAlerts();
+        populateMinistryDashboardSelect();
+
 
         console.log(
             "✅ ChurchHQ Supabase initialization complete."
@@ -5129,8 +8803,371 @@ async function initializeChurchHQ() {
 
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
+// =====================================
+// CHURCHHQ LOGIN SYSTEM
+// =====================================
 
-    await initializeChurchHQ();
+
+async function loginUser(){
+
+    const email =
+        document.getElementById("loginEmail").value.trim();
+
+    const password =
+        document.getElementById("loginPassword").value.trim();
+
+
+    const message =
+        document.getElementById("loginMessage");
+
+
+    if(!email || !password){
+
+        message.innerHTML =
+        "❌ Please enter email and password.";
+
+        return;
+    }
+
+
+
+    const {data,error} =
+        await churchSupabase.auth.signInWithPassword({
+
+            email: email,
+            password: password
+
+        });
+
+
+
+    if(error){
+
+        console.error(error);
+
+        message.innerHTML =
+        "❌ Invalid login.";
+
+        return;
+    }
+
+
+
+    console.log(
+        "✅ Login successful:",
+        data
+    );
+
+
+showChurchApp();
+
+await loadCurrentUserRole();
+
+applyRoleBasedUI();
+
+initializeChurchHQ();
+
+
+}
+
+// =====================================
+// CHURCHHQ USER ROLE
+// =====================================
+
+
+
+async function loadCurrentUserRole(){
+
+    try {
+
+        const {
+            data: {
+                user
+            },
+            error: userError
+        } = await churchSupabase.auth.getUser();
+
+
+        if(userError){
+
+            console.error(
+                "❌ Failed to get current user:",
+                userError
+            );
+
+            currentUser = null;
+            currentUserRole = null;
+
+            return null;
+        }
+
+
+        if(!user){
+
+            console.log(
+                "ℹ️ No authenticated user."
+            );
+
+            currentUser = null;
+            currentUserRole = null;
+
+            return null;
+        }
+
+
+        currentUser = user;
+
+
+        const {
+            data: roleData,
+            error: roleError
+        } = await churchSupabase
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", user.id)
+            .maybeSingle();
+
+
+        if(roleError){
+
+            console.error(
+                "❌ Failed to load user role:",
+                roleError
+            );
+
+            currentUserRole = null;
+
+            return null;
+        }
+
+
+        currentUserRole =
+            roleData?.role || null;
+
+
+        console.log(
+            "👤 Current user:",
+            currentUser.email
+        );
+
+
+        console.log(
+            "🔐 Current role:",
+            currentUserRole
+        );
+
+
+        return currentUserRole;
+
+
+    } catch(error){
+
+        console.error(
+            "❌ User role detection error:",
+            error
+        );
+
+        currentUser = null;
+        currentUserRole = null;
+
+        return null;
+    }
+
+}
+
+// =====================================
+// CHURCHHQ ROLE PERMISSIONS
+// =====================================
+
+function isAdminUser(){
+
+    return currentUserRole === "admin";
+
+}
+
+
+function isViewerUser(){
+
+    return currentUserRole === "viewer";
+
+}
+
+
+function requireAdmin(){
+
+    if(!isAdminUser()){
+
+        console.warn(
+            "🚫 Admin permission required."
+        );
+
+        alert(
+            "You do not have permission to perform this action."
+        );
+
+        return false;
+    }
+
+    return true;
+
+}
+
+function applyRoleBasedUI(){
+
+    console.log(
+        "🔐 Applying role-based UI:",
+        currentUserRole
+    );
+
+
+    const adminControls =
+        document.querySelectorAll(
+            '[data-admin-only="true"]'
+        );
+
+
+    adminControls.forEach(element => {
+
+        if(isAdminUser()){
+
+            element.style.display = "";
+
+            element.disabled = false;
+
+        }else{
+
+            element.style.display = "none";
+
+            element.disabled = true;
+
+        }
+
+    });
+
+
+    console.log(
+        isAdminUser()
+            ? "👑 Admin UI enabled"
+            : "👁️ Viewer UI enabled"
+    );
+
+}
+
+
+function showChurchApp(){
+
+    const login =
+    document.getElementById("loginScreen");
+
+
+    const app =
+    document.getElementById("churchApp");
+
+
+    if(login)
+        login.style.display="none";
+
+
+    if(app)
+        app.style.display="block";
+
+
+    console.log(
+        "✅ ChurchHQ App unlocked"
+    );
+
+
+}
+
+
+
+// CHECK EXISTING SESSION
+
+// CHECK EXISTING SESSION
+
+async function checkLoginSession(){
+
+    const {
+        data
+    } =
+    await churchSupabase.auth.getSession();
+
+
+    if(
+        data.session
+    ){
+
+        console.log(
+            "✅ Existing session found"
+        );
+
+showChurchApp();
+
+await loadCurrentUserRole();
+
+applyRoleBasedUI();
+
+initializeChurchHQ();
+
+    }
+
+}
+
+
+// RUN ON LOAD
+
+document.addEventListener(
+"DOMContentLoaded",
+()=>{
+
+    checkLoginSession();
 
 });
+
+// =====================================
+// LOGOUT SYSTEM
+// =====================================
+
+async function logoutUser(){
+
+    const { error } =
+        await churchSupabase.auth.signOut();
+
+
+    if(error){
+
+        console.error(
+            "Logout error:",
+            error
+        );
+
+        return;
+    }
+
+
+    console.log(
+        "✅ Logged out"
+    );
+
+currentUser = null;
+currentUserRole = null;
+
+
+    const login =
+        document.getElementById("loginScreen");
+
+
+    const app =
+        document.getElementById("churchApp");
+
+
+    if(login)
+        login.style.display="flex";
+
+
+    if(app)
+        app.style.display="none";
+
+
+}
+

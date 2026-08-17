@@ -8612,6 +8612,157 @@ function populateMidweekGeneratorFields() {
     }
 }
 
+// =====================================
+// FILE FOLDERS - SUPABASE READ
+// =====================================
+
+let fileFolders = [];
+
+
+async function loadFileFoldersFromSupabase() {
+
+    try {
+
+        const { data, error } =
+            await churchSupabase
+                .from("file_folders")
+                .select("*")
+                .order(
+                    "id",
+                    {
+                        ascending: true
+                    }
+                );
+
+
+        if (error) {
+
+            console.error(
+                "❌ Failed to load file folders:",
+                error
+            );
+
+            return false;
+
+        }
+
+
+        fileFolders = data || [];
+
+
+        renderFileFolders();
+
+
+        console.log(
+            "✅ File folders loaded:",
+            fileFolders
+        );
+
+
+        return true;
+
+
+    } catch (error) {
+
+        console.error(
+            "❌ File folder loading error:",
+            error
+        );
+
+        return false;
+
+    }
+
+}
+
+function renderFileFolders() {
+
+
+    const container =
+        document.getElementById(
+            "filesGrid"
+        );
+
+
+    if (!container) {
+
+        return;
+
+    }
+
+
+    container.innerHTML = "";
+
+
+    fileFolders.forEach(folder => {
+
+
+        const card =
+            document.createElement(
+                "div"
+            );
+
+
+        card.className =
+            "file-folder-card";
+
+
+        card.innerHTML = `
+
+            <div class="file-icon">
+                ${folder.icon || "📁"}
+            </div>
+
+
+            <h3>
+                ${folder.name}
+            </h3>
+
+
+            <p>
+                ${folder.description || ""}
+            </p>
+
+
+            <button
+                class="primary-btn"
+                onclick="openDriveFolder('${folder.drive_link}')"
+            >
+                Open Folder
+            </button>
+
+        `;
+
+
+        container.appendChild(card);
+
+
+    });
+
+}
+
+function openDriveFolder(link) {
+
+
+    if (!link) {
+
+        alert(
+            "Google Drive link is not available yet."
+        );
+
+        return;
+
+    }
+
+
+    window.open(
+        link,
+        "_blank"
+    );
+
+
+}
+
 async function initializeChurchHQ() {
 
     console.log("🚀 Initializing ChurchHQ from Supabase...");
@@ -8627,6 +8778,7 @@ async function initializeChurchHQ() {
         await loadActivitiesFromSupabase();
         await loadAnnouncementsFromSupabase();
         await loadAttendanceFromSupabase();
+        await loadFileFoldersFromSupabase();
 
         // =====================================
         // REFRESH DASHBOARD DATA
@@ -8635,7 +8787,7 @@ async function initializeChurchHQ() {
         renderMemberStatusAlerts();
         populateMinistryDashboardSelect();
 
-        
+
         console.log(
             "✅ ChurchHQ Supabase initialization complete."
         );
