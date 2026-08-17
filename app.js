@@ -164,7 +164,8 @@ async function loadMembersFromSupabase() {
         // -------------------------------------
         loadSavedMembers();
         loadDashboardBirthdays();
-
+        initializeServiceMemberAutocomplete();
+        initializeBackingVocalsAutocomplete();
         console.log(
             "✅ Members loaded from Supabase:",
             members
@@ -2748,6 +2749,519 @@ function loadSavedMembers() {
     // =====================================
 
     populateMemberMinistryFilter();
+}
+
+/* =========================================
+   SERVICE MEMBER AUTOCOMPLETE
+   SUNDAY + MIDWEEK
+========================================= */
+
+function setupServiceMemberAutocomplete(inputId) {
+
+    const input = document.getElementById(inputId);
+
+    if (!input) return;
+
+
+    // Prevent duplicate initialization
+    if (input.dataset.autocompleteReady === "true") {
+        return;
+    }
+
+    input.dataset.autocompleteReady = "true";
+
+
+    // Create wrapper
+    const wrapper = document.createElement("div");
+
+    wrapper.className = "member-autocomplete-wrapper";
+
+
+    // Insert wrapper before input
+    input.parentNode.insertBefore(wrapper, input);
+
+    // Move input inside wrapper
+    wrapper.appendChild(input);
+
+
+    // Suggestion container
+    const suggestionBox =
+        document.createElement("div");
+
+    suggestionBox.className =
+        "member-autocomplete-list";
+
+    suggestionBox.style.display = "none";
+
+    wrapper.appendChild(suggestionBox);
+
+
+    // =====================================
+    // SEARCH MEMBERS
+    // =====================================
+
+    input.addEventListener("input", function () {
+
+        const search =
+            input.value
+                .trim()
+                .toLowerCase();
+
+
+        suggestionBox.innerHTML = "";
+
+
+        if (!search) {
+
+            suggestionBox.style.display =
+                "none";
+
+            return;
+
+        }
+
+
+        const filteredMembers =
+            members
+                .filter(member => {
+
+                    const name =
+                        (member.name || "")
+                            .toLowerCase();
+
+                    return name.includes(search);
+
+                })
+                .sort((a, b) =>
+                    (a.name || "").localeCompare(
+                        b.name || ""
+                    )
+                )
+                .slice(0, 8);
+
+
+        if (filteredMembers.length === 0) {
+
+            suggestionBox.innerHTML = `
+                <div class="member-autocomplete-empty">
+                    No member found.
+                </div>
+            `;
+
+            suggestionBox.style.display =
+                "block";
+
+            return;
+        }
+
+
+        filteredMembers.forEach(member => {
+
+            const item =
+                document.createElement("div");
+
+            item.className =
+                "member-autocomplete-item";
+
+
+            const ministryText =
+                Array.isArray(member.ministries) &&
+                member.ministries.length > 0
+
+                    ? member.ministries.join(", ")
+
+                    : member.ministry ||
+                      "No Ministry";
+
+
+            item.innerHTML = `
+
+                <div class="member-autocomplete-name">
+                    ${member.name || ""}
+                </div>
+
+                <div class="member-autocomplete-meta">
+
+                    ${ministryText}
+
+                    ${
+                        member.role
+                            ? " • " + member.role
+                            : ""
+                    }
+
+                </div>
+
+            `;
+
+
+            item.addEventListener(
+                "mousedown",
+                function (event) {
+
+                    event.preventDefault();
+
+                    input.value =
+                        member.name || "";
+
+                    suggestionBox.style.display =
+                        "none";
+
+                }
+            );
+
+
+            suggestionBox.appendChild(item);
+
+        });
+
+
+        suggestionBox.style.display =
+            "block";
+
+    });
+
+
+    // =====================================
+    // SHOW AGAIN ON FOCUS
+    // =====================================
+
+    input.addEventListener(
+        "focus",
+        function () {
+
+            if (
+                input.value.trim() !== ""
+            ) {
+
+                input.dispatchEvent(
+                    new Event("input")
+                );
+
+            }
+
+        }
+    );
+
+
+    // =====================================
+    // CLOSE SUGGESTIONS
+    // =====================================
+
+    input.addEventListener(
+        "blur",
+        function () {
+
+            setTimeout(() => {
+
+                suggestionBox.style.display =
+                    "none";
+
+            }, 150);
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   INITIALIZE SERVICE MEMBER AUTOCOMPLETE
+========================================= */
+
+function initializeServiceMemberAutocomplete() {
+
+    const servicePrefixes = [
+        "sun",
+        "mid"
+    ];
+
+
+    const memberFields = [
+
+        "worshipLeader",
+        "keys",
+        "guitar",
+        "bass",
+        "drums",
+        "pptOperator",
+        "soundEngineer",
+        "liveStream",
+        "preacher"
+
+    ];
+
+
+    servicePrefixes.forEach(prefix => {
+
+        memberFields.forEach(field => {
+
+            setupServiceMemberAutocomplete(
+                `${prefix}_${field}`
+            );
+
+        });
+
+    });
+
+}
+
+/* =========================================
+   BACKING VOCALS MULTI-MEMBER AUTOCOMPLETE
+   SUNDAY + MIDWEEK
+========================================= */
+
+function setupBackingVocalsAutocomplete(inputId) {
+
+    const input = document.getElementById(inputId);
+
+    if (!input) return;
+
+    if (input.dataset.multiAutocompleteReady === "true") {
+        return;
+    }
+
+    input.dataset.multiAutocompleteReady = "true";
+
+
+    // Create wrapper
+    const wrapper = document.createElement("div");
+
+    wrapper.className = "member-autocomplete-wrapper";
+
+    input.parentNode.insertBefore(wrapper, input);
+
+    wrapper.appendChild(input);
+
+
+    // Suggestion box
+    const suggestionBox =
+        document.createElement("div");
+
+    suggestionBox.className =
+        "member-autocomplete-list";
+
+    suggestionBox.style.display = "none";
+
+    wrapper.appendChild(suggestionBox);
+
+
+    // =====================================
+    // SEARCH
+    // =====================================
+
+    input.addEventListener("input", function () {
+
+        const fullValue =
+            input.value || "";
+
+
+        // Split existing selected names
+        const parts =
+            fullValue.split(",");
+
+
+        // Current text after last comma
+        const currentSearch =
+            parts[parts.length - 1]
+                .trim()
+                .toLowerCase();
+
+
+        suggestionBox.innerHTML = "";
+
+
+        if (!currentSearch) {
+
+            suggestionBox.style.display =
+                "none";
+
+            return;
+        }
+
+
+        // Already selected names
+        const selectedNames =
+            parts
+                .slice(0, -1)
+                .map(name =>
+                    name.trim().toLowerCase()
+                )
+                .filter(Boolean);
+
+
+        const filteredMembers =
+            members
+                .filter(member => {
+
+                    const memberName =
+                        (member.name || "")
+                            .toLowerCase();
+
+
+                    const matchesSearch =
+                        memberName.includes(
+                            currentSearch
+                        );
+
+
+                    const alreadySelected =
+                        selectedNames.includes(
+                            memberName
+                        );
+
+
+                    return (
+                        matchesSearch &&
+                        !alreadySelected
+                    );
+
+                })
+                .sort((a, b) =>
+                    (a.name || "").localeCompare(
+                        b.name || ""
+                    )
+                )
+                .slice(0, 8);
+
+
+        if (filteredMembers.length === 0) {
+
+            suggestionBox.innerHTML = `
+                <div class="member-autocomplete-empty">
+                    No member found.
+                </div>
+            `;
+
+            suggestionBox.style.display =
+                "block";
+
+            return;
+        }
+
+
+        filteredMembers.forEach(member => {
+
+            const item =
+                document.createElement("div");
+
+            item.className =
+                "member-autocomplete-item";
+
+
+            const ministryText =
+                Array.isArray(member.ministries) &&
+                member.ministries.length > 0
+                    ? member.ministries.join(", ")
+                    : member.ministry ||
+                      "No Ministry";
+
+
+            item.innerHTML = `
+
+                <div class="member-autocomplete-name">
+                    ${member.name || ""}
+                </div>
+
+                <div class="member-autocomplete-meta">
+
+                    ${ministryText}
+
+                    ${
+                        member.role
+                            ? " • " + member.role
+                            : ""
+                    }
+
+                </div>
+
+            `;
+
+
+            item.addEventListener(
+                "mousedown",
+                function (event) {
+
+                    event.preventDefault();
+
+
+                    // Existing completed selections
+                    const existing =
+                        parts
+                            .slice(0, -1)
+                            .map(name =>
+                                name.trim()
+                            )
+                            .filter(Boolean);
+
+
+                    // Add selected member
+                    existing.push(
+                        member.name
+                    );
+
+
+                    input.value =
+                        existing.join(", ") + ", ";
+
+
+                    suggestionBox.style.display =
+                        "none";
+
+
+                    // Put cursor back into input
+                    input.focus();
+
+                }
+            );
+
+
+            suggestionBox.appendChild(item);
+
+        });
+
+
+        suggestionBox.style.display =
+            "block";
+
+    });
+
+
+    // =====================================
+    // CLOSE ON BLUR
+    // =====================================
+
+    input.addEventListener(
+        "blur",
+        function () {
+
+            setTimeout(() => {
+
+                suggestionBox.style.display =
+                    "none";
+
+            }, 150);
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   INITIALIZE BACKING VOCALS AUTOCOMPLETE
+========================================= */
+
+function initializeBackingVocalsAutocomplete() {
+
+    setupBackingVocalsAutocomplete(
+        "sun_backingVocals"
+    );
+
+    setupBackingVocalsAutocomplete(
+        "mid_backingVocals"
+    );
+
 }
 
 function populateMemberMinistryFilter() {
