@@ -4059,3 +4059,239 @@ body.dark *:focus-visible {
     }
 
 }
+
+/* =====================================
+   FILES ADMIN BUTTON
+===================================== */
+
+#addFileFolderBtn {
+    flex-shrink: 0;
+}
+
+
+@media (max-width: 768px) {
+
+    #files .songs-header {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 14px;
+    }
+
+
+    #addFileFolderBtn {
+        width: 100%;
+    }
+
+}
+
+/* =====================================
+   FILE FOLDER MODAL
+===================================== */
+
+.file-folder-modal-content {
+    width: 100%;
+    max-width: 520px;
+}
+
+
+.file-folder-modal-content .form-group {
+    margin-bottom: 14px;
+}
+
+
+.file-folder-modal-content label {
+    display: block;
+
+    margin-bottom: 6px;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    color: #334155;
+}
+
+
+.file-folder-modal-content input,
+.file-folder-modal-content textarea {
+
+    width: 100%;
+
+    padding: 10px 12px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    font-size: 13px;
+
+    box-sizing: border-box;
+}
+
+
+.file-folder-modal-content textarea {
+    resize: vertical;
+}
+
+
+.file-folder-modal-content .modal-actions {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    margin-top: 18px;
+}
+
+
+@media (max-width: 768px) {
+
+    .file-folder-modal-content {
+        max-width: 100%;
+    }
+
+
+    .file-folder-modal-content .modal-actions {
+        flex-direction: column;
+    }
+
+
+    .file-folder-modal-content .modal-actions button {
+        width: 100%;
+    }
+
+}
+
+/* =========================================
+   DASHBOARD TOP CARDS + BIRTHDAY
+========================================= */
+
+#dashboard .dashboard-grid {
+    display: grid;
+
+    grid-template-columns:
+        minmax(130px, 0.8fr)
+        minmax(130px, 0.8fr)
+        minmax(130px, 0.8fr)
+        minmax(130px, 0.8fr)
+        minmax(320px, 1.8fr);
+
+    gap: 16px;
+
+    width: 100%;
+    margin-top: 30px;
+}
+
+
+/* SMALL STAT CARDS */
+
+#dashboard .dashboard-grid .stat-card {
+    min-width: 0;
+    min-height: 150px;
+    padding: 18px;
+}
+
+
+/* BIRTHDAY CARD */
+
+#dashboard .dashboard-birthday-card {
+    min-width: 0;
+    min-height: 150px;
+
+    padding: 18px 20px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+
+#dashboard .dashboard-birthday-card h3 {
+    margin: 0 0 12px 0;
+
+    font-size: 16px;
+    font-weight: 700;
+
+    color: #0f172a;
+}
+
+
+#dashboard .dashboard-birthday-card #birthdayList {
+    font-size: 14px;
+}
+
+
+/* DARK MODE */
+
+body.dark #dashboard .dashboard-birthday-card h3 {
+    color: #f8fafc;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 1200px) {
+
+    #dashboard .dashboard-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    #dashboard .dashboard-birthday-card {
+        grid-column: 1 / -1;
+    }
+
+}
+
+
+@media (max-width: 650px) {
+
+    #dashboard .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    #dashboard .dashboard-birthday-card {
+        grid-column: auto;
+    }
+
+}
+
+/* =========================================
+   PLANNER OVERDUE TASK
+========================================= */
+
+.task-overdue-badge {
+    display: inline-block;
+
+    margin: 4px 0 10px;
+
+    padding: 5px 9px;
+
+    border-radius: 7px;
+
+    background: #fee2e2;
+
+    color: #b91c1c;
+
+    border: 1px solid #fecaca;
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    letter-spacing: 0.3px;
+}
+
+
+body.dark .task-overdue-badge {
+    background: #450a0a;
+
+    color: #fecaca;
+
+    border-color: #7f1d1d;
+}
