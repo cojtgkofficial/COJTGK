@@ -360,6 +360,8 @@ async function saveSongToSupabase(song) {
     }
 }
 
+
+
 // =====================================
 // SONGS - SUPABASE UPDATE
 // =====================================
@@ -2785,6 +2787,7 @@ async function saveMember() {
     loadDashboardBirthdays();
     clearMemberForm();
     refreshDashboardStatus();
+    filterMembers();
 
     if (memberModal) {
         memberModal.classList.add("hidden");
@@ -2843,6 +2846,87 @@ function loadSavedMembers() {
     // =====================================
 
     populateMemberMinistryFilter();
+}
+
+// =====================================
+// MEMBER AGE AUTO COMPUTE
+// =====================================
+
+function calculateAge(birthday) {
+
+    if (!birthday) {
+        return null;
+    }
+
+    const birthDate =
+        new Date(
+            birthday + "T00:00:00"
+        );
+
+    if (
+        isNaN(
+            birthDate.getTime()
+        )
+    ) {
+        return null;
+    }
+
+    const today =
+        new Date();
+
+    let age =
+        today.getFullYear() -
+        birthDate.getFullYear();
+
+    const monthDifference =
+        today.getMonth() -
+        birthDate.getMonth();
+
+    if (
+        monthDifference < 0 ||
+        (
+            monthDifference === 0 &&
+            today.getDate() <
+            birthDate.getDate()
+        )
+    ) {
+        age--;
+    }
+
+    return age;
+}
+
+// =====================================
+// MEMBER AGE GROUP
+// =====================================
+
+function getAgeGroup(age) {
+
+    if (
+        age === null ||
+        age === undefined ||
+        age === ""
+    ) {
+        return "Unknown";
+    }
+
+    if (age <= 12) {
+        return "Children";
+    }
+
+    if (age <= 21) {
+        return "Youth";
+    }
+
+    if (age <= 34) {
+        return "Young Pro";
+    }
+
+    if (age <= 59) {
+        return "Adult";
+    }
+
+    return "Senior";
 }
 
 /* =========================================
@@ -3441,25 +3525,45 @@ function populateMemberMinistryFilter() {
 function filterMembers() {
 
     const searchInput =
-        document.getElementById("memberSearch");
+        document.getElementById(
+            "memberSearch"
+        );
 
     const ministryFilter =
-        document.getElementById("memberMinistryFilter");
+        document.getElementById(
+            "memberMinistryFilter"
+        );
+
+    const ageGroupFilter =
+        document.getElementById(
+            "memberAgeGroupFilter"
+        );
 
     const membersGrid =
-        document.getElementById("membersGrid");
+        document.getElementById(
+            "membersGrid"
+        );
 
     if (!membersGrid) return;
 
     const searchQuery =
         searchInput
-            ? searchInput.value.trim().toLowerCase()
+            ? searchInput.value
+                .trim()
+                .toLowerCase()
             : "";
 
     const selectedMinistry =
         ministryFilter
             ? ministryFilter.value
             : "";
+
+    const selectedAgeGroup =
+        ageGroupFilter
+            ? ageGroupFilter.value
+            : "";
+
+
 
     // =====================================
     // FILTER MEMBERS
@@ -3501,7 +3605,27 @@ function filterMembers() {
             selectedMinistry === "" ||
             ministries.includes(selectedMinistry);
 
-        return matchesSearch && matchesMinistry;
+            // -------------------------------
+// AGE GROUP FILTER
+// -------------------------------
+
+const age =
+    calculateAge(
+        member.birthday
+    );
+
+const ageGroup =
+    getAgeGroup(age);
+
+const matchesAgeGroup =
+    selectedAgeGroup === "" ||
+    ageGroup === selectedAgeGroup;
+
+        return (
+    matchesSearch &&
+    matchesMinistry &&
+    matchesAgeGroup
+);
     });
 
     // =====================================
@@ -3549,6 +3673,22 @@ if (memberMinistryFilter) {
 
 }
 
+const memberAgeGroupFilter =
+    document.getElementById(
+        "memberAgeGroupFilter"
+    );
+
+if (memberAgeGroupFilter) {
+
+    memberAgeGroupFilter.addEventListener(
+        "change",
+        () => {
+            filterMembers();
+        }
+    );
+
+}
+
 function renderMemberCard(member) {
     const membersGrid = document.getElementById("membersGrid");
     if (!membersGrid) return;
@@ -3562,6 +3702,11 @@ function renderMemberCard(member) {
 
     const ministryText = ministries.join(", ");
 
+    const age =
+    calculateAge(
+        member.birthday
+    );
+
     card.innerHTML = `
         <div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -3572,10 +3717,16 @@ function renderMemberCard(member) {
             <p class="artist">📞 ${member.contact}</p>
 
             <div style="margin-top: 10px; font-size: 12px; color:#64748b;">
-                <span>🏛️ ${ministryText}</span> |
-                <span>💼 ${member.role}</span>
-            </div>
-        </div>
+    <span>🏛️ ${ministryText}</span> |
+    <span>💼 ${member.role}</span> |
+    <span>
+        🎂 ${
+            age !== null
+                ? `${age} years old`
+                : "Age N/A"
+        }
+    </span>
+</div>
 
         <div style="display:flex; justify-content:space-between; margin-top:15px;">
             <button
