@@ -5089,38 +5089,229 @@ function loadAttendanceRecord(date, serviceType) {
 
 /* =========================================
    SETTINGS & BACKUP ENGINE
+   SUPABASE EXPORT BACKUP
 ========================================= */
-function exportChurchData() {
-    const backupData = {
-        app: "ChurchHQ",
-        version: "2.1",
-        exportDate: new Date().toISOString(),
-        data: {
-            tasks: JSON.parse(localStorage.getItem("churchhq_tasks") || "[]"),
-            songs: JSON.parse(localStorage.getItem("churchhq_songs") || "[]"),
-            members: JSON.parse(localStorage.getItem("churchhq_members") || "[]"),
-            attendance: JSON.parse(localStorage.getItem("churchhq_attendance") || "[]"),
-            activities: JSON.parse(localStorage.getItem("churchhq_activities") || "[]"),
-            announcements: JSON.parse(localStorage.getItem("churchhq_announcements") || "[]"),
-            sundayServices: JSON.parse(localStorage.getItem("churchhq_sunday_services") || "[]"),
-            midweekServices: JSON.parse(localStorage.getItem("churchhq_midweek_services") || "[]"),
-            sundayLineup: JSON.parse(localStorage.getItem("churchhq_sunday_lineup") || "[]")
+
+async function exportChurchData() {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
+    try {
+
+        console.log("📦 Creating Supabase backup...");
+
+
+        const [
+            membersResult,
+            tasksResult,
+            songsResult,
+            servicesResult,
+            attendanceResult,
+            activitiesResult,
+            announcementsResult
+        ] = await Promise.all([
+
+            churchSupabase
+                .from("members")
+                .select("*"),
+
+            churchSupabase
+                .from("planner_tasks")
+                .select("*"),
+
+            churchSupabase
+                .from("songs")
+                .select("*"),
+
+            churchSupabase
+                .from("service_records")
+                .select("*"),
+
+            churchSupabase
+                .from("attendance_records")
+                .select("*"),
+
+            churchSupabase
+                .from("activities")
+                .select("*"),
+
+            churchSupabase
+                .from("announcements")
+                .select("*")
+
+        ]);
+
+
+        const results = [
+            ["members", membersResult],
+            ["planner_tasks", tasksResult],
+            ["songs", songsResult],
+            ["service_records", servicesResult],
+            ["attendance_records", attendanceResult],
+            ["activities", activitiesResult],
+            ["announcements", announcementsResult]
+        ];
+
+
+        // Check Supabase errors
+        for (const [tableName, result] of results) {
+
+            if (result.error) {
+
+                console.error(
+                    `❌ Failed to export ${tableName}:`,
+                    result.error
+                );
+
+                alert(
+                    `❌ Backup failed while reading ${tableName}.`
+                );
+
+                return;
+            }
+
         }
-    };
 
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
-    const downloadAnchor = document.createElement("a");
-    const today = new Date().toISOString().split("T")[0];
-    
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `churchhq_backup_${today}.json`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
 
-    alert("🎉 Backup file generated and downloaded successfully!");
+        const backupData = {
+
+            app: "ChurchHQ",
+
+            version: "3.0",
+
+            source: "Supabase",
+
+            exportDate:
+                new Date().toISOString(),
+
+            data: {
+
+                members:
+                    membersResult.data || [],
+
+                planner_tasks:
+                    tasksResult.data || [],
+
+                songs:
+                    songsResult.data || [],
+
+                service_records:
+                    servicesResult.data || [],
+
+                attendance_records:
+                    attendanceResult.data || [],
+
+                activities:
+                    activitiesResult.data || [],
+
+                announcements:
+                    announcementsResult.data || []
+
+            }
+
+        };
+
+
+        // Convert backup to JSON
+        const jsonData =
+            JSON.stringify(
+                backupData,
+                null,
+                2
+            );
+
+
+        const blob =
+            new Blob(
+                [jsonData],
+                {
+                    type: "application/json"
+                }
+            );
+
+
+        const url =
+            URL.createObjectURL(blob);
+
+
+        const downloadAnchor =
+            document.createElement("a");
+
+
+        const today =
+            new Date()
+                .toISOString()
+                .slice(0, 10);
+
+
+        downloadAnchor.href =
+            url;
+
+        downloadAnchor.download =
+            `churchhq_supabase_backup_${today}.json`;
+
+
+        document.body.appendChild(
+            downloadAnchor
+        );
+
+
+        downloadAnchor.click();
+
+
+        downloadAnchor.remove();
+
+        URL.revokeObjectURL(url);
+
+
+        console.log(
+            "✅ Supabase backup created:",
+            {
+                members:
+                    backupData.data.members.length,
+
+                planner_tasks:
+                    backupData.data.planner_tasks.length,
+
+                songs:
+                    backupData.data.songs.length,
+
+                service_records:
+                    backupData.data.service_records.length,
+
+                attendance_records:
+                    backupData.data.attendance_records.length,
+
+                activities:
+                    backupData.data.activities.length,
+
+                announcements:
+                    backupData.data.announcements.length
+            }
+        );
+
+
+        alert(
+            "✅ Supabase backup downloaded successfully!"
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "❌ Supabase backup error:",
+            error
+        );
+
+        alert(
+            "❌ Failed to create Supabase backup."
+        );
+
+    }
+
 }
-
 function importChurchData(event) {
     if (!requireAdmin()) {
     return;
