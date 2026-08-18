@@ -11351,7 +11351,7 @@ async function exportChurchData() {
                 "ChurchHQ",
 
             version:
-                "5.0",
+                "5.1",
 
             source:
                 "Supabase",
