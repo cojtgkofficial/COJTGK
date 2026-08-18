@@ -5366,6 +5366,113 @@ if (cancelMember) cancelMember.addEventListener("click", () => { if (memberModal
 if (saveMemberBtn) saveMemberBtn.addEventListener("click", saveMember);
 
 
+// =====================================================
+// MINISTRIES DATABASE
+// =====================================================
+
+let ministries = [];
+
+
+// =====================================================
+// LOAD MINISTRIES FROM SUPABASE
+// =====================================================
+
+async function loadMinistriesFromSupabase() {
+
+    const { data, error } =
+        await churchSupabase
+            .from("ministries")
+            .select("*")
+            .order("name", {
+                ascending: true
+            });
+
+
+    if (error) {
+
+        console.error(
+            "❌ Failed to load ministries:",
+            error
+        );
+
+        return;
+    }
+
+
+    ministries = data || [];
+
+
+    console.log(
+        "✅ Ministries loaded:",
+        ministries
+    );
+
+
+    renderMemberMinistries();
+}
+
+
+// =====================================================
+// RENDER MINISTRY CHECKBOXES
+// =====================================================
+
+function renderMemberMinistries(
+    selectedMinistries = []
+) {
+
+    const container =
+        document.getElementById(
+            "memberMinistry"
+        );
+
+
+    if (!container) {
+        return;
+    }
+
+
+    container.innerHTML = "";
+
+
+    ministries.forEach(
+        ministry => {
+
+            const label =
+                document.createElement(
+                    "label"
+                );
+
+
+            const checked =
+                selectedMinistries.includes(
+                    ministry.name
+                );
+
+
+            label.innerHTML = `
+
+                <input
+                    type="checkbox"
+                    value="${ministry.name}"
+                    ${checked ? "checked" : ""}
+                >
+
+                <span>
+                    ${ministry.name}
+                </span>
+
+            `;
+
+
+            container.appendChild(
+                label
+            );
+
+        }
+    );
+
+}
+
 function getSelectedMemberMinistries() {
     const container = document.getElementById("memberMinistry");
 
@@ -6504,55 +6611,833 @@ function editMember(id) {
     }
 }
 
-function addCustomMinistry() {
+// =====================================================
+// ADD NEW MINISTRY
+// =====================================================
+
+async function addCustomMinistry() {
 
     if (!requireAdmin()) {
         return;
     }
 
-    const newMinistry = prompt("Enter new Ministry Group name:");
 
-    if (newMinistry && newMinistry.trim() !== "") {
+    const ministryName =
+        prompt(
+            "Enter new ministry name:"
+        );
 
-        const container = document.getElementById("memberMinistry");
 
-        if (container) {
+    if (ministryName === null) {
+        return;
+    }
 
-            const ministryName = newMinistry.trim();
 
-            // Prevent duplicate ministry
-            const existingCheckboxes =
-                container.querySelectorAll('input[type="checkbox"]');
+    const cleanName =
+        ministryName.trim();
 
-            const alreadyExists = Array.from(existingCheckboxes)
-                .some(checkbox => checkbox.value === ministryName);
 
-            if (alreadyExists) {
-                alert(`"${ministryName}" already exists.`);
+    if (!cleanName) {
+
+        alert(
+            "Please enter a ministry name."
+        );
+
+        return;
+    }
+
+
+    // =====================================
+    // CHECK EXISTING MINISTRY
+    // =====================================
+
+    const alreadyExists =
+        ministries.some(
+            ministry =>
+                String(ministry.name)
+                    .trim()
+                    .toLowerCase() ===
+                cleanName.toLowerCase()
+        );
+
+
+    if (alreadyExists) {
+
+        alert(
+            "This ministry already exists."
+        );
+
+        return;
+    }
+
+
+    // =====================================
+    // SAVE TO SUPABASE
+    // =====================================
+
+    const {
+        data,
+        error
+    } =
+        await churchSupabase
+
+            .from("ministries")
+
+            .insert({
+
+                name:
+                    cleanName
+
+            })
+
+            .select()
+
+            .single();
+
+
+    if (error) {
+
+        console.error(
+            "❌ Failed to add ministry:",
+            error
+        );
+
+
+        alert(
+            "❌ Failed to save ministry."
+        );
+
+        return;
+    }
+
+
+    // =====================================
+    // UPDATE LOCAL ARRAY
+    // =====================================
+
+    ministries.push(
+        data
+    );
+
+
+    ministries.sort(
+        (a, b) =>
+            String(a.name)
+                .localeCompare(
+                    String(b.name)
+                )
+    );
+
+
+    // =====================================
+    // KEEP CURRENT CHECKBOX SELECTION
+    // =====================================
+
+    const currentlySelected =
+        getSelectedMemberMinistries();
+
+
+    currentlySelected.push(
+        data.name
+    );
+
+
+    // =====================================
+    // RENDER AGAIN
+    // =====================================
+
+    renderMemberMinistries(
+        currentlySelected
+    );
+
+
+    console.log(
+        "✅ Ministry saved:",
+        data
+    );
+
+
+    alert(
+        "✅ Ministry added successfully."
+    );
+
+}
+
+// =====================================================
+// OPEN MANAGE MINISTRIES
+// =====================================================
+
+function openManageMinistries() {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
+    const modal =
+        document.getElementById(
+            "manageMinistriesModal"
+        );
+
+    if (!modal) {
+        return;
+    }
+
+    renderManageMinistries();
+
+    modal.classList.remove(
+        "hidden"
+    );
+}
+
+
+// =====================================================
+// CLOSE MANAGE MINISTRIES
+// =====================================================
+
+function closeManageMinistries() {
+
+    const modal =
+        document.getElementById(
+            "manageMinistriesModal"
+        );
+
+    if (modal) {
+
+        modal.classList.add(
+            "hidden"
+        );
+
+    }
+}
+
+
+// =====================================================
+// RENDER MANAGE MINISTRIES
+// =====================================================
+
+function renderManageMinistries() {
+
+    const container =
+        document.getElementById(
+            "manageMinistriesList"
+        );
+
+    if (!container) {
+        return;
+    }
+
+
+    container.innerHTML = "";
+
+
+    if (
+        !Array.isArray(ministries) ||
+        ministries.length === 0
+    ) {
+
+        container.innerHTML = `
+            <div
+                style="
+                    padding:15px;
+                    color:#94a3b8;
+                    text-align:center;
+                "
+            >
+                No ministries found.
+            </div>
+        `;
+
+        return;
+    }
+
+
+    ministries.forEach(
+        ministry => {
+
+            const row =
+                document.createElement(
+                    "div"
+                );
+
+
+            row.style.cssText = `
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                gap:10px;
+                padding:10px 12px;
+                border:1px solid #e2e8f0;
+                border-radius:8px;
+            `;
+
+
+            row.innerHTML = `
+
+                <span
+                    style="
+                        font-size:13px;
+                        font-weight:600;
+                    "
+                >
+                    ${ministry.name}
+                </span>
+
+
+                <div
+                    style="
+                        display:flex;
+                        gap:6px;
+                    "
+                >
+
+                    <button
+                        type="button"
+                        class="secondary-btn"
+                        style="
+                            padding:4px 8px;
+                            font-size:10px;
+                        "
+                        onclick="editMinistry(${ministry.id})"
+                    >
+                        ✏ Edit
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="secondary-btn"
+                        style="
+                            padding:4px 8px;
+                            font-size:10px;
+                            color:#dc2626;
+                        "
+                        onclick="deleteMinistry(${ministry.id})"
+                    >
+                        ✖ Delete
+                    </button>
+
+                </div>
+
+            `;
+
+
+            container.appendChild(
+                row
+            );
+
+        }
+    );
+
+}
+
+// =====================================================
+// EDIT MINISTRY
+// =====================================================
+
+async function editMinistry(id) {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
+
+    const ministry =
+        ministries.find(
+            item =>
+                String(item.id) ===
+                String(id)
+        );
+
+
+    if (!ministry) {
+
+        alert(
+            "Ministry was not found."
+        );
+
+        return;
+    }
+
+
+    const oldName =
+        ministry.name;
+
+
+    const newNameInput =
+        prompt(
+            "Edit ministry name:",
+            oldName
+        );
+
+
+    if (newNameInput === null) {
+        return;
+    }
+
+
+    const newName =
+        newNameInput.trim();
+
+
+    if (!newName) {
+
+        alert(
+            "Ministry name cannot be empty."
+        );
+
+        return;
+    }
+
+
+    if (
+        newName.toLowerCase() ===
+        oldName.toLowerCase()
+    ) {
+        return;
+    }
+
+
+    // =====================================
+    // DUPLICATE CHECK
+    // =====================================
+
+    const duplicate =
+        ministries.some(
+            item =>
+                String(item.id) !==
+                    String(id) &&
+
+                String(item.name)
+                    .trim()
+                    .toLowerCase() ===
+                newName.toLowerCase()
+        );
+
+
+    if (duplicate) {
+
+        alert(
+            "This ministry already exists."
+        );
+
+        return;
+    }
+
+
+    try {
+
+        // =====================================
+        // 1. UPDATE MINISTRIES TABLE
+        // =====================================
+
+        const {
+            data: updatedMinistry,
+            error: ministryError
+        } =
+            await churchSupabase
+                .from("ministries")
+                .update({
+                    name:
+                        newName
+                })
+                .eq(
+                    "id",
+                    id
+                )
+                .select()
+                .single();
+
+
+        if (ministryError) {
+
+            console.error(
+                "❌ Failed to update ministry:",
+                ministryError
+            );
+
+            alert(
+                "❌ Failed to update ministry."
+            );
+
+            return;
+        }
+
+
+        // =====================================
+        // 2. FIND AFFECTED MEMBERS
+        // =====================================
+
+        const affectedMembers =
+            members.filter(member => {
+
+                const memberMinistries =
+                    Array.isArray(
+                        member.ministries
+                    )
+                        ? member.ministries
+                        : (
+                            member.ministry
+                                ? [member.ministry]
+                                : []
+                        );
+
+
+                return memberMinistries
+                    .some(
+                        name =>
+                            String(name)
+                                .trim()
+                                .toLowerCase() ===
+                            oldName.toLowerCase()
+                    );
+
+            });
+
+
+        // =====================================
+        // 3. UPDATE AFFECTED MEMBERS
+        // =====================================
+
+        for (
+            const member
+            of affectedMembers
+        ) {
+
+            let updatedMinistries =
+                Array.isArray(
+                    member.ministries
+                )
+                    ? [...member.ministries]
+                    : (
+                        member.ministry
+                            ? [member.ministry]
+                            : []
+                    );
+
+
+            updatedMinistries =
+                updatedMinistries.map(
+                    name =>
+                        String(name)
+                            .trim()
+                            .toLowerCase() ===
+                        oldName.toLowerCase()
+
+                            ? newName
+
+                            : name
+                );
+
+
+            const updatedMember = {
+
+                ...member,
+
+                ministry:
+                    String(
+                        member.ministry || ""
+                    )
+                    .trim()
+                    .toLowerCase() ===
+                    oldName.toLowerCase()
+
+                        ? newName
+
+                        : (
+                            member.ministry ||
+                            updatedMinistries[0] ||
+                            ""
+                        ),
+
+                ministries:
+                    updatedMinistries
+
+            };
+
+
+            const updated =
+                await updateMemberToSupabase(
+                    updatedMember
+                );
+
+
+            if (!updated) {
+
+                alert(
+                    `❌ Ministry was renamed, but failed to update member: ${member.name}`
+                );
+
+                await loadMinistriesFromSupabase();
+                await loadMembersFromSupabase();
+
                 return;
             }
 
-            // Create checkbox
-            const label = document.createElement("label");
-
-            const checkbox = document.createElement("input");
-            checkbox.type = "checkbox";
-            checkbox.value = ministryName;
-
-            const span = document.createElement("span");
-            span.textContent = ministryName;
-
-            label.appendChild(checkbox);
-            label.appendChild(span);
-
-            container.appendChild(label);
-
-            // Automatically select newly added ministry
-            checkbox.checked = true;
-
-            alert(`Added "${ministryName}" to Ministry list!`);
         }
+
+
+        // =====================================
+        // 4. RELOAD EVERYTHING
+        // =====================================
+
+        await loadMinistriesFromSupabase();
+
+        await loadMembersFromSupabase();
+
+
+        renderManageMinistries();
+
+
+        console.log(
+            "✅ Ministry renamed:",
+            oldName,
+            "→",
+            newName
+        );
+
+
+        alert(
+            `✅ Ministry renamed successfully.\n\n${oldName} → ${newName}`
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "❌ Edit ministry error:",
+            error
+        );
+
+
+        alert(
+            "❌ Failed to edit ministry."
+        );
+
     }
+
+}
+
+// =====================================================
+// DELETE MINISTRY
+// =====================================================
+
+async function deleteMinistry(id) {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
+
+    const ministry =
+        ministries.find(
+            item =>
+                String(item.id) ===
+                String(id)
+        );
+
+
+    if (!ministry) {
+
+        alert(
+            "Ministry was not found."
+        );
+
+        return;
+    }
+
+
+    const ministryName =
+        ministry.name;
+
+
+    // =====================================
+    // CHECK IF MINISTRY IS IN USE
+    // =====================================
+
+    const affectedMembers =
+        members.filter(member => {
+
+            const memberMinistries =
+                Array.isArray(
+                    member.ministries
+                )
+                    ? member.ministries
+                    : (
+                        member.ministry
+                            ? [member.ministry]
+                            : []
+                    );
+
+
+            return memberMinistries.some(
+                name =>
+                    String(name)
+                        .trim()
+                        .toLowerCase() ===
+                    String(ministryName)
+                        .trim()
+                        .toLowerCase()
+            );
+
+        });
+
+
+    // =====================================
+    // BLOCK DELETE IF USED BY MEMBERS
+    // =====================================
+
+    if (
+        affectedMembers.length > 0
+    ) {
+
+        const names =
+            affectedMembers
+                .slice(0, 5)
+                .map(
+                    member =>
+                        member.name
+                )
+                .join("\n• ");
+
+
+        let message =
+
+            `"${ministryName}" cannot be deleted yet.\n\n` +
+
+            `${affectedMembers.length} member(s) are still assigned to this ministry.\n\n` +
+
+            "Examples:\n• " +
+            names;
+
+
+        if (
+            affectedMembers.length > 5
+        ) {
+
+            message +=
+                `\n• +${affectedMembers.length - 5} more`;
+
+        }
+
+
+        message +=
+            "\n\nPlease edit those members first and remove this ministry from their Ministry Group.";
+
+
+        alert(
+            message
+        );
+
+
+        return;
+    }
+
+
+    // =====================================
+    // CONFIRM DELETE
+    // =====================================
+
+    const confirmed =
+        confirm(
+            `Delete ministry "${ministryName}"?\n\n` +
+            "This action cannot be undone."
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    try {
+
+        // =====================================
+        // DELETE FROM SUPABASE
+        // =====================================
+
+        const {
+            error
+        } =
+            await churchSupabase
+
+                .from(
+                    "ministries"
+                )
+
+                .delete()
+
+                .eq(
+                    "id",
+                    id
+                );
+
+
+        if (error) {
+
+            console.error(
+                "❌ Failed to delete ministry:",
+                error
+            );
+
+
+            alert(
+                "❌ Failed to delete ministry."
+            );
+
+            return;
+        }
+
+
+        // =====================================
+        // REMOVE FROM LOCAL ARRAY
+        // =====================================
+
+        ministries =
+            ministries.filter(
+                item =>
+                    String(item.id) !==
+                    String(id)
+            );
+
+
+        // Keep current member checkbox selections
+        const selected =
+            getSelectedMemberMinistries();
+
+
+        renderMemberMinistries(
+            selected
+        );
+
+
+        renderManageMinistries();
+
+
+        console.log(
+            "✅ Ministry deleted:",
+            ministryName
+        );
+
+
+        alert(
+            `✅ "${ministryName}" deleted successfully.`
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "❌ Delete ministry error:",
+            error
+        );
+
+
+        alert(
+            "❌ Failed to delete ministry."
+        );
+
+    }
+
 }
 
 async function deleteMember(id) {
@@ -10290,10 +11175,10 @@ if (!canManageAttendance()) {
     });
 }
 
-/* =========================================
-   SETTINGS & BACKUP ENGINE
-   SUPABASE EXPORT BACKUP
-========================================= */
+// =====================================================
+// SETTINGS & BACKUP ENGINE
+// SUPABASE EXPORT BACKUP
+// =====================================================
 
 async function exportChurchData() {
 
@@ -10304,11 +11189,16 @@ async function exportChurchData() {
     try {
 
         console.log(
-            "📦 Creating Supabase backup..."
+            "📦 Creating ChurchHQ Supabase backup..."
         );
 
 
+        // =====================================
+        // LOAD ALL DATABASE TABLES
+        // =====================================
+
         const [
+
             membersResult,
             tasksResult,
             songsResult,
@@ -10317,7 +11207,9 @@ async function exportChurchData() {
             annualActivitiesResult,
             announcementsResult,
             fileFoldersResult,
-            leadersResult
+            leadersResult,
+            ministriesResult
+
         ] = await Promise.all([
 
             churchSupabase
@@ -10354,17 +11246,22 @@ async function exportChurchData() {
 
             churchSupabase
                 .from("church_leaders")
+                .select("*"),
+
+            churchSupabase
+                .from("ministries")
                 .select("*")
 
         ]);
 
 
+        // =====================================
+        // CHECK FOR SUPABASE ERRORS
+        // =====================================
+
         const results = [
 
-            [
-                "members",
-                membersResult
-            ],
+            ["members", membersResult],
 
             [
                 "planner_tasks",
@@ -10404,14 +11301,15 @@ async function exportChurchData() {
             [
                 "church_leaders",
                 leadersResult
+            ],
+
+            [
+                "ministries",
+                ministriesResult
             ]
 
         ];
 
-
-        // =====================================
-        // CHECK SUPABASE ERRORS
-        // =====================================
 
         for (
             const [tableName, result]
@@ -10436,7 +11334,7 @@ async function exportChurchData() {
 
 
         // =====================================
-        // BACKUP DATA
+        // CREATE BACKUP OBJECT
         // =====================================
 
         const backupData = {
@@ -10445,7 +11343,7 @@ async function exportChurchData() {
                 "ChurchHQ",
 
             version:
-                "4.0",
+                "5.0",
 
             source:
                 "Supabase",
@@ -10481,7 +11379,10 @@ async function exportChurchData() {
                     fileFoldersResult.data || [],
 
                 church_leaders:
-                    leadersResult.data || []
+                    leadersResult.data || [],
+
+                ministries:
+                    ministriesResult.data || []
 
             }
 
@@ -10536,13 +11437,12 @@ async function exportChurchData() {
 
 
         downloadAnchor.download =
-            `churchhq_supabase_backup_${today}.json`;
+            `churchhq_backup_v5_${today}.json`;
 
 
-        document.body
-            .appendChild(
-                downloadAnchor
-            );
+        document.body.appendChild(
+            downloadAnchor
+        );
 
 
         downloadAnchor.click();
@@ -10557,73 +11457,59 @@ async function exportChurchData() {
 
 
         // =====================================
-        // CONSOLE SUMMARY
+        // CONSOLE BACKUP SUMMARY
         // =====================================
 
         console.log(
-            "✅ Supabase backup created:",
+            "✅ ChurchHQ backup created:",
             {
 
                 members:
-                    backupData
-                        .data
-                        .members
-                        .length,
+                    backupData.data
+                        .members.length,
 
                 planner_tasks:
-                    backupData
-                        .data
-                        .planner_tasks
-                        .length,
+                    backupData.data
+                        .planner_tasks.length,
 
                 songs:
-                    backupData
-                        .data
-                        .songs
-                        .length,
+                    backupData.data
+                        .songs.length,
 
                 service_records:
-                    backupData
-                        .data
-                        .service_records
-                        .length,
+                    backupData.data
+                        .service_records.length,
 
                 attendance_records:
-                    backupData
-                        .data
-                        .attendance_records
-                        .length,
+                    backupData.data
+                        .attendance_records.length,
 
                 annual_activities:
-                    backupData
-                        .data
-                        .annual_activities
-                        .length,
+                    backupData.data
+                        .annual_activities.length,
 
                 announcements:
-                    backupData
-                        .data
-                        .announcements
-                        .length,
+                    backupData.data
+                        .announcements.length,
 
                 file_folders:
-                    backupData
-                        .data
-                        .file_folders
-                        .length,
+                    backupData.data
+                        .file_folders.length,
 
                 church_leaders:
-                    backupData
-                        .data
-                        .church_leaders
-                        .length
+                    backupData.data
+                        .church_leaders.length,
+
+                ministries:
+                    backupData.data
+                        .ministries.length
 
             }
         );
 
 
         // =====================================
-        // LAST BACKUP DATE
+        // SAVE LAST BACKUP TIME
         // =====================================
 
         const backupTime =
@@ -10641,29 +11527,30 @@ async function exportChurchData() {
 
 
         alert(
-            "✅ Supabase backup downloaded successfully!"
+            "✅ ChurchHQ backup downloaded successfully!"
         );
 
 
     } catch (error) {
 
         console.error(
-            "❌ Supabase backup error:",
+            "❌ ChurchHQ backup error:",
             error
         );
 
 
         alert(
-            "❌ Failed to create Supabase backup."
+            "❌ Failed to create ChurchHQ backup."
         );
 
     }
 
 }
-/* =========================================
-   SETTINGS & BACKUP ENGINE
-   SUPABASE IMPORT / RESTORE
-========================================= */
+
+// =====================================================
+// SETTINGS & BACKUP ENGINE
+// SUPABASE IMPORT / RESTORE
+// =====================================================
 
 async function importChurchData(event) {
 
@@ -10674,6 +11561,7 @@ async function importChurchData(event) {
 
     const file =
         event.target.files[0];
+
 
     if (!file) {
         return;
@@ -10696,12 +11584,13 @@ async function importChurchData(event) {
 
 
                 // =====================================
-                // VALIDATE BASIC BACKUP FORMAT
+                // BASIC VALIDATION
                 // =====================================
 
                 if (
                     !importedJSON ||
-                    importedJSON.app !== "ChurchHQ" ||
+                    importedJSON.app !==
+                        "ChurchHQ" ||
                     !importedJSON.data
                 ) {
 
@@ -10709,7 +11598,8 @@ async function importChurchData(event) {
                         "❌ Invalid ChurchHQ backup file."
                     );
 
-                    event.target.value = "";
+                    event.target.value =
+                        "";
 
                     return;
                 }
@@ -10720,10 +11610,10 @@ async function importChurchData(event) {
 
 
                 // =====================================
-                // VALIDATE REQUIRED DATA
+                // VALIDATE REQUIRED ARRAYS
                 // =====================================
 
-                const validSupabaseBackup =
+                const validBackup =
 
                     Array.isArray(
                         backup.members
@@ -10755,46 +11645,104 @@ async function importChurchData(event) {
 
                     Array.isArray(
                         backup.church_leaders
+                    ) &&
+
+                    Array.isArray(
+                        backup.ministries
                     );
 
 
-                if (!validSupabaseBackup) {
+                if (!validBackup) {
 
                     alert(
-                        "❌ This is not a valid ChurchHQ v4 backup."
+                        "❌ This is not a valid ChurchHQ v5 backup."
                     );
 
-                    event.target.value = "";
+                    event.target.value =
+                        "";
 
                     return;
                 }
 
 
-                // =====================================
-                // CONFIRM RESTORE
-                // =====================================
-
                 const confirmed =
                     confirm(
-                        "⚠️ Restore this backup to the ChurchHQ Supabase database?\n\n" +
+
+                        "⚠️ RESTORE CHURCHHQ BACKUP?\n\n" +
+
                         "Existing records with the same IDs will be updated.\n" +
-                        "New records will be added.\n\n" +
-                        "This includes Annual Activities and Church Leaders.\n\n" +
+
+                        "Records not currently in the database will be added.\n\n" +
+
+                        "This backup includes:\n" +
+
+                        "• Members\n" +
+                        "• Planner Tasks\n" +
+                        "• Songs\n" +
+                        "• Services\n" +
+                        "• Attendance\n" +
+                        "• Annual Activities\n" +
+                        "• Announcements\n" +
+                        "• File Folders\n" +
+                        "• Church Leaders\n" +
+                        "• Ministries\n\n" +
+
                         "Continue?"
+
                     );
 
 
                 if (!confirmed) {
 
-                    event.target.value = "";
+                    event.target.value =
+                        "";
 
                     return;
                 }
 
 
                 console.log(
-                    "📤 Starting ChurchHQ v4 Supabase restore..."
+                    "📤 Starting ChurchHQ restore..."
                 );
+
+
+                // =====================================
+                // RESTORE MINISTRIES FIRST
+                // =====================================
+
+                if (
+                    backup.ministries.length > 0
+                ) {
+
+                    const {
+                        error:
+                            ministriesError
+                    } =
+                        await churchSupabase
+
+                            .from(
+                                "ministries"
+                            )
+
+                            .upsert(
+                                backup.ministries,
+                                {
+                                    onConflict:
+                                        "id"
+                                }
+                            );
+
+
+                    if (ministriesError) {
+
+                        throw new Error(
+                            "Ministries restore failed: " +
+                            ministriesError.message
+                        );
+
+                    }
+
+                }
 
 
                 // =====================================
@@ -10806,14 +11754,20 @@ async function importChurchData(event) {
                 ) {
 
                     const {
-                        error: membersError
+                        error:
+                            membersError
                     } =
                         await churchSupabase
-                            .from("members")
+
+                            .from(
+                                "members"
+                            )
+
                             .upsert(
                                 backup.members,
                                 {
-                                    onConflict: "id"
+                                    onConflict:
+                                        "id"
                                 }
                             );
 
@@ -10835,20 +11789,25 @@ async function importChurchData(event) {
                 // =====================================
 
                 if (
-                    backup.planner_tasks.length > 0
+                    backup.planner_tasks
+                        .length > 0
                 ) {
 
                     const {
-                        error: tasksError
+                        error:
+                            tasksError
                     } =
                         await churchSupabase
+
                             .from(
                                 "planner_tasks"
                             )
+
                             .upsert(
                                 backup.planner_tasks,
                                 {
-                                    onConflict: "id"
+                                    onConflict:
+                                        "id"
                                 }
                             );
 
@@ -10874,14 +11833,20 @@ async function importChurchData(event) {
                 ) {
 
                     const {
-                        error: songsError
+                        error:
+                            songsError
                     } =
                         await churchSupabase
-                            .from("songs")
+
+                            .from(
+                                "songs"
+                            )
+
                             .upsert(
                                 backup.songs,
                                 {
-                                    onConflict: "id"
+                                    onConflict:
+                                        "id"
                                 }
                             );
 
@@ -10899,7 +11864,7 @@ async function importChurchData(event) {
 
 
                 // =====================================
-                // RESTORE SERVICE RECORDS
+                // RESTORE SERVICES
                 // =====================================
 
                 if (
@@ -10908,16 +11873,20 @@ async function importChurchData(event) {
                 ) {
 
                     const {
-                        error: servicesError
+                        error:
+                            servicesError
                     } =
                         await churchSupabase
+
                             .from(
                                 "service_records"
                             )
+
                             .upsert(
                                 backup.service_records,
                                 {
-                                    onConflict: "id"
+                                    onConflict:
+                                        "id"
                                 }
                             );
 
@@ -10944,16 +11913,20 @@ async function importChurchData(event) {
                 ) {
 
                     const {
-                        error: attendanceError
+                        error:
+                            attendanceError
                     } =
                         await churchSupabase
+
                             .from(
                                 "attendance_records"
                             )
+
                             .upsert(
                                 backup.attendance_records,
                                 {
-                                    onConflict: "id"
+                                    onConflict:
+                                        "id"
                                 }
                             );
 
@@ -10984,13 +11957,16 @@ async function importChurchData(event) {
                             annualActivitiesError
                     } =
                         await churchSupabase
+
                             .from(
                                 "annual_activities"
                             )
+
                             .upsert(
                                 backup.annual_activities,
                                 {
-                                    onConflict: "id"
+                                    onConflict:
+                                        "id"
                                 }
                             );
 
@@ -11023,13 +11999,16 @@ async function importChurchData(event) {
                             announcementsError
                     } =
                         await churchSupabase
+
                             .from(
                                 "announcements"
                             )
+
                             .upsert(
                                 backup.announcements,
                                 {
-                                    onConflict: "id"
+                                    onConflict:
+                                        "id"
                                 }
                             );
 
@@ -11065,13 +12044,16 @@ async function importChurchData(event) {
                             fileFoldersError
                     } =
                         await churchSupabase
+
                             .from(
                                 "file_folders"
                             )
+
                             .upsert(
                                 backup.file_folders,
                                 {
-                                    onConflict: "id"
+                                    onConflict:
+                                        "id"
                                 }
                             );
 
@@ -11091,7 +12073,7 @@ async function importChurchData(event) {
 
 
                 // =====================================
-                // RESTORE CHURCH LEADERS
+                // RESTORE CHURCH LEADERS LAST
                 // =====================================
 
                 if (
@@ -11104,13 +12086,16 @@ async function importChurchData(event) {
                             leadersError
                     } =
                         await churchSupabase
+
                             .from(
                                 "church_leaders"
                             )
+
                             .upsert(
                                 backup.church_leaders,
                                 {
-                                    onConflict: "id"
+                                    onConflict:
+                                        "id"
                                 }
                             );
 
@@ -11127,35 +12112,64 @@ async function importChurchData(event) {
                 }
 
 
-                // =====================================
-                // SUCCESS
-                // =====================================
-
                 console.log(
-                    "✅ ChurchHQ v4 Supabase restore completed successfully."
+                    "✅ ChurchHQ Supabase restore completed."
                 );
 
 
                 alert(
-                    "✅ ChurchHQ backup restored successfully!\n\n" +
-                    "Annual Activities and Church Leaders were included."
+                    "✅ ChurchHQ backup restored successfully!"
                 );
 
 
-                event.target.value = "";
+                event.target.value =
+                    "";
 
 
                 // =====================================
-                // RELOAD ALL DATA FROM SUPABASE
+                // RELOAD DATA
                 // =====================================
 
                 await initializeChurchHQ();
 
 
+                if (
+                    typeof loadMinistriesFromSupabase ===
+                    "function"
+                ) {
+
+                    await loadMinistriesFromSupabase();
+
+                }
+
+
+                if (
+                    typeof loadLeadersFromSupabase ===
+                    "function"
+                ) {
+
+                    await loadLeadersFromSupabase();
+
+                }
+
+
+                if (
+                    typeof loadAnnualActivitiesFromSupabase ===
+                    "function"
+                ) {
+
+                    await loadAnnualActivitiesFromSupabase();
+
+                }
+
+
+                refreshDashboardStatus();
+
+
             } catch (error) {
 
                 console.error(
-                    "❌ Supabase restore error:",
+                    "❌ ChurchHQ restore error:",
                     error
                 );
 
@@ -11166,7 +12180,8 @@ async function importChurchData(event) {
                 );
 
 
-                event.target.value = "";
+                event.target.value =
+                    "";
 
             }
 
@@ -11216,10 +12231,10 @@ function updateLastBackupDisplay() {
 
 }
 
-/* =========================================
-   CLEAR ALL CHURCH DATA
-   SUPABASE DATABASE RESET
-========================================= */
+// =====================================================
+// CLEAR ALL CHURCH DATA
+// SUPABASE DATABASE RESET
+// =====================================================
 
 async function clearAllChurchData() {
 
@@ -11228,22 +12243,37 @@ async function clearAllChurchData() {
     }
 
 
-    const firstConfirm = confirm(
-        "🚨 WARNING!\n\n" +
-        "This will permanently delete ALL ChurchHQ records from the Supabase database.\n\n" +
-        "This includes:\n" +
-        "• Members\n" +
-        "• Planner Tasks\n" +
-        "• Songs\n" +
-        "• Sunday & Midweek Services\n" +
-        "• Attendance\n" +
-        "• Annual Activities\n" +
-        "• Announcements\n" +
-        "• File Folders\n" +
-        "• Church Leaders\n\n" +
-        "Your login account will NOT be deleted.\n\n" +
-        "Continue?"
-    );
+    // =====================================
+    // FIRST CONFIRMATION
+    // =====================================
+
+    const firstConfirm =
+        confirm(
+
+            "🚨 WARNING!\n\n" +
+
+            "This will permanently delete ALL ChurchHQ records from the Supabase database.\n\n" +
+
+            "This includes:\n" +
+
+            "• Members\n" +
+            "• Planner Tasks\n" +
+            "• Songs\n" +
+            "• Sunday & Midweek Services\n" +
+            "• Attendance\n" +
+            "• Annual Activities\n" +
+            "• Announcements\n" +
+            "• File Folders\n" +
+            "• Church Leaders\n" +
+            "• Ministries\n\n" +
+
+            "Your login account will NOT be deleted.\n\n" +
+
+            "Make sure you exported a backup first.\n\n" +
+
+            "Continue?"
+
+        );
 
 
     if (!firstConfirm) {
@@ -11251,10 +12281,19 @@ async function clearAllChurchData() {
     }
 
 
+    // =====================================
+    // FINAL CONFIRMATION
+    // =====================================
+
     const confirmationText =
         prompt(
+
             "⚠️ FINAL CONFIRMATION\n\n" +
-            "Type DELETE ALL DATA to confirm:"
+
+            "Type exactly:\n\n" +
+
+            "DELETE ALL DATA"
+
         );
 
 
@@ -11279,10 +12318,15 @@ async function clearAllChurchData() {
 
 
         // =====================================
-        // TABLES TO CLEAR
+        // DELETE ORDER
+        //
+        // Child/dependent records first.
+        // Members before ministry master list.
         // =====================================
 
         const tables = [
+
+            "church_leaders",
 
             "attendance_records",
 
@@ -11298,15 +12342,15 @@ async function clearAllChurchData() {
 
             "file_folders",
 
-            "church_leaders",
+            "members",
 
-            "members"
+            "ministries"
 
         ];
 
 
         // =====================================
-        // DELETE SUPABASE DATA
+        // DELETE EACH TABLE
         // =====================================
 
         for (
@@ -11321,8 +12365,13 @@ async function clearAllChurchData() {
 
             const { error } =
                 await churchSupabase
-                    .from(tableName)
+
+                    .from(
+                        tableName
+                    )
+
                     .delete()
+
                     .not(
                         "id",
                         "is",
@@ -11353,7 +12402,7 @@ async function clearAllChurchData() {
 
 
         // =====================================
-        // CLEAR CHURCHHQ LOCAL CACHE
+        // CLEAR LOCAL CHURCHHQ CACHE
         // =====================================
 
         const localKeys = [
@@ -11366,6 +12415,8 @@ async function clearAllChurchData() {
 
             "churchhq_attendance",
 
+            "churchhq_activities",
+
             "churchhq_announcements",
 
             "churchhq_sunday_services",
@@ -11374,7 +12425,9 @@ async function clearAllChurchData() {
 
             "churchhq_sunday_lineup",
 
-            "churchhq_leaders"
+            "churchhq_leaders",
+
+            "churchhq_ministries"
 
         ];
 
@@ -11391,24 +12444,82 @@ async function clearAllChurchData() {
 
 
         // =====================================
-        // RESET IN-MEMORY DATA
+        // RESET IN-MEMORY ARRAYS
         // =====================================
 
-        annualActivities = [];
+        if (
+            typeof members !==
+            "undefined"
+        ) {
+            members = [];
+        }
 
-        churchLeaders = [];
+
+        if (
+            typeof churchLeaders !==
+            "undefined"
+        ) {
+            churchLeaders = [];
+        }
+
+
+        if (
+            typeof annualActivities !==
+            "undefined"
+        ) {
+            annualActivities = [];
+        }
+
+
+        if (
+            typeof ministries !==
+            "undefined"
+        ) {
+            ministries = [];
+        }
+
+
+        if (
+            typeof sundayServices !==
+            "undefined"
+        ) {
+            sundayServices = [];
+        }
+
+
+        if (
+            typeof midweekServices !==
+            "undefined"
+        ) {
+            midweekServices = [];
+        }
+
+
+        if (
+            typeof attendanceRecords !==
+            "undefined"
+        ) {
+            attendanceRecords = [];
+        }
 
 
         console.log(
-            "✅ ChurchHQ local cache cleared."
+            "✅ ChurchHQ database and local cache cleared."
         );
 
 
         alert(
+
             "✅ ChurchHQ database has been completely cleared.\n\n" +
-            "Your login account was not deleted."
+
+            "Your login account was NOT deleted."
+
         );
 
+
+        // =====================================
+        // RELOAD APPLICATION
+        // =====================================
 
         location.reload();
 
@@ -11422,14 +12533,19 @@ async function clearAllChurchData() {
 
 
         alert(
+
             "❌ Database reset failed.\n\n" +
+
             error.message +
+
             "\n\nSome tables may not have been cleared."
+
         );
 
     }
 
 }
+
 /* =========================================
    REPORTS & ANALYTICS ENGINE
    SUPABASE SOURCE OF TRUTH
@@ -13440,9 +14556,11 @@ async function initializeChurchHQ() {
 
         await testSupabaseConnection();
 
+        await loadMinistriesFromSupabase();
         await loadMembersFromSupabase();
         await loadLeadersFromSupabase();
         await loadTasksFromSupabase();
+
 
         await loadAnnualActivitiesFromSupabase();
         await loadServicesFromSupabase();
