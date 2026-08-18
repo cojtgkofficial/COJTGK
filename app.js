@@ -6247,81 +6247,107 @@ function initializeBackingVocalsAutocomplete() {
 function populateMemberMinistryFilter() {
 
     const filter =
-        document.getElementById("memberMinistryFilter");
+        document.getElementById(
+            "memberMinistryFilter"
+        );
 
-    if (!filter) return;
+    if (!filter) {
+        return;
+    }
 
-    // Clear existing options
+
+    // Keep current selected value
+    const currentValue =
+        filter.value;
+
+
     filter.innerHTML = "";
 
-    // Default option
-    const allOption = document.createElement("option");
+
+    // ALL MINISTRIES
+    const allOption =
+        document.createElement(
+            "option"
+        );
 
     allOption.value = "";
-    allOption.textContent = "All Ministries";
+    allOption.textContent =
+        "All Ministries";
 
-    filter.appendChild(allOption);
+    filter.appendChild(
+        allOption
+    );
 
-    // Store unique ministries
-    const ministries = new Set();
 
-    members.forEach(member => {
+    // =====================================
+    // SOURCE: SUPABASE MINISTRIES MASTER LIST
+    // =====================================
 
-        // New multiple-ministry format
-        if (
-            Array.isArray(member.ministries)
-        ) {
+    const sortedMinistries =
+        (Array.isArray(ministries)
+            ? [...ministries]
+            : []
+        )
+        .sort(
+            (a, b) =>
+                String(a.name || "")
+                    .localeCompare(
+                        String(b.name || ""),
+                        undefined,
+                        {
+                            sensitivity:
+                                "base"
+                        }
+                    )
+        );
 
-            member.ministries.forEach(ministry => {
 
-                if (
-                    typeof ministry === "string" &&
-                    ministry.trim() !== ""
-                ) {
-                    ministries.add(
-                        ministry.trim()
-                    );
-                }
+    sortedMinistries.forEach(
+        ministry => {
 
-            });
+            if (!ministry.name) {
+                return;
+            }
 
-        }
 
-        // Support old single-ministry data
-        else if (
-            typeof member.ministry === "string" &&
-            member.ministry.trim() !== ""
-        ) {
+            const option =
+                document.createElement(
+                    "option"
+                );
 
-            ministries.add(
-                member.ministry.trim()
+
+            option.value =
+                ministry.name;
+
+
+            option.textContent =
+                ministry.name;
+
+
+            filter.appendChild(
+                option
             );
 
         }
+    );
 
-    });
 
-    // Sort ministries alphabetically
-    const sortedMinistries =
-        Array.from(ministries).sort((a, b) =>
-            a.localeCompare(
-                b,
-                undefined,
-                { sensitivity: "base" }
-            )
+    // Restore selection if it still exists
+    const valueStillExists =
+        Array.from(
+            filter.options
+        ).some(
+            option =>
+                option.value ===
+                currentValue
         );
 
-    // Add ministries to dropdown
-    sortedMinistries.forEach(ministry => {
 
-        const option =
-            document.createElement("option");
+    if (valueStillExists) {
+        filter.value =
+            currentValue;
+    }
 
-        option.value = ministry;
-        option.textContent = ministry;
-
-        filter.appendChild(option);
-    });
 }
 
 function filterMembers() {
@@ -6750,6 +6776,9 @@ async function addCustomMinistry() {
         currentlySelected
     );
 
+    populateMemberMinistryFilter();
+    populateMinistryDashboardSelect();
+
 
     console.log(
         "✅ Ministry saved:",
@@ -7169,6 +7198,8 @@ async function editMinistry(id) {
 
                 await loadMinistriesFromSupabase();
                 await loadMembersFromSupabase();
+                populateMemberMinistryFilter();
+                populateMinistryDashboardSelect();
 
                 return;
             }
@@ -7409,34 +7440,28 @@ async function deleteMinistry(id) {
             selected
         );
 
+renderManageMinistries();
 
-        renderManageMinistries();
+populateMemberMinistryFilter();
 
+populateMinistryDashboardSelect();
 
-        console.log(
-            "✅ Ministry deleted:",
-            ministryName
-        );
+alert(
+    "✅ Ministry deleted successfully."
+);
 
+} catch (error) {
 
-        alert(
-            `✅ "${ministryName}" deleted successfully.`
-        );
+    console.error(
+        "❌ Delete ministry error:",
+        error
+    );
 
+    alert(
+        "❌ Failed to delete ministry."
+    );
 
-    } catch (error) {
-
-        console.error(
-            "❌ Delete ministry error:",
-            error
-        );
-
-
-        alert(
-            "❌ Failed to delete ministry."
-        );
-
-    }
+}
 
 }
 
@@ -10270,51 +10295,34 @@ function renderSystemStatusAlerts() {
 
 function getAvailableMinistries() {
 
-    const ministrySet = new Set();
+    if (
+        !Array.isArray(ministries)
+    ) {
+        return [];
+    }
 
 
-    members.forEach(member => {
+    return ministries
 
-        // Multiple ministries
-        if (Array.isArray(member.ministries)) {
+        .map(
+            ministry =>
+                String(
+                    ministry.name || ""
+                ).trim()
+        )
 
-            member.ministries.forEach(ministry => {
+        .filter(Boolean)
 
-                const name =
-                    String(ministry || "").trim();
-
-                if (name) {
-                    ministrySet.add(name);
-                }
-
-            });
-
-        }
-
-
-        // Legacy / primary ministry
-        const primaryMinistry =
-            String(
-                member.ministry || ""
-            ).trim();
-
-
-        if (primaryMinistry) {
-            ministrySet.add(primaryMinistry);
-        }
-
-    });
-
-
-    return Array.from(ministrySet)
-        .sort((a, b) =>
-            a.localeCompare(
-                b,
-                undefined,
-                {
-                    sensitivity: "base"
-                }
-            )
+        .sort(
+            (a, b) =>
+                a.localeCompare(
+                    b,
+                    undefined,
+                    {
+                        sensitivity:
+                            "base"
+                    }
+                )
         );
 
 }
