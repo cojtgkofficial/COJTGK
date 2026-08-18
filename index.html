@@ -2319,40 +2319,32 @@
 
     <div class="form-group">
 
-        <div
-    style="
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        gap:10px;
-    "
->
+     <div class="ministry-header">
+
     <label>
         Ministry Group
     </label>
 
-    <div
-        style="
-            display:flex;
-            gap:6px;
-            align-items:center;
-        "
-    >
+    <div class="ministry-actions">
 
         <button
             type="button"
+            class="ministry-action-btn"
             onclick="addCustomMinistry()"
             data-admin-only="true"
         >
-            + Add New Ministry
+            <span>＋</span>
+            Add Ministry
         </button>
 
         <button
             type="button"
+            class="ministry-action-btn"
             onclick="openManageMinistries()"
             data-admin-only="true"
         >
-            ⚙ Manage
+            <span>⚙</span>
+            Manage
         </button>
 
     </div>

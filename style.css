@@ -5777,3 +5777,111 @@ body.dark .dashboard-activity-days {
     background: #1e3a8a;
     color: #bfdbfe;
 }
+
+/* =========================================
+   MINISTRY HEADER + ACTION BUTTONS
+========================================= */
+
+.ministry-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.ministry-header > label {
+    margin: 0;
+    font-weight: 600;
+    color: #334155;
+    white-space: nowrap;
+}
+
+
+/* ACTION BUTTON CONTAINER */
+
+.ministry-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+
+/* ADD MINISTRY + MANAGE BUTTON */
+
+.ministry-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+
+    width: auto;
+    min-width: 0;
+
+    padding: 6px 10px;
+
+    border: 1px solid #dbe3ee;
+    border-radius: 7px;
+
+    background: #ffffff;
+    color: #334155;
+
+    font-size: 12px;
+    font-weight: 500;
+
+    line-height: 1;
+    white-space: nowrap;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease;
+}
+
+
+/* ICON */
+
+.ministry-action-btn span {
+    font-size: 14px;
+    line-height: 1;
+}
+
+
+/* HOVER */
+
+.ministry-action-btn:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+    color: #2563eb;
+}
+
+
+/* MINISTRY CHECKBOX LIST */
+
+.ministry-checkbox-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+
+/* MOBILE / SMALL MODAL */
+
+@media (max-width: 600px) {
+
+    .ministry-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .ministry-actions {
+        width: 100%;
+    }
+
+    .ministry-action-btn {
+        flex: 1;
+    }
+}
