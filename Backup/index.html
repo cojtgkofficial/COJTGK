@@ -25,65 +25,197 @@
 
 <div id="loginScreen" class="login-screen">
 
-    <div class="login-card">
+    <div class="login-page-layout">
 
-        <div class="login-brand">
+        <!-- =====================================
+             LEFT SIDE - LOGIN
+        ====================================== -->
 
-            <div class="login-logo-wrap">
-                <img
-                    src="images/COJ Logo.png"
-                    alt="Church Logo"
-                    class="login-logo"
+        <div class="login-left">
+
+            <div class="login-card">
+
+                <div class="login-brand">
+
+                    <div class="login-logo-wrap">
+                        <img
+                            src="images/COJ Logo B.png"
+                            alt="Church Logo"
+                            class="login-logo"
+                        >
+                    </div>
+
+                    <h1>COJTGK CMS</h1>
+
+                    <p class="login-church-name">
+                        Church of Jesus The Glorious King
+                    </p>
+
+                    <span class="login-subtitle">
+                        Church Management System
+                    </span>
+
+                </div>
+
+
+                <div class="login-divider"></div>
+
+
+                <div class="login-field">
+                    <label>Email Address</label>
+
+                    <input
+                        id="loginEmail"
+                        type="email"
+                        placeholder="Enter your email"
+                    >
+                </div>
+
+
+                <div class="login-field">
+                    <label>Password</label>
+
+                    <input
+                        id="loginPassword"
+                        type="password"
+                        placeholder="Enter your password"
+                    >
+                </div>
+
+
+                <button
+                    type="button"
+                    class="login-button"
+                    onclick="loginUser()"
                 >
+                    Sign In
+                </button>
+
+
+                <p
+                    id="loginMessage"
+                    class="login-message"
+                ></p>
+
             </div>
 
-            <h1>COJTGK CIS</h1>
-
-            <p class="login-church-name">
-                Church of Jesus The Glorious King
-            </p>
-
-            <span class="login-subtitle">
-                Church Management System
-            </span>
-
         </div>
 
-        <div class="login-divider"></div>
 
-        <div class="login-field">
-            <label>Email Address</label>
+        <!-- =====================================
+             RIGHT SIDE - CHURCH INFORMATION
+        ====================================== -->
 
-            <input
-                id="loginEmail"
-                type="email"
-                placeholder="Enter your email"
-            >
-        </div>
+        <div class="login-info-panel">
 
-        <div class="login-field">
-            <label>Password</label>
+            <div class="login-info-header">
 
-            <input
-                id="loginPassword"
-                type="password"
-                placeholder="Enter your password"
-            >
-        </div>
+                <span class="login-info-small">
+                    WELCOME TO
+                </span>
 
-        <button
-            type="button"
-            class="login-button"
-            onclick="loginUser()"
+                <h2>
+                    Church of Jesus The Glorious King
+                </h2>
+
+                <p>
+                    Growing together in faith,
+                    fellowship, and service.
+                </p>
+
+            </div>
+
+
+            <!-- MISSION -->
+
+            <div class="church-info-card">
+
+                <h3>🎯 Mission</h3>
+
+                <p>
+                    The Church of Jesus the Glorious King (Cavite) Inc. Exists to be a part of the great commission of the Lord Jesus Christ, that is to bring all people to Him and making them His disciples (Matthew 28:19-20). And to help the church in preparing to be glorious for the meeting of the Glorious King in His second appearing to be with Him forever.
+                </p>
+
+            </div>
+
+
+            <!-- VISION -->
+
+            <div class="church-info-card">
+
+                <h3>👁️ Vision</h3>
+
+                <p>
+                    Macro Vision That all the nations of the earth will be saturated by the word of God and many will be saved regardless of color, race, and nationality, before the Lord comes. 
+                    Micro Vision That the entire Philippine archipelago will be evangelized and many of the Filipino people would receive the gift of eternal life from the Lord Jesus Christ.
+                </p>
+
+            </div>
+
+
+            <!-- CHURCH SCHEDULE -->
+
+            <div class="church-info-card">
+
+                <h3>📅 Church Schedule</h3>
+
+                <div class="church-schedule-row">
+                    <span>Sunday Service</span>
+                    <strong>8:30 AM</strong>
+                </div>
+
+                <div class="church-schedule-row">
+                    <span>Midweek Service</span>
+                    <strong>7:00 PM</strong>
+                </div>
+
+                <div class="church-schedule-row">
+                    <span>Prayer Meeting</span>
+                    <strong>6:30 PM</strong>
+                </div>
+
+            </div>
+
+                         <!-- =====================================
+     SOCIAL MEDIA
+====================================== -->
+
+<div class="login-socials">
+
+    <span class="login-social-title">
+        Follow Us
+    </span>
+
+    <div class="login-social-links">
+
+        <a
+            href="https://www.facebook.com/COJTGKofficial"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="login-social-link"
         >
-            Sign In
-        </button>
+            <span>Facebook</span>
+        </a>
 
-        <p id="loginMessage" class="login-message"></p>
+        <a
+            href="https://www.youtube.com/@cojtgkofficial"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="login-social-link"
+        >
+            <span>YouTube</span>
+        </a>
+
+    </div>
+
+</div>   
+
+        </div>
 
     </div>
 
 </div>
+
 
 <!-- ================= MAIN APP ================= -->
 
@@ -95,11 +227,11 @@
     <!-- ================= SIDEBAR ================= -->
     <aside class="sidebar">
 
-        <div class="sidebar-header" style="background-color: #2563eb; color: white; display: flex; align-items: center; gap: 12px; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        <div class="sidebar-header">
             <img src="images/COJ Logo.png" alt="ChurchHQ Logo" style="width: 60px; height: 60px; object-fit: fill;">
             <div>
                 <h1 style="margin: 0; font-size: 16px; color: white; line-height: 1;">Church of Jesus The Glorious King</h1>
-                <span style="font-size: 10px; color: #93c5fd;">Bets Edition</span>
+                <span style="font-size: 10px;">Bets Edition</span>
             </div>
         </div>
         <nav>
@@ -131,6 +263,11 @@
             <div class="nav-item" onclick="showPage('members')">
                 <i data-lucide="users"></i>
                 <span>Members</span>
+            </div>
+
+            <div class="nav-item" onclick="showPage('leaders')">
+                <i data-lucide="network"></i>
+                <span>Leaders</span>
             </div>
 
             <div class="nav-item" onclick="showPage('attendance')">
@@ -269,41 +406,88 @@
     </div>
 
 </div>
+<div class="dashboard-lower">
 
-           <!-- DASHBOARD LOWER SECTION -->
-            <div class="dashboard-lower">
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <h2 style="margin: 0;">📅 Upcoming Activities</h2>
-                        <button
-    class="secondary-btn"
-    data-admin-only="true"
-    style="padding: 4px 10px; font-size: 12px;"
-    onclick="openActivityModal()"
->
-    ⚙️ Manage
-</button>
-                    </div>
-                    <ul class="activity-list" id="dashboardActivities"></ul>
-                </div>
+    <!-- UPCOMING ACTIVITIES -->
+    <div class="card">
 
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <h2 style="margin: 0;">📢 Announcements</h2>
-                        <button
-    class="secondary-btn"
-    data-admin-only="true"
-    style="padding: 4px 10px; font-size: 12px;"
-    onclick="openAnnouncementModal()"
->
-    ⚙️ Manage
-</button>
-                    </div>
-                    <ul class="announcement-list" id="dashboardAnnouncements"></ul>
-                </div>
+        <div
+            style="
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                gap:12px;
+                margin-bottom:15px;
+            "
+        >
+
+            <div>
+
+                <h2 style="margin:0;">
+                    📅 Upcoming Activities
+                </h2>
+
+                <p
+                    style="
+                        margin:4px 0 0;
+                        font-size:12px;
+                        color:#64748b;
+                    "
+                >
+                    Next church activities
+                </p>
+
             </div>
-        </section>
 
+        </div>
+
+        <ul
+            class="activity-list"
+            id="dashboardActivities"
+        ></ul>
+
+    </div>
+
+
+    <!-- ANNOUNCEMENTS -->
+    <div class="card">
+
+        <div
+            style="
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                margin-bottom:15px;
+            "
+        >
+
+            <h2 style="margin:0;">
+                📢 Announcements
+            </h2>
+
+            <button
+                class="secondary-btn"
+                data-admin-only="true"
+                style="
+                    padding:4px 10px;
+                    font-size:12px;
+                "
+                onclick="openAnnouncementModal()"
+            >
+                ⚙️ Manage
+            </button>
+
+        </div>
+
+        <ul
+            class="announcement-list"
+            id="dashboardAnnouncements"
+        ></ul>
+
+    </div>
+
+</div>
+</section>
         <!----------------------------------------------------------------------------- PLANNER ------------------------------------------------------------------->
 <section id="planner" class="page hidden">
     <div class="planner-header">
@@ -352,6 +536,163 @@
                     <div id="completedColumn" class="task-list"></div>
                 </div>
             </div>
+
+            <!-- =====================================================
+     CHURCH ANNUAL ACTIVITIES
+===================================================== -->
+
+<div class="annual-activities-section">
+
+    <div class="annual-activities-header">
+
+        <div class="annual-activities-heading">
+
+            <h2>
+                Church Annual Activities
+            </h2>
+
+            <p>
+                Yearly church activities and events
+            </p>
+
+        </div>
+
+
+        <div class="annual-activities-actions">
+
+            <label for="annualActivityYear">
+                Year
+            </label>
+
+            <select id="annualActivityYear">
+                <!-- Years will be generated by JavaScript -->
+            </select>
+
+
+            <button
+                type="button"
+                class="primary-btn"
+                id="addAnnualActivityBtn"
+                data-admin-only="true"
+                onclick="openAnnualActivityModal()"
+            >
+                + Add Activity
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- JANUARY - DECEMBER WILL APPEAR HERE -->
+
+    <div
+        class="annual-activities-grid"
+        id="annualActivitiesGrid"
+    >
+    </div>
+
+</div>
+
+<!-- =====================================================
+     ANNUAL ACTIVITY MODAL
+===================================================== -->
+
+<div id="annualActivityModal" class="modal hidden">
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+
+            <h2 id="annualActivityModalTitle">
+                Add Annual Activity
+            </h2>
+
+            <button
+                type="button"
+                class="close-btn"
+                onclick="closeAnnualActivityModal()"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="annualActivityTitle">
+                Activity Name
+            </label>
+
+            <input
+                type="text"
+                id="annualActivityTitle"
+                placeholder="Example: Youth Fellowship"
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="annualActivityDate">
+                Date
+            </label>
+
+            <input
+                type="date"
+                id="annualActivityDate"
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="annualActivityDescription">
+                Description
+            </label>
+
+            <textarea
+                id="annualActivityDescription"
+                placeholder="Optional details"
+            ></textarea>
+
+        </div>
+
+
+        <input
+            type="hidden"
+            id="annualActivityEditId"
+        >
+
+
+        <div class="modal-footer">
+
+            <button
+                type="button"
+                class="secondary-btn"
+                onclick="closeAnnualActivityModal()"
+            >
+                Cancel
+            </button>
+
+            <button
+                type="button"
+                class="primary-btn"
+                data-admin-only="true"
+                onclick="saveAnnualActivity()"
+            >
+                Save Activity
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
         </section>
 
         <!-- ================= SUNDAY SERVICE PAGE ================= -->
@@ -715,9 +1056,441 @@
 
 <div class="songs-grid" id="membersGrid"></div>
 
-
-
         </section>
+
+<!-- =====================================================
+     LEADERS PAGE
+===================================================== -->
+<section id="leaders" class="page hidden">
+<div class="songs-header">
+
+    <div>
+
+        <div style="
+            display:flex;
+            align-items:center;
+            gap:12px;
+            margin-bottom:4px;
+        ">
+
+            <i
+                data-lucide="network"
+                style="width:28px; height:28px;"
+            ></i>
+
+            <h1
+                class="page-title"
+                style="margin:0;"
+            >
+                Church Leaders
+            </h1>
+
+        </div>
+
+        <p class="page-subtitle">
+            Organizational structure of church leadership
+        </p>
+
+    </div>
+
+
+    <button
+        type="button"
+        class="primary-btn"
+        id="addLeaderBtn"
+        data-admin-only="true"
+        onclick="openLeaderModal()"
+    >
+        + Add Leader
+    </button>
+
+</div>
+
+    <!-- =====================================
+         ORGANIZATIONAL CHART
+    ====================================== -->
+
+
+    <div class="leaders-org-chart">
+
+
+        <!-- =====================================
+             LEVEL 1
+        ====================================== -->
+
+       <div class="leaders-level leaders-level-top">
+
+    <div
+        class="leader-slot"
+        data-leader-slot="senior-pastor"
+    >
+
+        <div class="leader-slot-empty">
+
+            <div class="leader-slot-icon">
+                +
+            </div>
+
+            <strong>
+                Senior Pastor
+            </strong>
+
+            <span>
+                No leader assigned
+            </span>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+        <!-- CONNECTOR -->
+
+        <div class="leader-connector-vertical"></div>
+
+
+        <!-- =====================================
+             LEVEL 2
+        ====================================== -->
+
+        <div class="leaders-level leaders-level-two">
+
+            <div
+                class="leader-slot"
+                data-leader-slot="assistant-pastor"
+            >
+
+                <div class="leader-slot-empty">
+
+                    <div class="leader-slot-icon">
+                        +
+                    </div>
+
+                    <strong>
+                        Assistant Pastor
+                    </strong>
+
+                    <span>
+                        No leader assigned
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="leader-slot"
+                data-leader-slot="church-administrator"
+            >
+
+                <div class="leader-slot-empty">
+
+                    <div class="leader-slot-icon">
+                        +
+                    </div>
+
+                    <strong>
+                        Church Administrator
+                    </strong>
+
+                    <span>
+                        No leader assigned
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- CONNECTOR -->
+
+        <div class="leader-connector-vertical"></div>
+
+
+        <!-- =====================================
+             LEVEL 3
+        ====================================== -->
+
+        <div class="leaders-level leaders-level-three">
+
+
+            <div
+                class="leader-slot"
+                data-leader-slot="worship-leader"
+            >
+
+                <div class="leader-slot-empty">
+
+                    <div class="leader-slot-icon">
+                        +
+                    </div>
+
+                    <strong>
+                        Worship Leader
+                    </strong>
+
+                    <span>
+                        No leader assigned
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="leader-slot"
+                data-leader-slot="youth-leader"
+            >
+
+                <div class="leader-slot-empty">
+
+                    <div class="leader-slot-icon">
+                        +
+                    </div>
+
+                    <strong>
+                        Youth Leader
+                    </strong>
+
+                    <span>
+                        No leader assigned
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="leader-slot"
+                data-leader-slot="children-leader"
+            >
+
+                <div class="leader-slot-empty">
+
+                    <div class="leader-slot-icon">
+                        +
+                    </div>
+
+                    <strong>
+                        Children Ministry Leader
+                    </strong>
+
+                    <span>
+                        No leader assigned
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="leader-slot"
+                data-leader-slot="multimedia-leader"
+            >
+
+                <div class="leader-slot-empty">
+
+                    <div class="leader-slot-icon">
+                        +
+                    </div>
+
+                    <strong>
+                        Multimedia Leader
+                    </strong>
+
+                    <span>
+                        No leader assigned
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     LEADER ADD / EDIT MODAL
+===================================================== -->
+
+<div
+    id="leaderModal"
+    class="modal hidden"
+>
+
+    <div class="modal-content leader-modal-content">
+
+        <!-- HEADER -->
+
+        <div class="modal-header">
+
+            <div>
+                <h2 id="leaderModalTitle">
+                    Add Leader
+                </h2>
+
+                <p>
+                    Assign a church member to a leadership position.
+                </p>
+            </div>
+
+            <button
+                type="button"
+                class="modal-close"
+                onclick="closeLeaderModal()"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <!-- BODY -->
+
+        <div class="leader-modal-body">
+
+            <!-- MEMBER -->
+
+            <div class="form-group">
+
+                <label for="leaderMemberSelect">
+                    Member
+                </label>
+
+                <select id="leaderMemberSelect">
+
+                    <option value="">
+                        Select Member
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- POSITION -->
+
+            <div class="form-group">
+
+                <label for="leaderPosition">
+                    Position
+                </label>
+
+                <input
+                    type="text"
+                    id="leaderPosition"
+                    placeholder="Example: Senior Pastor"
+                >
+
+            </div>
+
+
+            <!-- CONTACT -->
+
+            <div class="form-group">
+
+                <label for="leaderContact">
+                    Contact Number
+                </label>
+
+                <input
+                    type="text"
+                    id="leaderContact"
+                    placeholder="Contact number"
+                    readonly
+                >
+
+                <small>
+                    Automatically taken from Members.
+                </small>
+
+            </div>
+
+
+            <!-- CHART LEVEL -->
+
+            <div class="form-group">
+
+                <label for="leaderLevel">
+                    Organizational Level
+                </label>
+
+<select id="leaderLevel">
+
+    <option value="1">
+        Level 1 — Main Leader
+    </option>
+
+    <option value="2">
+        Level 2 — Supporting Leaders
+    </option>
+
+    <option value="3">
+        Level 3 — Ministry Leaders
+    </option>
+
+    <option value="4">
+        Level 4 — Department / Team Leaders
+    </option>
+
+    <option value="5">
+        Level 5 — Additional Leaders
+    </option>
+
+</select>
+
+            </div>
+
+
+            <!-- HIDDEN SLOT -->
+
+            <input
+                type="hidden"
+                id="leaderSlotId"
+            >
+
+        </div>
+
+
+        <!-- FOOTER -->
+
+        <div class="modal-actions">
+
+            <button
+                type="button"
+                class="secondary-btn"
+                onclick="closeLeaderModal()"
+            >
+                Cancel
+            </button>
+
+            <button
+                type="button"
+                class="primary-btn"
+                id="saveLeaderBtn"
+                onclick="saveLeaderAssignment()"
+                data-admin-only="true"
+            >
+                Save Leader
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
 
         <!----------------------------------------------------------------------- ATTENDANCE ------------------------------------------------------------------->
         <section id="attendance" class="page hidden">
@@ -1542,81 +2315,139 @@
     >
 </div>
 
-        <div class="form-row">
-            <div class="form-group">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <label>Ministry Group</label>
-                    <button
-    type="button"
-    onclick="addCustomMinistry()"
-    data-admin-only="true"
->
-    + Add New Ministry
-</button>
-                </div>
+<div class="form-row">
 
-                <div id="memberMinistry" class="ministry-checkbox-list">
+    <div class="form-group">
 
-                    <label>
-                        <input type="checkbox" value="Adults Ministry">
-                        <span>Adults Ministry</span>
-                    </label>
+     <div class="ministry-header">
 
-                    <label>
-                        <input type="checkbox" value="Children Ministry">
-                        <span>Children Ministry</span>
-                    </label>
+    <label>
+        Ministry Group
+    </label>
 
-                    <label>
-                        <input type="checkbox" value="General/Regular Member">
-                        <span>General/Regular Member</span>
-                    </label>
+    <div class="ministry-actions">
 
-                    <label>
-                        <input type="checkbox" value="Multimedia Team">
-                        <span>Multimedia Team</span>
-                    </label>
+        <button
+            type="button"
+            class="ministry-action-btn"
+            onclick="addCustomMinistry()"
+            data-admin-only="true"
+        >
+            <span>＋</span>
+            Add Ministry
+        </button>
 
-                    <label>
-                        <input type="checkbox" value="Ushering & Security Ministry">
-                        <span> Ushering & Security Ministry</span>
-                    </label>
+        <button
+            type="button"
+            class="ministry-action-btn"
+            onclick="openManageMinistries()"
+            data-admin-only="true"
+        >
+            <span>⚙</span>
+            Manage
+        </button>
 
-                    <label>
-                        <input type="checkbox" value="Worship Team">
-                        <span>Worship Team</span>
-                    </label>
+    </div>
 
-                    <label>
-                        <input type="checkbox" value="Young Pro Ministry">
-                        <span>Young Pro Ministry</span>
-                    </label>
+</div>
 
-                    <label>
-                        <input type="checkbox" value="Youth Ministry">
-                        <span>Youth Ministry</span>
-                    </label>
-
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>Role</label>
-                <input type="text" id="memberRole" placeholder="e.g. Leader, Guitarist, Member">
-            </div>
+        <div
+            id="memberMinistry"
+            class="ministry-checkbox-list"
+        >
+            <!-- Ministries loaded from Supabase -->
         </div>
+
+    </div>
+
+
+    <div class="form-group">
+
+        <label>Role</label>
+
+        <input
+            type="text"
+            id="memberRole"
+            placeholder="e.g. Leader, Guitarist, Member"
+        >
+
+    </div>
+
+</div>
+
+
+<div class="modal-footer">
+
+    <button
+        id="cancelMember"
+        class="secondary-btn"
+    >
+        Cancel
+    </button>
+
+    <button
+        id="saveMember"
+        class="primary-btn"
+        data-admin-only="true"
+    >
+        Save Member
+    </button>
+
+</div>
+
+<!-- =====================================================
+     MANAGE MINISTRIES MODAL
+===================================================== -->
+
+<div
+    id="manageMinistriesModal"
+    class="modal hidden"
+>
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+
+            <h2>
+                Manage Ministries
+            </h2>
+
+            <button
+                type="button"
+                class="close-btn"
+                onclick="closeManageMinistries()"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div
+            id="manageMinistriesList"
+            style="
+                display:flex;
+                flex-direction:column;
+                gap:8px;
+            "
+        >
+        </div>
+
 
         <div class="modal-footer">
-            <button id="cancelMember" class="secondary-btn">Cancel</button>
+
             <button
-    id="saveMember"
-    class="primary-btn"
-    data-admin-only="true"
->
-    Save Member
-</button>
+                type="button"
+                class="secondary-btn"
+                onclick="closeManageMinistries()"
+            >
+                Close
+            </button>
+
         </div>
+
     </div>
+
 </div>
 
 <!-- =====================================

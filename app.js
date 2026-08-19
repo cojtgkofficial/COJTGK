@@ -1,3 +1,4 @@
+
 // =====================================
 // ChurchHQ - Supabase Configuration
 // =====================================
@@ -11351,7 +11352,7 @@ async function exportChurchData() {
                 "ChurchHQ",
 
             version:
-                "5.1",
+                "5.2",
 
             source:
                 "Supabase",

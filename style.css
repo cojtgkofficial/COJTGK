@@ -5885,3 +5885,5436 @@ body.dark .dashboard-activity-days {
         flex: 1;
     }
 }
+
+/* =========================================================
+   CHURCHHQ 2026 - BLUE & BEIGE THEME OVERRIDE
+========================================================= */
+
+/* =========================================================
+   CHURCHHQ 2026
+   BLUE + BEIGE CHURCH THEME
+   PHASE 1
+========================================================= */
+
+:root {
+
+    /* MAIN BRAND COLORS */
+
+    --church-blue: #164F94;
+    --church-blue-dark: #103B70;
+    --church-blue-deep: #0C315D;
+    --church-blue-light: #E8F0F8;
+
+    --church-beige: #DBCBB9;
+    --church-beige-light: #F1E8DE;
+    --church-cream: #F7F3EE;
+
+    --church-dark: #191B1E;
+    --church-gray: #6F7780;
+    --church-gray-light: #A5A8AC;
+
+    --church-border: #DDD6CE;
+
+    --church-white: #FFFFFF;
+
+}
+
+
+/* =========================================================
+   BODY / GLOBAL BACKGROUND
+========================================================= */
+
+body {
+
+    background:
+        var(--church-cream);
+
+    color:
+        var(--church-dark);
+
+}
+
+
+/* =========================================================
+   MAIN APPLICATION
+========================================================= */
+
+.app-container {
+
+    background:
+        var(--church-cream);
+
+}
+
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.sidebar {
+
+    background:
+        var(--church-blue);
+
+    border-right:
+        none;
+
+    box-shadow:
+        5px 0 24px
+        rgba(12, 49, 93, 0.12);
+
+}
+
+
+/* =========================================================
+   SIDEBAR HEADER
+========================================================= */
+
+.sidebar-header {
+
+    background:
+        var(--church-blue-dark) !important;
+
+    border:
+        1px solid
+        rgba(255,255,255,.12);
+
+    box-shadow:
+        0 8px 18px
+        rgba(0,0,0,.10);
+
+}
+
+
+/* Church name */
+
+.sidebar-header h1 {
+
+    color:
+        var(--church-white) !important;
+
+}
+
+
+/* Bets Edition */
+
+.sidebar-header span {
+
+    color:
+        var(--church-beige) !important;
+
+}
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+.sidebar .nav-item {
+
+    color:
+        rgba(255,255,255,.88);
+
+    border-radius:
+        8px;
+
+}
+
+
+/* icons */
+
+.sidebar .nav-item svg,
+.sidebar .nav-item i {
+
+    color:
+        currentColor;
+
+}
+
+
+/* HOVER */
+
+.sidebar .nav-item:hover {
+
+    background:
+        rgba(255,255,255,.10);
+
+    color:
+        var(--church-white);
+
+}
+
+
+/* ACTIVE NAVIGATION */
+
+.sidebar .nav-item.active {
+
+    background:
+        var(--church-beige);
+
+    color:
+        var(--church-blue-dark);
+
+    font-weight:
+        700;
+
+    box-shadow:
+        0 5px 12px
+        rgba(0,0,0,.10);
+
+}
+
+
+/* =========================================================
+   MAIN CONTENT
+========================================================= */
+
+.main-content {
+
+    background:
+        var(--church-cream);
+
+}
+
+
+/* =========================================================
+   PAGE TITLES
+========================================================= */
+
+.page-title {
+
+    color:
+        var(--church-dark);
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        -0.7px;
+
+}
+
+
+/* ICON BESIDE PAGE TITLE */
+
+.page-title + svg,
+.page-title + i {
+
+    color:
+        var(--church-blue);
+
+}
+
+
+/* PAGE SUBTITLE */
+
+.page-subtitle {
+
+    color:
+        var(--church-gray);
+
+}
+
+
+/* =========================================================
+   GENERAL CARDS
+========================================================= */
+
+.card {
+
+    background:
+        var(--church-white);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-radius:
+        14px;
+
+    box-shadow:
+        0 6px 18px
+        rgba(25,27,30,.06);
+
+}
+
+
+/* hover effect */
+
+.card:hover {
+
+    box-shadow:
+        0 10px 26px
+        rgba(22,79,148,.10);
+
+}
+
+
+/* =========================================================
+   DASHBOARD STAT CARDS
+========================================================= */
+
+#dashboard .stat-card {
+
+    position:
+        relative;
+
+    overflow:
+        hidden;
+
+    border-top:
+        4px solid
+        var(--church-blue);
+
+}
+
+
+/* CARD TITLE */
+
+#dashboard .stat-card h3 {
+
+    color:
+        var(--church-gray);
+
+    font-weight:
+        700;
+
+}
+
+
+/* BIG NUMBER */
+
+#dashboard .stat-card h2 {
+
+    color:
+        var(--church-blue);
+
+    font-weight:
+        800;
+
+}
+
+
+/* CARD DESCRIPTION */
+
+#dashboard .stat-card p {
+
+    color:
+        var(--church-gray);
+
+}
+
+
+/* decorative circle */
+
+#dashboard .stat-card::after {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    width:
+        95px;
+
+    height:
+        95px;
+
+    right:
+        -35px;
+
+    bottom:
+        -40px;
+
+    border-radius:
+        50%;
+
+    background:
+        var(--church-beige-light);
+
+    opacity:
+        .8;
+
+}
+
+
+/* =========================================================
+   BIRTHDAY CARD
+========================================================= */
+
+#dashboard .dashboard-birthday-card {
+
+    background:
+        var(--church-beige-light);
+
+    border:
+        1px solid
+        var(--church-beige);
+
+    border-top:
+        4px solid
+        var(--church-blue);
+
+}
+
+
+#dashboard .dashboard-birthday-card h3 {
+
+    color:
+        var(--church-blue-dark);
+
+}
+
+
+/* =========================================================
+   DASHBOARD LOWER CARDS
+========================================================= */
+
+.dashboard-lower .card {
+
+    border-top:
+        4px solid
+        var(--church-blue);
+
+}
+
+
+.dashboard-lower h2,
+.dashboard-lower h3 {
+
+    color:
+        var(--church-dark);
+
+}
+
+
+/* =========================================================
+   DASHBOARD ALERTS
+========================================================= */
+
+.dashboard-alerts-card {
+
+    background:
+        var(--church-white);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-left:
+        5px solid
+        var(--church-blue);
+
+    border-radius:
+        14px;
+
+    box-shadow:
+        0 6px 18px
+        rgba(25,27,30,.06);
+
+}
+
+
+.dashboard-alerts-header h3 {
+
+    color:
+        var(--church-dark);
+
+}
+
+
+.dashboard-alerts-header p {
+
+    color:
+        var(--church-gray);
+
+}
+
+
+/* =========================================================
+   PRIMARY BUTTON
+========================================================= */
+
+.primary-btn {
+
+    background:
+        var(--church-blue);
+
+    color:
+        var(--church-white);
+
+    border:
+        1px solid
+        var(--church-blue);
+
+    border-radius:
+        8px;
+
+    box-shadow:
+        0 4px 10px
+        rgba(22,79,148,.16);
+
+}
+
+
+.primary-btn:hover {
+
+    background:
+        var(--church-blue-dark);
+
+    border-color:
+        var(--church-blue-dark);
+
+    transform:
+        translateY(-1px);
+
+}
+
+
+/* =========================================================
+   SECONDARY BUTTON
+========================================================= */
+
+.secondary-btn {
+
+    background:
+        var(--church-beige-light);
+
+    color:
+        var(--church-dark);
+
+    border:
+        1px solid
+        var(--church-beige);
+
+    border-radius:
+        8px;
+
+}
+
+
+.secondary-btn:hover {
+
+    background:
+        var(--church-beige);
+
+    color:
+        var(--church-blue-dark);
+
+}
+
+
+/* =========================================================
+   FORM INPUTS
+========================================================= */
+
+input,
+select,
+textarea {
+
+    border-color:
+        var(--church-border);
+
+}
+
+
+input:focus,
+select:focus,
+textarea:focus {
+
+    border-color:
+        var(--church-blue) !important;
+
+    outline:
+        none;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(22,79,148,.10);
+
+}
+
+
+/* =========================================================
+   GLOBAL FOCUS
+========================================================= */
+
+*:focus-visible {
+
+    outline:
+        3px solid
+        rgba(22,79,148,.25);
+
+    outline-offset:
+        2px;
+
+}
+
+
+/* =========================================================
+   SCROLLBAR
+========================================================= */
+
+::-webkit-scrollbar {
+
+    width:
+        8px;
+
+    height:
+        8px;
+
+}
+
+
+::-webkit-scrollbar-track {
+
+    background:
+        var(--church-cream);
+
+}
+
+
+::-webkit-scrollbar-thumb {
+
+    background:
+        var(--church-beige);
+
+    border-radius:
+        20px;
+
+}
+
+
+::-webkit-scrollbar-thumb:hover {
+
+    background:
+        var(--church-blue);
+
+}
+
+
+/* =========================================================
+   MOBILE
+   KEEP EXISTING TOP NAVIGATION LAYOUT
+========================================================= */
+
+@media (max-width: 768px) {
+
+    .app-container .sidebar {
+
+        background:
+            var(--church-blue) !important;
+
+    }
+
+
+    .sidebar-header {
+
+        background:
+            var(--church-blue-dark) !important;
+
+    }
+
+
+    .sidebar nav {
+
+        background:
+            transparent;
+
+    }
+
+
+    .sidebar .nav-item {
+
+        color:
+            rgba(255,255,255,.90);
+
+    }
+
+
+    .sidebar .nav-item.active {
+
+        background:
+            var(--church-beige);
+
+        color:
+            var(--church-blue-dark);
+
+    }
+
+
+    .app-container .main-content {
+
+        background:
+            var(--church-cream);
+
+    }
+
+}
+
+
+/* =========================================================
+   SMALL PHONE
+========================================================= */
+
+@media (max-width: 480px) {
+
+    .card {
+
+        border-radius:
+            10px;
+
+    }
+
+
+    #dashboard .stat-card {
+
+        border-top-width:
+            3px;
+
+    }
+
+}
+
+/* =========================================================
+   CHURCHHQ 2026
+   BLUE + BEIGE CHURCH THEME
+   PHASE 2
+   PLANNER + SERVICES
+========================================================= */
+
+
+/* =========================================================
+   PLANNER HEADER
+========================================================= */
+
+#planner .planner-header {
+
+    padding-bottom:
+        14px;
+
+    border-bottom:
+        1px solid
+        var(--church-border);
+
+}
+
+
+#planner .page-title {
+
+    color:
+        var(--church-dark);
+
+}
+
+
+#planner .page-subtitle {
+
+    color:
+        var(--church-gray);
+
+}
+
+
+/* =========================================================
+   PLANNER SEARCH
+========================================================= */
+
+#planner .planner-search input {
+
+    background:
+        var(--church-white);
+
+    color:
+        var(--church-dark);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-radius:
+        9px;
+
+}
+
+
+#planner .planner-search input::placeholder {
+
+    color:
+        var(--church-gray-light);
+
+}
+
+
+#planner .planner-search input:focus {
+
+    border-color:
+        var(--church-blue);
+
+    box-shadow:
+        0 0 0 3px
+        rgba(22,79,148,.10);
+
+}
+
+
+/* =========================================================
+   PLANNER BOARD
+========================================================= */
+
+#planner .planner-board {
+
+    align-items:
+        start;
+
+}
+
+
+/* =========================================================
+   PLANNER COLUMNS
+========================================================= */
+
+#planner .planner-column {
+
+    background:
+        var(--church-beige-light);
+
+    border:
+        1px solid
+        var(--church-beige);
+
+    border-radius:
+        12px;
+
+    box-shadow:
+        0 4px 14px
+        rgba(25,27,30,.04);
+
+}
+
+
+/* =========================================================
+   COLUMN HEADER
+========================================================= */
+
+#planner .column-header {
+
+    padding-bottom:
+        10px;
+
+    border-bottom:
+        1px solid
+        var(--church-beige);
+
+}
+
+
+#planner .column-header h3 {
+
+    color:
+        var(--church-blue-dark);
+
+    font-weight:
+        800;
+
+}
+
+
+/* TASK COUNTER */
+
+#planner .task-counter {
+
+    background:
+        var(--church-blue);
+
+    color:
+        var(--church-white);
+
+    box-shadow:
+        0 3px 8px
+        rgba(22,79,148,.16);
+
+}
+
+
+/* =========================================================
+   TASK CARDS
+========================================================= */
+
+#planner .task-card {
+
+    background:
+        var(--church-white);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-left:
+        5px solid
+        var(--church-blue);
+
+    border-radius:
+        10px;
+
+    box-shadow:
+        0 4px 12px
+        rgba(25,27,30,.06);
+
+}
+
+
+#planner .task-card:hover {
+
+    transform:
+        translateY(-2px);
+
+    box-shadow:
+        0 8px 18px
+        rgba(22,79,148,.10);
+
+}
+
+
+#planner .task-card h4 {
+
+    color:
+        var(--church-dark);
+
+}
+
+
+#planner .task-card p {
+
+    color:
+        var(--church-gray);
+
+}
+
+
+/* =========================================================
+   TASK PRIORITY COLORS
+========================================================= */
+
+#planner .priority.high {
+
+    background:
+        #A84242;
+
+}
+
+
+#planner .priority.medium {
+
+    background:
+        #C08B34;
+
+}
+
+
+#planner .priority.low {
+
+    background:
+        #4C7A63;
+
+}
+
+
+/* =========================================================
+   ANNUAL ACTIVITIES
+========================================================= */
+
+#planner .annual-activities-section {
+
+    margin-top:
+        34px;
+
+    padding-top:
+        24px;
+
+    border-top:
+        2px solid
+        var(--church-beige);
+
+}
+
+
+#planner .annual-activities-heading h2 {
+
+    color:
+        var(--church-blue-dark);
+
+}
+
+
+#planner .annual-activities-heading p,
+#planner .annual-activities-actions label {
+
+    color:
+        var(--church-gray);
+
+}
+
+
+/* YEAR SELECT */
+
+#planner #annualActivityYear {
+
+    background:
+        var(--church-white);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    color:
+        var(--church-dark);
+
+    border-radius:
+        8px;
+
+}
+
+
+#planner #annualActivityYear:focus {
+
+    border-color:
+        var(--church-blue);
+
+}
+
+
+/* =========================================================
+   ANNUAL MONTH CARDS
+========================================================= */
+
+#planner .annual-month-card {
+
+    background:
+        var(--church-white);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-radius:
+        11px;
+
+    box-shadow:
+        0 4px 12px
+        rgba(25,27,30,.05);
+
+}
+
+
+#planner .annual-month-title {
+
+    border-bottom:
+        1px solid
+        var(--church-beige);
+
+}
+
+
+#planner .annual-month-title strong {
+
+    color:
+        var(--church-blue-dark);
+
+}
+
+
+#planner .annual-month-count {
+
+    background:
+        var(--church-beige-light);
+
+    color:
+        var(--church-blue-dark);
+
+}
+
+
+/* =========================================================
+   ANNUAL ACTIVITY ITEM
+========================================================= */
+
+#planner .annual-activity-item {
+
+    background:
+        var(--church-cream);
+
+    border:
+        1px solid
+        var(--church-beige);
+
+}
+
+
+#planner .annual-activity-date {
+
+    color:
+        var(--church-blue);
+
+}
+
+
+#planner .annual-activity-title {
+
+    color:
+        var(--church-dark);
+
+}
+
+
+/* =========================================================
+   SERVICES
+========================================================= */
+
+#sunday-service,
+#midweek-service {
+
+    color:
+        var(--church-dark);
+
+}
+
+
+/* =========================================================
+   SERVICE HEADER
+========================================================= */
+
+#sunday-service .planner-header,
+#midweek-service .planner-header {
+
+    padding-bottom:
+        14px;
+
+    border-bottom:
+        1px solid
+        var(--church-border);
+
+}
+
+
+#sunday-service .page-title,
+#midweek-service .page-title {
+
+    color:
+        var(--church-dark);
+
+}
+
+
+#sunday-service .page-subtitle,
+#midweek-service .page-subtitle {
+
+    color:
+        var(--church-gray);
+
+}
+
+
+/* =========================================================
+   SERVICE MAIN CARD
+========================================================= */
+
+#sunday-service .service-card,
+#midweek-service .service-card {
+
+    background:
+        var(--church-white);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-top:
+        4px solid
+        var(--church-blue);
+
+    border-radius:
+        12px;
+
+    box-shadow:
+        0 6px 18px
+        rgba(25,27,30,.06);
+
+}
+
+
+/* =========================================================
+   SERVICE BOXES
+========================================================= */
+
+#sunday-service .service-box,
+#midweek-service .service-box {
+
+    background:
+        var(--church-beige-light);
+
+    border:
+        1px solid
+        var(--church-beige);
+
+    border-radius:
+        10px;
+
+}
+
+
+/* SERVICE BOX TITLE */
+
+#sunday-service .service-box h4,
+#midweek-service .service-box h4 {
+
+    color:
+        var(--church-blue-dark);
+
+    border-bottom:
+        1px solid
+        var(--church-beige);
+
+}
+
+
+/* SERVICE LABEL */
+
+#sunday-service .service-box label,
+#midweek-service .service-box label {
+
+    color:
+        var(--church-gray);
+
+}
+
+
+/* =========================================================
+   SERVICE INPUTS
+========================================================= */
+
+#sunday-service input,
+#sunday-service textarea,
+#sunday-service select,
+#midweek-service input,
+#midweek-service textarea,
+#midweek-service select {
+
+    background:
+        var(--church-white);
+
+    color:
+        var(--church-dark);
+
+    border:
+        1px solid
+        var(--church-border);
+
+}
+
+
+#sunday-service input:focus,
+#sunday-service textarea:focus,
+#sunday-service select:focus,
+#midweek-service input:focus,
+#midweek-service textarea:focus,
+#midweek-service select:focus {
+
+    border-color:
+        var(--church-blue) !important;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(22,79,148,.10);
+
+}
+
+
+/* =========================================================
+   SERVICE DATE INPUT
+========================================================= */
+
+#sun_serviceDate,
+#mid_serviceDate {
+
+    background:
+        var(--church-white) !important;
+
+    border:
+        1px solid
+        var(--church-beige) !important;
+
+    color:
+        var(--church-dark);
+
+}
+
+
+/* =========================================================
+   SERVICE ROSTER / SAVED RECORDS
+========================================================= */
+
+#sunday-service .saved-service-card,
+#midweek-service .saved-service-card,
+#sunday-service .service-record-card,
+#midweek-service .service-record-card {
+
+    background:
+        var(--church-white);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-left:
+        4px solid
+        var(--church-blue);
+
+    border-radius:
+        10px;
+
+    box-shadow:
+        0 4px 12px
+        rgba(25,27,30,.05);
+
+}
+
+
+/* =========================================================
+   SERVICE SECTION TITLES
+========================================================= */
+
+#sunday-service h2,
+#sunday-service h3,
+#midweek-service h2,
+#midweek-service h3 {
+
+    color:
+        var(--church-dark);
+
+}
+
+
+/* =========================================================
+   SERVICE TABLES
+========================================================= */
+
+#sunday-service table,
+#midweek-service table {
+
+    background:
+        var(--church-white);
+
+    border-color:
+        var(--church-border);
+
+}
+
+
+#sunday-service table thead,
+#midweek-service table thead {
+
+    background:
+        var(--church-blue);
+
+    color:
+        var(--church-white);
+
+}
+
+
+#sunday-service table th,
+#midweek-service table th {
+
+    color:
+        var(--church-white);
+
+    border-color:
+        rgba(255,255,255,.15);
+
+}
+
+
+#sunday-service table td,
+#midweek-service table td {
+
+    border-color:
+        var(--church-border);
+
+    color:
+        var(--church-dark);
+
+}
+
+
+#sunday-service table tbody tr:nth-child(even),
+#midweek-service table tbody tr:nth-child(even) {
+
+    background:
+        var(--church-cream);
+
+}
+
+
+/* =========================================================
+   MODALS USED BY PLANNER / SERVICES
+========================================================= */
+
+#planner .modal-content,
+#sunday-service .modal-content,
+#midweek-service .modal-content {
+
+    background:
+        var(--church-white);
+
+    border:
+        1px solid
+        var(--church-beige);
+
+    border-top:
+        5px solid
+        var(--church-blue);
+
+}
+
+
+#planner .modal-header,
+#sunday-service .modal-header,
+#midweek-service .modal-header {
+
+    border-bottom:
+        1px solid
+        var(--church-beige);
+
+}
+
+
+#planner .modal-header h2,
+#sunday-service .modal-header h2,
+#midweek-service .modal-header h2 {
+
+    color:
+        var(--church-blue-dark);
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+
+    #planner .planner-column {
+
+        background:
+            var(--church-beige-light);
+
+    }
+
+
+    #planner .planner-board {
+
+        gap:
+            12px;
+
+    }
+
+
+    #sunday-service .service-card,
+    #midweek-service .service-card {
+
+        border-radius:
+            10px;
+
+    }
+
+
+    #sunday-service .service-box,
+    #midweek-service .service-box {
+
+        border-radius:
+            8px;
+
+    }
+
+}
+
+/* =========================================================
+   CHURCHHQ 2026
+   BLUE + BEIGE CHURCH THEME
+   PHASE 3
+   SONG LIBRARY + MEMBERS + LEADERS
+========================================================= */
+
+
+/* =========================================================
+   SONG LIBRARY
+========================================================= */
+
+#songs .page-title,
+#songs .songs-header h1 {
+
+    color:
+        var(--church-dark);
+
+}
+
+
+#songs .page-subtitle {
+
+    color:
+        var(--church-gray);
+
+}
+
+
+#songs .song-card {
+
+    background:
+        var(--church-white);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-top:
+        4px solid
+        var(--church-blue);
+
+    border-radius:
+        12px;
+
+    box-shadow:
+        0 5px 16px
+        rgba(25,27,30,.06);
+
+}
+
+
+#songs .song-card:hover {
+
+    transform:
+        translateY(-2px);
+
+    box-shadow:
+        0 9px 22px
+        rgba(22,79,148,.10);
+
+}
+
+
+#songs .song-card h3 {
+
+    color:
+        var(--church-dark);
+
+}
+
+
+#songs .song-card .artist {
+
+    color:
+        var(--church-gray);
+
+}
+
+
+/* SONG BADGES */
+
+#songs .key-badge {
+
+    background:
+        var(--church-blue-light);
+
+    color:
+        var(--church-blue-dark);
+
+    border:
+        1px solid
+        rgba(22,79,148,.14);
+
+}
+
+
+#songs .category-badge {
+
+    background:
+        var(--church-beige-light);
+
+    color:
+        var(--church-dark);
+
+    border:
+        1px solid
+        var(--church-beige);
+
+}
+
+
+/* SONG CARD FOOTER */
+
+#songs .song-card-footer {
+
+    border-top:
+        1px solid
+        var(--church-border);
+
+}
+
+
+/* SONG CONTROLS */
+
+#songs .song-controls-bar {
+
+    background:
+        var(--church-beige-light);
+
+    border:
+        1px solid
+        var(--church-beige);
+
+    border-radius:
+        9px;
+
+}
+
+
+#songs .control-group label {
+
+    color:
+        var(--church-gray);
+
+}
+
+
+#songs .control-group select {
+
+    background:
+        var(--church-white);
+
+    color:
+        var(--church-dark);
+
+    border:
+        1px solid
+        var(--church-border);
+
+}
+
+
+/* =========================================================
+   MEMBERS PAGE
+========================================================= */
+
+#members {
+
+    color:
+        var(--church-dark);
+
+}
+
+
+#members .page-title {
+
+    color:
+        var(--church-dark);
+
+}
+
+
+#members .page-subtitle {
+
+    color:
+        var(--church-gray);
+
+}
+
+
+/* =========================================================
+   MEMBERS CARDS / CONTAINERS
+========================================================= */
+
+#members .card,
+#members .members-card,
+#members .member-card {
+
+    background:
+        var(--church-white);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-radius:
+        12px;
+
+    box-shadow:
+        0 5px 16px
+        rgba(25,27,30,.05);
+
+}
+
+
+/* =========================================================
+   MEMBERS TABLE
+========================================================= */
+
+#members table {
+
+    background:
+        var(--church-white);
+
+    border-collapse:
+        collapse;
+
+}
+
+
+#members table thead {
+
+    background:
+        var(--church-blue);
+
+}
+
+
+#members table th {
+
+    color:
+        var(--church-white);
+
+    border-color:
+        rgba(255,255,255,.12);
+
+    font-weight:
+        700;
+
+}
+
+
+#members table td {
+
+    color:
+        var(--church-dark);
+
+    border-color:
+        var(--church-border);
+
+}
+
+
+#members table tbody tr:nth-child(even) {
+
+    background:
+        var(--church-cream);
+
+}
+
+
+#members table tbody tr:hover {
+
+    background:
+        var(--church-beige-light);
+
+}
+
+
+/* =========================================================
+   MEMBER SEARCH / FILTERS
+========================================================= */
+
+#members input[type="search"],
+#members .search-box input,
+#members input[type="text"],
+#members select {
+
+    background:
+        var(--church-white);
+
+    color:
+        var(--church-dark);
+
+    border:
+        1px solid
+        var(--church-border);
+
+}
+
+
+#members input:focus,
+#members select:focus {
+
+    border-color:
+        var(--church-blue) !important;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(22,79,148,.10);
+
+}
+
+
+/* =========================================================
+   MEMBER STATUS BADGES
+========================================================= */
+
+#members .status-badge.active {
+
+    background:
+        #E2EFE7;
+
+    color:
+        #2F6B47;
+
+    border:
+        1px solid
+        #BED7C7;
+
+}
+
+
+#members .status-badge.inactive {
+
+    background:
+        #F5E2E2;
+
+    color:
+        #934040;
+
+    border:
+        1px solid
+        #E8C5C5;
+
+}
+
+
+#members .status-badge.visitor {
+
+    background:
+        var(--church-beige-light);
+
+    color:
+        #7A5B30;
+
+    border:
+        1px solid
+        var(--church-beige);
+
+}
+
+
+/* =========================================================
+   MEMBER ALERTS
+========================================================= */
+
+#members .member-alert-count {
+
+    background:
+        var(--church-blue);
+
+    color:
+        var(--church-white);
+
+}
+
+
+#members .member-alert-empty {
+
+    color:
+        var(--church-gray);
+
+}
+
+
+/* =========================================================
+   MEMBERS MODAL
+========================================================= */
+
+#members .modal-content {
+
+    background:
+        var(--church-white);
+
+    border:
+        1px solid
+        var(--church-beige);
+
+    border-top:
+        5px solid
+        var(--church-blue);
+
+}
+
+
+#members .modal-header {
+
+    border-bottom:
+        1px solid
+        var(--church-beige);
+
+}
+
+
+#members .modal-header h2 {
+
+    color:
+        var(--church-blue-dark);
+
+}
+
+
+#members .form-group label {
+
+    color:
+        var(--church-dark);
+
+}
+
+
+#members .form-group input,
+#members .form-group textarea,
+#members .form-group select {
+
+    background:
+        var(--church-white);
+
+    color:
+        var(--church-dark);
+
+    border:
+        1px solid
+        var(--church-border);
+
+}
+
+
+/* =========================================================
+   MINISTRY CHECKBOX LIST
+========================================================= */
+
+#members .ministry-checkbox-list {
+
+    background:
+        var(--church-cream);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-radius:
+        9px;
+
+    padding:
+        12px;
+
+}
+
+
+#members .ministry-checkbox-list label {
+
+    color:
+        var(--church-dark);
+
+}
+
+
+/* =========================================================
+   LEADERS PAGE
+========================================================= */
+
+#leaders {
+
+    color:
+        var(--church-dark);
+
+}
+
+
+#leaders .page-title {
+
+    color:
+        var(--church-dark);
+
+}
+
+
+#leaders .page-subtitle {
+
+    color:
+        var(--church-gray);
+
+}
+
+
+/* =========================================================
+   LEADERS CARDS / CHART
+========================================================= */
+
+#leaders .card,
+#leaders .leader-card,
+#leaders .leader-node,
+#leaders .leader-box {
+
+    background:
+        var(--church-white);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-radius:
+        12px;
+
+    box-shadow:
+        0 5px 16px
+        rgba(25,27,30,.05);
+
+}
+
+
+/* LEADER POSITION */
+
+#leaders .leader-card h3,
+#leaders .leader-card h4,
+#leaders .leader-position,
+#leaders .leader-title {
+
+    color:
+        var(--church-blue-dark);
+
+}
+
+
+/* LEADER NAME */
+
+#leaders .leader-name {
+
+    color:
+        var(--church-dark);
+
+    font-weight:
+        700;
+
+}
+
+
+/* LEADER DETAILS */
+
+#leaders .leader-contact,
+#leaders .leader-details,
+#leaders .leader-meta {
+
+    color:
+        var(--church-gray);
+
+}
+
+
+/* =========================================================
+   LEADER HIERARCHY ACCENT
+========================================================= */
+
+#leaders .leader-node,
+#leaders .leader-card {
+
+    border-top:
+        4px solid
+        var(--church-blue);
+
+}
+
+
+/* =========================================================
+   LEADER LEVELS
+========================================================= */
+
+#leaders [data-level="1"],
+#leaders .leader-level-1 {
+
+    background:
+        var(--church-blue);
+
+    color:
+        var(--church-white);
+
+    border-color:
+        var(--church-blue);
+
+}
+
+
+#leaders [data-level="2"],
+#leaders .leader-level-2 {
+
+    background:
+        var(--church-beige-light);
+
+    border-color:
+        var(--church-beige);
+
+}
+
+
+#leaders [data-level="3"],
+#leaders .leader-level-3 {
+
+    background:
+        var(--church-white);
+
+    border-color:
+        var(--church-border);
+
+}
+
+
+/* =========================================================
+   LEADERS MODAL
+========================================================= */
+
+#leaders .modal-content {
+
+    background:
+        var(--church-white);
+
+    border:
+        1px solid
+        var(--church-beige);
+
+    border-top:
+        5px solid
+        var(--church-blue);
+
+}
+
+
+#leaders .modal-header {
+
+    border-bottom:
+        1px solid
+        var(--church-beige);
+
+}
+
+
+#leaders .modal-header h2 {
+
+    color:
+        var(--church-blue-dark);
+
+}
+
+
+#leaders .form-group label {
+
+    color:
+        var(--church-dark);
+
+}
+
+
+#leaders .form-group input,
+#leaders .form-group select,
+#leaders .form-group textarea {
+
+    background:
+        var(--church-white);
+
+    color:
+        var(--church-dark);
+
+    border:
+        1px solid
+        var(--church-border);
+
+}
+
+
+/* =========================================================
+   GENERAL TABLE POLISH
+========================================================= */
+
+#members table,
+#leaders table {
+
+    border-radius:
+        10px;
+
+    overflow:
+        hidden;
+
+}
+
+
+#members table th,
+#members table td,
+#leaders table th,
+#leaders table td {
+
+    padding:
+        11px 12px;
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+
+    #songs .songs-grid {
+
+        gap:
+            12px;
+
+    }
+
+
+    #songs .song-card {
+
+        border-radius:
+            10px;
+
+    }
+
+
+    #members .card,
+    #leaders .card {
+
+        border-radius:
+            10px;
+
+    }
+
+
+    #members table,
+    #leaders table {
+
+        font-size:
+            12px;
+
+    }
+
+}
+
+/* =========================================================
+   CHURCHHQ 2026
+   BLUE + BEIGE CHURCH THEME
+   PHASE 4
+   ATTENDANCE + REPORTS + FILES + SETTINGS
+========================================================= */
+
+
+/* =========================================================
+   ATTENDANCE PAGE
+========================================================= */
+
+#attendance {
+
+    color:
+        var(--church-dark);
+
+}
+
+
+#attendance .page-title {
+
+    color:
+        var(--church-dark);
+
+}
+
+
+#attendance .page-subtitle {
+
+    color:
+        var(--church-gray);
+
+}
+
+
+/* =========================================================
+   ATTENDANCE CARDS
+========================================================= */
+
+#attendance .card,
+#attendance .attendance-card,
+#attendance .attendance-summary-card {
+
+    background:
+        var(--church-white);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-radius:
+        12px;
+
+    box-shadow:
+        0 5px 16px
+        rgba(25,27,30,.05);
+
+}
+
+
+/* =========================================================
+   ATTENDANCE MEMBER CARD
+========================================================= */
+
+#attendance .att-card {
+
+    background:
+        var(--church-white);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    color:
+        var(--church-dark);
+
+    border-radius:
+        9px;
+
+}
+
+
+#attendance .att-card:hover {
+
+    border-color:
+        var(--church-blue);
+
+    background:
+        var(--church-blue-light);
+
+}
+
+
+/* CHECKED / PRESENT */
+
+#attendance .att-card.checked {
+
+    background:
+        #E5EFE9;
+
+    border-color:
+        #9FC5AD;
+
+    box-shadow:
+        0 3px 9px
+        rgba(76,122,99,.08);
+
+}
+
+
+/* =========================================================
+   ATTENDANCE CHECKBOX
+========================================================= */
+
+#attendance input[type="checkbox"] {
+
+    accent-color:
+        var(--church-blue);
+
+}
+
+
+/* =========================================================
+   ATTENDANCE FORM
+========================================================= */
+
+#attendance input,
+#attendance select,
+#attendance textarea {
+
+    background:
+        var(--church-white);
+
+    color:
+        var(--church-dark);
+
+    border:
+        1px solid
+        var(--church-border);
+
+}
+
+
+#attendance input:focus,
+#attendance select:focus,
+#attendance textarea:focus {
+
+    border-color:
+        var(--church-blue) !important;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(22,79,148,.10);
+
+}
+
+
+/* =========================================================
+   ATTENDANCE SUMMARY
+========================================================= */
+
+#attendance .attendance-summary,
+#attendance .attendance-summary-card {
+
+    border-top:
+        4px solid
+        var(--church-blue);
+
+}
+
+
+/* SUMMARY TITLE */
+
+#attendance .attendance-summary h2,
+#attendance .attendance-summary h3,
+#attendance .attendance-summary-card h2,
+#attendance .attendance-summary-card h3 {
+
+    color:
+        var(--church-blue-dark);
+
+}
+
+
+/* =========================================================
+   ATTENDANCE TABLE
+========================================================= */
+
+#attendance table {
+
+    background:
+        var(--church-white);
+
+    border-collapse:
+        collapse;
+
+}
+
+
+#attendance table thead {
+
+    background:
+        var(--church-blue);
+
+}
+
+
+#attendance table th {
+
+    background:
+        var(--church-blue);
+
+    color:
+        var(--church-white);
+
+    font-weight:
+        700;
+
+    border-color:
+        rgba(255,255,255,.12);
+
+}
+
+
+#attendance table td {
+
+    color:
+        var(--church-dark);
+
+    border-color:
+        var(--church-border);
+
+}
+
+
+#attendance table tbody tr:nth-child(even) {
+
+    background:
+        var(--church-cream);
+
+}
+
+
+#attendance table tbody tr:hover {
+
+    background:
+        var(--church-beige-light);
+
+}
+
+
+/* =========================================================
+   REPORTS PAGE
+========================================================= */
+
+#reports {
+
+    color:
+        var(--church-dark);
+
+}
+
+
+#reports .page-title {
+
+    color:
+        var(--church-dark);
+
+}
+
+
+#reports .page-subtitle {
+
+    color:
+        var(--church-gray);
+
+}
+
+
+/* =========================================================
+   REPORT CARDS
+========================================================= */
+
+#reports .card,
+#reports .report-card,
+#reports .reports-card {
+
+    background:
+        var(--church-white);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-top:
+        4px solid
+        var(--church-blue);
+
+    border-radius:
+        12px;
+
+    box-shadow:
+        0 5px 16px
+        rgba(25,27,30,.05);
+
+}
+
+
+/* REPORT HEADINGS */
+
+#reports h2,
+#reports h3,
+#reports h4 {
+
+    color:
+        var(--church-blue-dark);
+
+}
+
+
+/* =========================================================
+   REPORT FILTERS
+========================================================= */
+
+#reports input,
+#reports select {
+
+    background:
+        var(--church-white);
+
+    color:
+        var(--church-dark);
+
+    border:
+        1px solid
+        var(--church-border);
+
+}
+
+
+#reports input:focus,
+#reports select:focus {
+
+    border-color:
+        var(--church-blue) !important;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(22,79,148,.10);
+
+}
+
+
+/* =========================================================
+   REPORT TABLES
+========================================================= */
+
+#reports table {
+
+    background:
+        var(--church-white);
+
+}
+
+
+#reports table thead {
+
+    background:
+        var(--church-blue);
+
+}
+
+
+#reports table th {
+
+    background:
+        var(--church-blue);
+
+    color:
+        var(--church-white);
+
+}
+
+
+#reports table td {
+
+    color:
+        var(--church-dark);
+
+    border-color:
+        var(--church-border);
+
+}
+
+
+#reports table tbody tr:nth-child(even) {
+
+    background:
+        var(--church-cream);
+
+}
+
+
+#reports table tbody tr:hover {
+
+    background:
+        var(--church-beige-light);
+
+}
+
+
+/* =========================================================
+   FILES PAGE
+========================================================= */
+
+#files {
+
+    color:
+        var(--church-dark);
+
+}
+
+
+#files .page-title {
+
+    color:
+        var(--church-dark);
+
+}
+
+
+#files .page-subtitle {
+
+    color:
+        var(--church-gray);
+
+}
+
+
+/* =========================================================
+   FILE CARDS / FOLDERS
+========================================================= */
+
+#files .card,
+#files .file-card,
+#files .folder-card,
+#files .file-folder-card {
+
+    background:
+        var(--church-white);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-radius:
+        11px;
+
+    box-shadow:
+        0 4px 14px
+        rgba(25,27,30,.05);
+
+}
+
+
+#files .file-card:hover,
+#files .folder-card:hover,
+#files .file-folder-card:hover {
+
+    border-color:
+        var(--church-beige);
+
+    box-shadow:
+        0 7px 18px
+        rgba(22,79,148,.09);
+
+}
+
+
+/* =========================================================
+   FILE/FOLDER ICON ACCENT
+========================================================= */
+
+#files .file-icon,
+#files .folder-icon {
+
+    color:
+        var(--church-blue);
+
+}
+
+
+#files .folder-icon {
+
+    background:
+        var(--church-beige-light);
+
+}
+
+
+/* =========================================================
+   FILE TITLES
+========================================================= */
+
+#files .file-name,
+#files .folder-name,
+#files h3,
+#files h4 {
+
+    color:
+        var(--church-dark);
+
+}
+
+
+#files .file-meta,
+#files .folder-meta {
+
+    color:
+        var(--church-gray);
+
+}
+
+
+/* =========================================================
+   FILE SEARCH
+========================================================= */
+
+#files input[type="search"],
+#files input[type="text"],
+#files select {
+
+    background:
+        var(--church-white);
+
+    color:
+        var(--church-dark);
+
+    border:
+        1px solid
+        var(--church-border);
+
+}
+
+
+#files input:focus,
+#files select:focus {
+
+    border-color:
+        var(--church-blue) !important;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(22,79,148,.10);
+
+}
+
+
+/* =========================================================
+   FILE / FOLDER MODAL
+========================================================= */
+
+#files .modal-content,
+.file-folder-modal-content {
+
+    background:
+        var(--church-white);
+
+    border:
+        1px solid
+        var(--church-beige);
+
+    border-top:
+        5px solid
+        var(--church-blue);
+
+}
+
+
+#files .modal-header,
+.file-folder-modal-content .modal-header {
+
+    border-bottom:
+        1px solid
+        var(--church-beige);
+
+}
+
+
+#files .modal-header h2,
+.file-folder-modal-content .modal-header h2 {
+
+    color:
+        var(--church-blue-dark);
+
+}
+
+
+/* =========================================================
+   SETTINGS PAGE
+========================================================= */
+
+#settings {
+
+    color:
+        var(--church-dark);
+
+}
+
+
+#settings .page-title {
+
+    color:
+        var(--church-dark);
+
+}
+
+
+#settings .page-subtitle {
+
+    color:
+        var(--church-gray);
+
+}
+
+
+/* =========================================================
+   SETTINGS CARDS
+========================================================= */
+
+#settings .card,
+#settings .settings-card,
+#settings .setting-card {
+
+    background:
+        var(--church-white);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-radius:
+        12px;
+
+    box-shadow:
+        0 5px 16px
+        rgba(25,27,30,.05);
+
+}
+
+
+/* SETTINGS HEADINGS */
+
+#settings h2,
+#settings h3,
+#settings h4 {
+
+    color:
+        var(--church-blue-dark);
+
+}
+
+
+/* SETTINGS TEXT */
+
+#settings p,
+#settings .setting-description {
+
+    color:
+        var(--church-gray);
+
+}
+
+
+/* =========================================================
+   SETTINGS FORM
+========================================================= */
+
+#settings input,
+#settings select,
+#settings textarea {
+
+    background:
+        var(--church-white);
+
+    color:
+        var(--church-dark);
+
+    border:
+        1px solid
+        var(--church-border);
+
+}
+
+
+#settings input:focus,
+#settings select:focus,
+#settings textarea:focus {
+
+    border-color:
+        var(--church-blue) !important;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(22,79,148,.10);
+
+}
+
+
+/* =========================================================
+   SETTINGS TOGGLE / CHECKBOX
+========================================================= */
+
+#settings input[type="checkbox"] {
+
+    accent-color:
+        var(--church-blue);
+
+}
+
+
+/* =========================================================
+   GENERAL SECTION HEADERS
+========================================================= */
+
+#attendance h2,
+#attendance h3,
+#reports h2,
+#reports h3,
+#files h2,
+#files h3,
+#settings h2,
+#settings h3 {
+
+    font-weight:
+        700;
+
+}
+
+
+/* =========================================================
+   GENERAL TABLE POLISH
+========================================================= */
+
+#attendance table,
+#reports table {
+
+    border-radius:
+        10px;
+
+    overflow:
+        hidden;
+
+}
+
+
+#attendance table th,
+#attendance table td,
+#reports table th,
+#reports table td {
+
+    padding:
+        10px 12px;
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+
+    #attendance .card,
+    #reports .card,
+    #files .card,
+    #settings .card {
+
+        border-radius:
+            10px;
+
+    }
+
+
+    #attendance .att-card {
+
+        border-radius:
+            8px;
+
+    }
+
+
+    #attendance table,
+    #reports table {
+
+        font-size:
+            12px;
+
+    }
+
+
+    #files .file-card,
+    #files .folder-card {
+
+        border-radius:
+            9px;
+
+    }
+
+}
+
+/* =========================================================
+   CHURCHHQ 2026
+   BLUE + BEIGE CHURCH THEME
+   PHASE 5
+   LOGIN + MODALS + FINAL CLEANUP
+========================================================= */
+
+
+/* =========================================================
+   LOGIN SCREEN
+========================================================= */
+
+.login-screen {
+
+    background:
+        var(--church-cream);
+
+}
+
+
+/* MAIN LOGIN LAYOUT */
+
+.login-page-layout {
+
+    background:
+        var(--church-white);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-radius:
+        18px;
+
+    overflow:
+        hidden;
+
+    box-shadow:
+        0 22px 55px
+        rgba(25,27,30,.12);
+
+}
+
+
+/* =========================================================
+   LOGIN LEFT SIDE
+========================================================= */
+
+.login-left {
+
+    background:
+        var(--church-white);
+
+}
+
+
+/* LOGIN CARD */
+
+.login-card {
+
+    background:
+        transparent;
+
+}
+
+
+/* LOGO AREA */
+
+.login-logo-wrap {
+
+    background:
+        var(--church-beige-light);
+
+    border:
+        1px solid
+        var(--church-beige);
+
+    box-shadow:
+        0 6px 16px
+        rgba(22,79,148,.08);
+
+}
+
+
+/* LOGIN TITLE */
+
+.login-brand h1 {
+
+    color:
+        var(--church-blue-dark);
+
+}
+
+
+/* CHURCH NAME */
+
+.login-church-name {
+
+    color:
+        var(--church-dark);
+
+}
+
+
+/* SUBTITLE */
+
+.login-subtitle {
+
+    color:
+        var(--church-gray);
+
+}
+
+
+/* DIVIDER */
+
+.login-divider {
+
+    background:
+        var(--church-border);
+
+}
+
+
+/* =========================================================
+   LOGIN FORM
+========================================================= */
+
+.login-field label {
+
+    color:
+        var(--church-dark);
+
+}
+
+
+.login-field input {
+
+    background:
+        var(--church-white);
+
+    color:
+        var(--church-dark);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-radius:
+        9px;
+
+}
+
+
+.login-field input::placeholder {
+
+    color:
+        var(--church-gray-light);
+
+}
+
+
+.login-field input:focus {
+
+    border-color:
+        var(--church-blue);
+
+    box-shadow:
+        0 0 0 3px
+        rgba(22,79,148,.10);
+
+}
+
+
+/* =========================================================
+   LOGIN BUTTON
+========================================================= */
+
+.login-button {
+
+    background:
+        var(--church-blue);
+
+    color:
+        var(--church-white);
+
+    border:
+        none;
+
+    border-radius:
+        9px;
+
+    box-shadow:
+        0 5px 12px
+        rgba(22,79,148,.18);
+
+}
+
+
+.login-button:hover {
+
+    background:
+        var(--church-blue-dark);
+
+    transform:
+        translateY(-1px);
+
+}
+
+
+/* LOGIN MESSAGE */
+
+.login-message {
+
+    color:
+        var(--church-gray);
+
+}
+
+
+/* =========================================================
+   LOGIN RIGHT INFO PANEL
+========================================================= */
+
+.login-info-panel {
+
+    background:
+        var(--church-blue);
+
+    color:
+        var(--church-white);
+
+}
+
+
+/* INFO HEADER */
+
+.login-info-small {
+
+    color:
+        var(--church-beige);
+
+}
+
+
+.login-info-header h2 {
+
+    color:
+        var(--church-white);
+
+}
+
+
+.login-info-header p {
+
+    color:
+        rgba(255,255,255,.82);
+
+}
+
+
+/* =========================================================
+   MISSION / VISION / SCHEDULE CARDS
+========================================================= */
+
+.login-info-panel .church-info-card {
+
+    background:
+        rgba(255,255,255,.08);
+
+    border:
+        1px solid
+        rgba(255,255,255,.13);
+
+    border-left:
+        4px solid
+        var(--church-beige);
+
+    border-radius:
+        10px;
+
+    box-shadow:
+        none;
+
+}
+
+
+.login-info-panel .church-info-card h3 {
+
+    color:
+        var(--church-beige);
+
+}
+
+
+.login-info-panel .church-info-card p {
+
+    color:
+        rgba(255,255,255,.88);
+
+}
+
+
+/* =========================================================
+   CHURCH SCHEDULE
+========================================================= */
+
+.login-info-panel .church-schedule-row {
+
+    border-bottom:
+        1px solid
+        rgba(255,255,255,.12);
+
+}
+
+
+.login-info-panel .church-schedule-row span {
+
+    color:
+        rgba(255,255,255,.82);
+
+}
+
+
+.login-info-panel .church-schedule-row strong {
+
+    color:
+        var(--church-beige);
+
+}
+
+
+/* =========================================================
+   SOCIAL LINKS
+========================================================= */
+
+.login-social-title {
+
+    color:
+        rgba(255,255,255,.75);
+
+}
+
+
+.login-social-link {
+
+    background:
+        var(--church-beige);
+
+    color:
+        var(--church-blue-dark);
+
+    border:
+        1px solid
+        var(--church-beige);
+
+    border-radius:
+        8px;
+
+}
+
+
+.login-social-link:hover {
+
+    background:
+        var(--church-white);
+
+    color:
+        var(--church-blue);
+
+}
+
+
+/* =========================================================
+   GENERIC MODAL
+========================================================= */
+
+.modal {
+
+    background:
+        rgba(12,49,93,.42);
+
+    backdrop-filter:
+        blur(5px);
+
+}
+
+
+/* =========================================================
+   MODAL CONTENT
+========================================================= */
+
+.modal-content {
+
+    background:
+        var(--church-white);
+
+    color:
+        var(--church-dark);
+
+    border:
+        1px solid
+        var(--church-beige);
+
+    border-top:
+        5px solid
+        var(--church-blue);
+
+    border-radius:
+        14px;
+
+    box-shadow:
+        0 24px 55px
+        rgba(12,49,93,.20);
+
+}
+
+
+/* MODAL HEADER */
+
+.modal-header {
+
+    border-bottom:
+        1px solid
+        var(--church-border);
+
+}
+
+
+.modal-header h2 {
+
+    color:
+        var(--church-blue-dark);
+
+}
+
+
+/* CLOSE BUTTON */
+
+.close-btn {
+
+    color:
+        var(--church-gray);
+
+}
+
+
+.close-btn:hover {
+
+    color:
+        var(--church-blue);
+
+}
+
+
+/* =========================================================
+   MODAL FORM
+========================================================= */
+
+.modal-content .form-group label {
+
+    color:
+        var(--church-dark);
+
+}
+
+
+.modal-content input,
+.modal-content select,
+.modal-content textarea {
+
+    background:
+        var(--church-white);
+
+    color:
+        var(--church-dark);
+
+    border:
+        1px solid
+        var(--church-border);
+
+}
+
+
+.modal-content input:focus,
+.modal-content select:focus,
+.modal-content textarea:focus {
+
+    border-color:
+        var(--church-blue) !important;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(22,79,148,.10);
+
+}
+
+
+/* MODAL FOOTER */
+
+.modal-footer {
+
+    border-top:
+        1px solid
+        var(--church-border);
+
+}
+
+
+/* =========================================================
+   GLOBAL BADGES
+========================================================= */
+
+.key-badge,
+.task-counter,
+.member-alert-count {
+
+    background:
+        var(--church-blue);
+
+    color:
+        var(--church-white);
+
+}
+
+
+.category-badge {
+
+    background:
+        var(--church-beige-light);
+
+    color:
+        var(--church-dark);
+
+}
+
+
+/* =========================================================
+   GENERAL LINKS
+========================================================= */
+
+a {
+
+    color:
+        var(--church-blue);
+
+}
+
+
+a:hover {
+
+    color:
+        var(--church-blue-dark);
+
+}
+
+
+/* =========================================================
+   GENERAL TABLE HEADER
+========================================================= */
+
+table thead {
+
+    background:
+        var(--church-blue);
+
+}
+
+
+table th {
+
+    color:
+        var(--church-white);
+
+}
+
+
+/* =========================================================
+   GENERAL FORM CONTROL
+========================================================= */
+
+input,
+select,
+textarea {
+
+    transition:
+        border-color .2s ease,
+        box-shadow .2s ease,
+        background .2s ease;
+
+}
+
+
+/* =========================================================
+   SELECTION COLOR
+========================================================= */
+
+::selection {
+
+    background:
+        var(--church-blue);
+
+    color:
+        var(--church-white);
+
+}
+
+
+/* =========================================================
+   FINAL BLUE REPLACEMENT
+========================================================= */
+
+/* old common blue utility */
+
+.logo-icon,
+.theme-btn {
+
+    background:
+        var(--church-blue);
+
+}
+
+
+.theme-btn:hover {
+
+    background:
+        var(--church-blue-dark);
+
+}
+
+
+/* =========================================================
+   FINAL LIGHT BLUE ELEMENTS
+========================================================= */
+
+.key-badge,
+.song-controls-bar {
+
+    border-color:
+        var(--church-beige);
+
+}
+
+
+/* =========================================================
+   GENERAL EMPTY STATES
+========================================================= */
+
+.empty-state,
+.no-data,
+.member-alert-empty {
+
+    color:
+        var(--church-gray);
+
+}
+
+
+/* =========================================================
+   DARK MODE - MATCH BRAND
+========================================================= */
+
+body.dark {
+
+    background:
+        #111820;
+
+    color:
+        #F6F2ED;
+
+}
+
+
+body.dark .main-content {
+
+    background:
+        #111820;
+
+}
+
+
+body.dark .sidebar {
+
+    background:
+        var(--church-blue-deep);
+
+}
+
+
+body.dark .card,
+body.dark .song-card,
+body.dark .modal-content {
+
+    background:
+        #19232D;
+
+    border-color:
+        #34414C;
+
+    color:
+        #F6F2ED;
+
+}
+
+
+body.dark .page-title {
+
+    color:
+        #F6F2ED;
+
+}
+
+
+body.dark .page-subtitle {
+
+    color:
+        #A9B0B7;
+
+}
+
+
+body.dark input,
+body.dark select,
+body.dark textarea {
+
+    background:
+        #111820;
+
+    color:
+        #FFFFFF;
+
+    border-color:
+        #46525E;
+
+}
+
+
+body.dark input:focus,
+body.dark select:focus,
+body.dark textarea:focus {
+
+    border-color:
+        var(--church-beige) !important;
+
+}
+
+
+body.dark .nav-item.active {
+
+    background:
+        var(--church-beige);
+
+    color:
+        var(--church-blue-deep);
+
+}
+
+
+/* =========================================================
+   MOBILE LOGIN
+========================================================= */
+
+@media (max-width: 768px) {
+
+    .login-screen {
+
+        padding:
+            12px;
+
+        align-items:
+            flex-start;
+
+    }
+
+
+    .login-page-layout {
+
+        width:
+            100%;
+
+        border-radius:
+            12px;
+
+    }
+
+
+    .login-left,
+    .login-info-panel {
+
+        width:
+            100%;
+
+    }
+
+
+    .login-info-panel {
+
+        background:
+            var(--church-blue);
+
+    }
+
+
+    .modal-content {
+
+        border-radius:
+            11px;
+
+    }
+
+}
+
+
+/* =========================================================
+   SMALL PHONE
+========================================================= */
+
+@media (max-width: 480px) {
+
+    .login-screen {
+
+        padding:
+            8px;
+
+    }
+
+
+    .login-page-layout {
+
+        border-radius:
+            10px;
+
+    }
+
+
+    .login-logo-wrap {
+
+        box-shadow:
+            none;
+
+    }
+
+
+    .login-info-panel .church-info-card {
+
+        border-radius:
+            8px;
+
+    }
+
+}
+
+/* =========================================================
+   CHURCHHQ 2026
+   FINAL THEME CLEANUP
+   BLUE + BEIGE CONSISTENCY
+========================================================= */
+
+
+/* =========================================================
+   OLD BLUE COLOR OVERRIDES
+========================================================= */
+
+.logo-icon,
+.theme-btn,
+.primary-btn,
+.task-counter {
+
+    background:
+        var(--church-blue) !important;
+
+}
+
+
+.theme-btn:hover,
+.primary-btn:hover {
+
+    background:
+        var(--church-blue-dark) !important;
+
+}
+
+
+/* =========================================================
+   PAGE ICONS
+========================================================= */
+
+.page > div:first-child > i,
+.page > div:first-child > svg,
+.planner-header i,
+.planner-header svg,
+.songs-header i,
+.songs-header svg {
+
+    color:
+        var(--church-blue);
+
+}
+
+
+/* =========================================================
+   SIDEBAR FINAL CLEANUP
+========================================================= */
+
+.sidebar {
+
+    background:
+        var(--church-blue) !important;
+
+}
+
+
+.sidebar-header {
+
+    background:
+        var(--church-blue-dark) !important;
+
+}
+
+
+.sidebar-header span {
+
+    color:
+        var(--church-beige) !important;
+
+}
+
+
+.sidebar .nav-item {
+
+    color:
+        rgba(255,255,255,.88) !important;
+
+}
+
+
+.sidebar .nav-item:hover {
+
+    background:
+        rgba(255,255,255,.10) !important;
+
+    color:
+        #ffffff !important;
+
+}
+
+
+.sidebar .nav-item.active {
+
+    background:
+        var(--church-beige) !important;
+
+    color:
+        var(--church-blue-dark) !important;
+
+}
+
+
+/* =========================================================
+   STAT NUMBERS
+========================================================= */
+
+.stat-card h2,
+#memberCount,
+#songCount,
+#eventCount,
+#taskCount,
+#attTotalCount {
+
+    color:
+        var(--church-blue) !important;
+
+}
+
+
+/* =========================================================
+   ATTENDANCE STATISTICS
+========================================================= */
+
+#attPresentCount {
+
+    color:
+        #4C7A63 !important;
+
+}
+
+
+#attAbsentCount {
+
+    color:
+        #A84242 !important;
+
+}
+
+
+/* =========================================================
+   REPORT NUMBERS / ACCENTS
+========================================================= */
+
+#reports .song-card {
+
+    border-color:
+        var(--church-border);
+
+}
+
+
+#rep-total-members,
+#rep-latest-att {
+
+    color:
+        var(--church-dark) !important;
+
+}
+
+
+#rep-latest-att-rate {
+
+    color:
+        var(--church-blue) !important;
+
+}
+
+
+/* =========================================================
+   SERVICE GENERATED OUTPUTS
+========================================================= */
+
+#outputStreamTitle,
+#outputStreamDesc,
+#outputMidweekTitle,
+#outputMidweekDesc {
+
+    background:
+        var(--church-cream) !important;
+
+    color:
+        var(--church-dark) !important;
+
+    border-color:
+        var(--church-border) !important;
+
+}
+
+
+#sunday-service label,
+#midweek-service label {
+
+    color:
+        var(--church-gray);
+
+}
+
+
+/* =========================================================
+   SONG TABLES / SERVICE TABLES
+========================================================= */
+
+#songs table thead tr,
+#sunday-service table thead tr,
+#midweek-service table thead tr {
+
+    background:
+        var(--church-blue) !important;
+
+    color:
+        #ffffff !important;
+
+}
+
+
+#songs table thead th,
+#sunday-service table thead th,
+#midweek-service table thead th {
+
+    color:
+        #ffffff !important;
+
+}
+
+
+/* =========================================================
+   MEMBERS / ATTENDANCE / REPORTS TABLE HEADERS
+========================================================= */
+
+#members table thead,
+#attendance table thead,
+#reports table thead {
+
+    background:
+        var(--church-blue) !important;
+
+}
+
+
+#members table th,
+#attendance table th,
+#reports table th {
+
+    background:
+        var(--church-blue) !important;
+
+    color:
+        #ffffff !important;
+
+}
+
+
+/* =========================================================
+   GENERIC CARD HEADINGS
+========================================================= */
+
+.card h2,
+.card h3 {
+
+    color:
+        var(--church-dark);
+
+}
+
+
+/* Sections where blue headings are preferred */
+
+.annual-activities-heading h2,
+.modal-header h2,
+.service-box h4,
+#settings .song-card h3,
+#reports .report-card h3 {
+
+    color:
+        var(--church-blue-dark) !important;
+
+}
+
+
+/* =========================================================
+   BACKUP / SETTINGS
+========================================================= */
+
+#settings .song-card {
+
+    border-color:
+        var(--church-border) !important;
+
+}
+
+
+#settings .song-card:first-of-type h3 {
+
+    color:
+        var(--church-blue-dark) !important;
+
+}
+
+
+/* SYSTEM RESET MUST STAY RED */
+
+#settings .song-card:last-of-type {
+
+    border-color:
+        #E8C5C5 !important;
+
+}
+
+
+#settings .song-card:last-of-type h3 {
+
+    color:
+        #A84242 !important;
+
+}
+
+
+/* =========================================================
+   DANGER / DELETE BUTTONS
+========================================================= */
+
+button[style*="#dc2626"],
+button[style*="#ef4444"],
+.danger-btn,
+.delete-btn {
+
+    background:
+        #A84242 !important;
+
+    color:
+        #ffffff !important;
+
+    border-color:
+        #A84242 !important;
+
+}
+
+
+button[style*="#dc2626"]:hover,
+button[style*="#ef4444"]:hover,
+.danger-btn:hover,
+.delete-btn:hover {
+
+    background:
+        #873535 !important;
+
+}
+
+
+/* =========================================================
+   SECONDARY BUTTON FINAL
+========================================================= */
+
+.secondary-btn {
+
+    background:
+        var(--church-beige-light) !important;
+
+    color:
+        var(--church-dark) !important;
+
+    border:
+        1px solid
+        var(--church-beige) !important;
+
+}
+
+
+.secondary-btn:hover {
+
+    background:
+        var(--church-beige) !important;
+
+    color:
+        var(--church-blue-dark) !important;
+
+}
+
+
+/* =========================================================
+   FORM FINAL CONSISTENCY
+========================================================= */
+
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
+
+    border-color:
+        var(--church-border);
+
+}
+
+
+input:not([type="checkbox"]):not([type="radio"]):focus,
+select:focus,
+textarea:focus {
+
+    border-color:
+        var(--church-blue) !important;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(22,79,148,.10) !important;
+
+}
+
+
+/* =========================================================
+   READONLY INPUTS
+========================================================= */
+
+input[readonly],
+textarea[readonly] {
+
+    background:
+        var(--church-cream) !important;
+
+    color:
+        var(--church-dark);
+
+}
+
+
+/* =========================================================
+   GENERAL SEARCH FIELDS
+========================================================= */
+
+.planner-search input,
+.search-box input,
+input[type="search"] {
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid
+        var(--church-border);
+
+    color:
+        var(--church-dark);
+
+}
+
+
+/* =========================================================
+   CARD FINAL CONSISTENCY
+========================================================= */
+
+.card,
+.song-card,
+.service-card {
+
+    border-color:
+        var(--church-border);
+
+}
+
+
+.song-card:hover,
+.card:hover {
+
+    border-color:
+        var(--church-beige);
+
+}
+
+
+/* =========================================================
+   MODAL FINAL
+========================================================= */
+
+.modal-content {
+
+    background:
+        #ffffff !important;
+
+    border-color:
+        var(--church-beige) !important;
+
+    border-top-color:
+        var(--church-blue) !important;
+
+}
+
+
+.modal-header h2 {
+
+    color:
+        var(--church-blue-dark) !important;
+
+}
+
+
+/* =========================================================
+   GLOBAL TEXT COLORS
+========================================================= */
+
+.page-subtitle,
+.empty-state,
+.no-data {
+
+    color:
+        var(--church-gray) !important;
+
+}
+
+
+/* =========================================================
+   MOBILE FINAL CLEANUP
+========================================================= */
+
+@media (max-width:768px) {
+
+    .app-container .sidebar {
+
+        background:
+            var(--church-blue) !important;
+
+    }
+
+
+    .sidebar-header {
+
+        background:
+            var(--church-blue-dark) !important;
+
+    }
+
+
+    .sidebar .nav-item.active {
+
+        background:
+            var(--church-beige) !important;
+
+        color:
+            var(--church-blue-dark) !important;
+
+    }
+
+
+    .main-content {
+
+        background:
+            var(--church-cream) !important;
+
+    }
+
+}
+
+
+/* =========================================================
+   DARK MODE FINAL BRAND CONSISTENCY
+========================================================= */
+
+body.dark .sidebar {
+
+    background:
+        var(--church-blue-deep) !important;
+
+}
+
+
+body.dark .sidebar-header {
+
+    background:
+        #082747 !important;
+
+}
+
+
+body.dark .nav-item.active {
+
+    background:
+        var(--church-beige) !important;
+
+    color:
+        var(--church-blue-deep) !important;
+
+}
+
+
+body.dark .primary-btn {
+
+    background:
+        var(--church-blue) !important;
+
+}
+
+
+body.dark .secondary-btn {
+
+    background:
+        #403B35 !important;
+
+    color:
+        var(--church-beige-light) !important;
+
+    border-color:
+        #62594F !important;
+
+}
+
+/* =========================================================
+   CHURCHHQ LOGIN - PREMIUM PROFESSIONAL VERSION
+========================================================= */
+
+.login-screen {
+    position: fixed;
+    inset: 0;
+    min-height: 100vh;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 30px;
+
+    background:
+        linear-gradient(
+            rgba(245, 241, 236, .84),
+            rgba(245, 241, 236, .84)
+        ),
+        url("images/Background 1.jpg");
+
+    background-size: cover;
+    background-position: center;
+
+    overflow-y: auto;
+}
+
+
+/* =========================================================
+   MAIN SHELL
+========================================================= */
+
+.login-page-layout {
+    width: min(1120px, 100%);
+    min-height: 640px;
+
+    display: grid;
+    grid-template-columns: 430px 1fr;
+
+    background: rgba(255,255,255,.96);
+
+    border: 1px solid rgba(22,79,148,.10);
+    border-radius: 24px;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 30px 80px rgba(25,27,30,.18);
+}
+
+
+/* =========================================================
+   LEFT PANEL
+========================================================= */
+
+.login-left {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 52px 42px;
+
+    background: #ffffff;
+}
+
+
+/* LOGIN CARD */
+
+.login-left .login-card {
+    width: 100%;
+    max-width: 340px;
+
+    padding: 0;
+
+    background: transparent;
+
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+
+    height: auto;
+}
+
+
+/* =========================================================
+   BRAND
+========================================================= */
+
+.login-brand {
+    text-align: center;
+}
+
+
+.login-logo-wrap {
+    width: 96px;
+    height: 96px;
+
+    margin: 0 auto 22px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #F3EBE2;
+
+    border: 1px solid #E0D1C1;
+    border-radius: 22px;
+
+    box-shadow:
+        0 10px 28px rgba(25,27,30,.07);
+}
+
+
+.login-logo {
+    width: 72px;
+    height: 72px;
+    object-fit: contain;
+}
+
+
+.login-brand h1 {
+    margin: 0 0 8px;
+
+    color: #164F94;
+
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.8px;
+}
+
+
+.login-church-name {
+    margin: 0;
+
+    color: #1D2125;
+
+    font-size: 14px;
+    font-weight: 700;
+}
+
+
+.login-subtitle {
+    display: block;
+
+    margin-top: 5px;
+
+    color: #7A7F85;
+
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   DIVIDER
+========================================================= */
+
+.login-divider {
+    width: 44px;
+    height: 3px;
+
+    margin: 26px auto 24px;
+
+    background: #DBCBB9;
+
+    border-radius: 10px;
+}
+
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.login-field {
+    margin-bottom: 17px;
+}
+
+
+.login-field label {
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: #2A2E33;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+.login-field input {
+    width: 100%;
+
+    padding: 13px 14px;
+
+    background: #FBFAF8;
+
+    color: #191B1E;
+
+    border: 1px solid #DDD6CE;
+    border-radius: 9px;
+
+    font-size: 14px;
+
+    outline: none;
+
+    transition: .2s ease;
+}
+
+
+.login-field input::placeholder {
+    color: #A0A4A8;
+}
+
+
+.login-field input:focus {
+    background: #ffffff;
+
+    border-color: #164F94;
+
+    box-shadow:
+        0 0 0 3px rgba(22,79,148,.09);
+}
+
+
+/* =========================================================
+   LOGIN BUTTON
+========================================================= */
+
+.login-button {
+    width: 100%;
+
+    margin-top: 7px;
+
+    padding: 13px 16px;
+
+    background: #164F94;
+
+    color: #ffffff;
+
+    border: none;
+    border-radius: 9px;
+
+    font-size: 13px;
+    font-weight: 800;
+
+    box-shadow:
+        0 8px 18px rgba(22,79,148,.18);
+
+    transition: .2s ease;
+}
+
+
+.login-button:hover {
+    background: #103B70;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 10px 22px rgba(22,79,148,.22);
+}
+
+
+/* =========================================================
+   RIGHT PANEL
+========================================================= */
+
+.login-info-panel {
+    position: relative;
+
+    padding: 48px 50px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    gap: 18px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #E3D2BF 0%,
+            #D9C6B2 100%
+        );
+
+    color: #191B1E;
+
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+
+    height: auto;
+}
+
+
+/* TOP ACCENT */
+
+.login-info-panel::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 7px;
+
+    background: #164F94;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.login-info-small {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: #164F94;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    letter-spacing: 2.2px;
+}
+
+
+.login-info-header h2 {
+    margin: 0 0 10px;
+
+    max-width: 600px;
+
+    color: #1A1D21;
+
+    font-size: 34px;
+    line-height: 1.15;
+
+    font-weight: 800;
+    letter-spacing: -0.7px;
+}
+
+
+.login-info-header p {
+    margin: 0;
+
+    color: #555A60;
+
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   INFO CARDS
+========================================================= */
+
+.login-info-panel .church-info-card {
+    padding: 16px 18px;
+
+    background: rgba(255,255,255,.42);
+
+    border: 1px solid rgba(255,255,255,.42);
+    border-radius: 12px;
+
+    box-shadow:
+        0 5px 14px rgba(25,27,30,.03);
+}
+
+
+.login-info-panel .church-info-card h3 {
+    margin: 0 0 7px;
+
+    color: #164F94;
+
+    font-size: 14px;
+    font-weight: 800;
+}
+
+
+.login-info-panel .church-info-card p {
+    margin: 0;
+
+    color: #40454A;
+
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+
+/* =========================================================
+   SCHEDULE
+========================================================= */
+
+.login-info-panel .church-schedule-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 7px 0;
+
+    border-bottom:
+        1px solid rgba(25,27,30,.10);
+}
+
+
+.login-info-panel .church-schedule-row:last-child {
+    border-bottom: none;
+}
+
+
+.login-info-panel .church-schedule-row span {
+    color: #454A50;
+}
+
+
+.login-info-panel .church-schedule-row strong {
+    color: #164F94;
+
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   SOCIAL SECTION
+========================================================= */
+
+.login-socials {
+    margin-top: 4px;
+}
+
+
+.login-social-title {
+    display: block;
+
+    margin-bottom: 10px;
+
+    color: #4E5358;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+/* SOCIAL BUTTON WRAPPER */
+
+.login-social-links {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 12px;
+}
+
+
+/* BIGGER FACEBOOK / YOUTUBE BUTTONS */
+
+.login-social-link {
+    min-height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 13px 22px;
+
+    background: #164F94;
+
+    color: #ffffff;
+
+    border: 1px solid #164F94;
+    border-radius: 9px;
+
+    text-decoration: none;
+
+    font-size: 13px;
+    font-weight: 800;
+
+    letter-spacing: .1px;
+
+    box-shadow:
+        0 7px 16px rgba(22,79,148,.14);
+
+    transition: .2s ease;
+}
+
+
+.login-social-link:hover {
+    background: #103B70;
+
+    color: #ffffff;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 10px 20px rgba(22,79,148,.20);
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 900px) {
+
+    .login-page-layout {
+        grid-template-columns: 1fr;
+        max-width: 640px;
+    }
+
+    .login-left {
+        padding: 38px 28px;
+    }
+
+    .login-info-panel {
+        padding: 36px 28px;
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    .login-screen {
+        padding: 12px;
+        align-items: flex-start;
+    }
+
+    .login-page-layout {
+        border-radius: 16px;
+    }
+
+    .login-left {
+        padding: 30px 20px;
+    }
+
+    .login-info-panel {
+        padding: 30px 20px;
+    }
+
+    .login-info-header h2 {
+        font-size: 25px;
+    }
+
+    .login-social-links {
+        grid-template-columns: 1fr;
+    }
+
+    .login-social-link {
+        min-height: 50px;
+        font-size: 14px;
+    }
+
+}
+
+
+
+/* =========================================================
+   CHURCHHQ - UNIFORM ROUND DELETE BUTTONS
+========================================================= */
+
+/* ALL DELETE ACTION BUTTONS */
+
+button[onclick^="deleteMember("],
+button[onclick^="deleteTask("],
+button[onclick^="deleteSong("],
+button[onclick^="deleteLeader("],
+button[onclick^="deleteServiceRecord("],
+button[onclick^="deleteAnnualActivity("],
+button[onclick^="deleteMinistry("],
+button[onclick^="deleteAttendance("],
+button[onclick^="deleteActivityItem("],
+button[onclick^="deleteAnnouncementItem("],
+button[onclick^="removeSongFromServiceLineup("] {
+
+    width: 32px !important;
+    height: 32px !important;
+
+    min-width: 32px !important;
+    min-height: 32px !important;
+
+    max-width: 32px !important;
+    max-height: 32px !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    flex: 0 0 32px !important;
+
+    background: #FBEAEA !important;
+    color: #A84242 !important;
+
+    border: 1px solid #E8C5C5 !important;
+    border-radius: 50% !important;
+
+    font-size: 0 !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+
+    cursor: pointer !important;
+
+    box-shadow: none !important;
+
+    vertical-align: middle !important;
+
+    transition:
+        background .2s ease,
+        color .2s ease,
+        border-color .2s ease,
+        transform .2s ease !important;
+}
+
+
+/* =========================================================
+   CREATE SAME DELETE SYMBOL
+========================================================= */
+
+button[onclick^="deleteMember("]::before,
+button[onclick^="deleteTask("]::before,
+button[onclick^="deleteSong("]::before,
+button[onclick^="deleteLeader("]::before,
+button[onclick^="deleteServiceRecord("]::before,
+button[onclick^="deleteAnnualActivity("]::before,
+button[onclick^="deleteMinistry("]::before,
+button[onclick^="deleteAttendance("]::before,
+button[onclick^="deleteActivityItem("]::before,
+button[onclick^="deleteAnnouncementItem("]::before,
+button[onclick^="removeSongFromServiceLineup("]::before {
+
+    content: "×";
+
+    display: block;
+
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1;
+
+    color: inherit;
+
+}
+
+
+/* =========================================================
+   HOVER
+========================================================= */
+
+button[onclick^="deleteMember("]:hover,
+button[onclick^="deleteTask("]:hover,
+button[onclick^="deleteSong("]:hover,
+button[onclick^="deleteLeader("]:hover,
+button[onclick^="deleteServiceRecord("]:hover,
+button[onclick^="deleteAnnualActivity("]:hover,
+button[onclick^="deleteMinistry("]:hover,
+button[onclick^="deleteAttendance("]:hover,
+button[onclick^="deleteActivityItem("]:hover,
+button[onclick^="deleteAnnouncementItem("]:hover,
+button[onclick^="removeSongFromServiceLineup("]:hover {
+
+    background: #A84242 !important;
+
+    color: #FFFFFF !important;
+
+    border-color: #A84242 !important;
+
+    transform: scale(1.06) !important;
+
+}
+
+
+/* =========================================================
+   CLICK
+========================================================= */
+
+button[onclick^="deleteMember("]:active,
+button[onclick^="deleteTask("]:active,
+button[onclick^="deleteSong("]:active,
+button[onclick^="deleteLeader("]:active,
+button[onclick^="deleteServiceRecord("]:active,
+button[onclick^="deleteAnnualActivity("]:active,
+button[onclick^="deleteMinistry("]:active,
+button[onclick^="deleteAttendance("]:active,
+button[onclick^="deleteActivityItem("]:active,
+button[onclick^="deleteAnnouncementItem("]:active,
+button[onclick^="removeSongFromServiceLineup("]:active {
+
+    transform: scale(.94) !important;
+
+}
+
+/* =========================================================
+   CHURCHHQ - UNIFORM ROUND EDIT BUTTONS
+========================================================= */
+
+button[onclick^="editLeader("],
+button[onclick^="editAnnualActivity("],
+button[onclick^="editMember("],
+button[onclick^="editMinistry("],
+button[onclick^="editActivityItem("],
+button[onclick^="editAnnouncementItem("],
+button[onclick^="openEditTaskModal("],
+button[onclick^="openEditSongModal("] {
+
+    width: 32px !important;
+    height: 32px !important;
+
+    min-width: 32px !important;
+    min-height: 32px !important;
+
+    max-width: 32px !important;
+    max-height: 32px !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    flex: 0 0 32px !important;
+
+    background: #E8F0F8 !important;
+    color: #164F94 !important;
+
+    border: 1px solid #C7D8EB !important;
+    border-radius: 50% !important;
+
+    font-size: 0 !important;
+
+    line-height: 1 !important;
+
+    cursor: pointer !important;
+
+    box-shadow: none !important;
+
+    vertical-align: middle !important;
+
+    transition:
+        background .2s ease,
+        color .2s ease,
+        border-color .2s ease,
+        transform .2s ease !important;
+}
+
+
+/* =========================================================
+   SAME EDIT ICON FOR ALL
+========================================================= */
+
+button[onclick^="editLeader("]::before,
+button[onclick^="editAnnualActivity("]::before,
+button[onclick^="editMember("]::before,
+button[onclick^="editMinistry("]::before,
+button[onclick^="editActivityItem("]::before,
+button[onclick^="editAnnouncementItem("]::before,
+button[onclick^="openEditTaskModal("]::before,
+button[onclick^="openEditSongModal("]::before {
+
+    content: "✎";
+
+    display: block;
+
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1;
+
+    color: inherit;
+}
+
+
+/* =========================================================
+   EDIT HOVER
+========================================================= */
+
+button[onclick^="editLeader("]:hover,
+button[onclick^="editAnnualActivity("]:hover,
+button[onclick^="editMember("]:hover,
+button[onclick^="editMinistry("]:hover,
+button[onclick^="editActivityItem("]:hover,
+button[onclick^="editAnnouncementItem("]:hover,
+button[onclick^="openEditTaskModal("]:hover,
+button[onclick^="openEditSongModal("]:hover {
+
+    background: #164F94 !important;
+
+    color: #FFFFFF !important;
+
+    border-color: #164F94 !important;
+
+    transform: scale(1.06) !important;
+}
+
+
+/* =========================================================
+   EDIT CLICK
+========================================================= */
+
+button[onclick^="editLeader("]:active,
+button[onclick^="editAnnualActivity("]:active,
+button[onclick^="editMember("]:active,
+button[onclick^="editMinistry("]:active,
+button[onclick^="editActivityItem("]:active,
+button[onclick^="editAnnouncementItem("]:active,
+button[onclick^="openEditTaskModal("]:active,
+button[onclick^="openEditSongModal("]:active {
+
+    transform: scale(.94) !important;
+}
+
+/* =========================================================
+   SIDEBAR HEADER - PROFESSIONAL CLEANUP
+========================================================= */
+
+.sidebar-header {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+
+    padding: 12px 14px !important;
+    margin-bottom: 18px !important;
+
+    background: #103B70 !important;
+
+    border-radius: 10px !important;
+
+    border: 1px solid rgba(255,255,255,.10);
+
+    box-shadow: none !important;
+}
+
+
+/* LOGO */
+
+.sidebar-header img {
+    width: 52px !important;
+    height: 52px !important;
+
+    object-fit: contain !important;
+
+    flex-shrink: 0 !important;
+}
+
+
+/* TEXT WRAPPER */
+
+.sidebar-header > div {
+    display: flex;
+    flex-direction: column;
+
+    min-width: 0;
+}
+
+
+/* CHURCH NAME */
+
+.sidebar-header h1 {
+    margin: 0 !important;
+
+    color: #ffffff !important;
+
+    font-size: 13px !important;
+    font-weight: 700 !important;
+
+    line-height: 1.15 !important;
+
+    white-space: normal !important;
+}
+
+
+/* BETS EDITION */
+
+.sidebar-header span {
+    margin-top: 5px;
+
+    color: #DBCBB9 !important;
+
+    font-size: 9px !important;
+    font-weight: 500;
+
+    letter-spacing: .3px;
+}
+
+
+/* =========================================================
+   SIDEBAR NAV ITEMS
+========================================================= */
+
+.sidebar .nav-item {
+    min-height: 44px;
+
+    padding: 10px 13px !important;
+
+    margin-bottom: 6px !important;
+
+    border-radius: 8px !important;
+
+    font-size: 14px;
+
+    gap: 10px !important;
+}
+
+
+/* ICON */
+
+.sidebar .nav-item svg,
+.sidebar .nav-item i {
+    width: 20px !important;
+    height: 20px !important;
+
+    flex-shrink: 0;
+}
+
+
+/* ACTIVE ITEM */
+
+.sidebar .nav-item.active {
+    background: #DBCBB9 !important;
+
+    color: #103B70 !important;
+
+    font-weight: 700 !important;
+
+    box-shadow:
+        0 4px 10px rgba(0,0,0,.08) !important;
+}
+
+
+/* HOVER */
+
+.sidebar .nav-item:hover {
+    background:
+        rgba(255,255,255,.10) !important;
+
+    color: #ffffff !important;
+}
+
+
+/* KEEP ACTIVE COLOR ON HOVER */
+
+.sidebar .nav-item.active:hover {
+    background: #DBCBB9 !important;
+    color: #103B70 !important;
+}   
