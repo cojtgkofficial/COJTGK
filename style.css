@@ -11571,3 +11571,222 @@ button[onclick^="openEditSongModal("]:active {
         #ffffff !important;
 
 }
+
+/* =========================================================
+   PLANNER TASK CARD - FINAL UNIFORM FIX
+========================================================= */
+
+
+#planner .task-card {
+
+    height: 150px !important;
+
+    min-height: 150px !important;
+
+    max-height: 150px !important;
+
+    padding: 14px !important;
+
+    display: flex !important;
+
+    flex-direction: column !important;
+
+    overflow: hidden !important;
+
+}
+
+
+/* TITLE */
+
+#planner .task-card h3,
+#planner .task-card h4 {
+
+    flex-shrink: 0 !important;
+
+    margin-bottom: 8px !important;
+
+}
+
+
+/* DESCRIPTION AREA */
+
+#planner .task-card p {
+
+    flex: 1 !important;
+
+    margin: 0 !important;
+
+    display: -webkit-box !important;
+
+    -webkit-line-clamp: 2 !important;
+
+    -webkit-box-orient: vertical !important;
+
+    overflow: hidden !important;
+
+    line-height: 1.35 !important;
+
+}
+
+
+/* DATE + PRIORITY AREA */
+
+#planner .task-card .task-meta,
+#planner .task-card .task-footer {
+
+    flex-shrink: 0 !important;
+
+    margin-top: auto !important;
+
+}
+
+
+/* PRIORITY BADGE */
+
+#planner .priority,
+#planner .task-priority {
+
+    display: inline-flex !important;
+
+    align-items: center !important;
+
+    height: 24px !important;
+
+    padding: 0 10px !important;
+
+    border-radius: 20px !important;
+
+    font-size: 11px !important;
+
+    font-weight: 700 !important;
+
+}
+
+
+/* KEEP BUTTONS TOP RIGHT */
+
+#planner .task-card button {
+
+    flex-shrink: 0 !important;
+
+}
+
+/* =========================================================
+   PLANNER TASK CARD - UNIFORM PREVIEW STYLE
+========================================================= */
+
+
+.task-card {
+
+    height: 150px !important;
+
+    min-height: 150px !important;
+
+    max-height: 150px !important;
+
+    overflow: hidden !important;
+
+    display: flex !important;
+
+    flex-direction: column !important;
+
+    padding: 14px !important;
+
+    box-sizing: border-box !important;
+
+}
+
+
+/* TITLE AREA */
+
+.task-card h3,
+.task-card h4 {
+
+    flex-shrink: 0 !important;
+
+    margin-bottom: 8px !important;
+
+}
+
+
+/* DESCRIPTION */
+
+.task-card p {
+
+    flex: 1 !important;
+
+    overflow: hidden !important;
+
+    display: -webkit-box !important;
+
+    -webkit-line-clamp: 2 !important;
+
+    -webkit-box-orient: vertical !important;
+
+    margin: 0 !important;
+
+    line-height: 1.4 !important;
+
+}
+
+
+/* DATE / CATEGORY / PRIORITY */
+
+.task-card span,
+.task-card small {
+
+    flex-shrink: 0 !important;
+
+}
+
+
+/* BUTTONS AREA */
+
+.task-card button {
+
+    flex-shrink: 0 !important;
+
+}
+
+
+/* REMOVE INTERNAL OVERFLOW */
+
+.task-card > div {
+
+    overflow: hidden;
+
+}
+
+/* =========================================================
+   PLANNER COLUMN - COMPACT HEIGHT
+========================================================= */
+
+.planner-column {
+
+    min-height: 0 !important;
+
+    height: 420px !important;
+
+    padding: 12px !important;
+
+}
+
+
+/* TASK LIST AREA */
+
+.planner-column .task-list {
+
+    max-height: 320px !important;
+
+    overflow-y: auto !important;
+
+}
+
+
+/* REMOVE EXCESS EMPTY SPACE */
+
+#planner .planner-board {
+
+    align-items: start !important;
+
+}
