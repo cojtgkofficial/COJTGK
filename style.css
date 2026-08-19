@@ -11318,3 +11318,256 @@ button[onclick^="openEditSongModal("]:active {
     background: #DBCBB9 !important;
     color: #103B70 !important;
 }   
+
+/* =========================================================
+   LEADERS PAGE LAYOUT FIX
+========================================================= */
+
+#leaders .leadership-container,
+#leaders .leaders-container,
+#leaders .org-chart {
+
+    background: transparent !important;
+
+    padding: 20px !important;
+
+}
+
+
+/* LEVEL SECTIONS */
+
+#leaders .leader-level,
+#leaders .level-section {
+
+    min-height: auto !important;
+
+    padding: 25px 20px !important;
+
+    margin-bottom: 30px !important;
+
+    background: transparent !important;
+
+}
+
+
+/* REMOVE HUGE BLUE AREA */
+
+#leaders .level-header {
+
+    background: transparent !important;
+
+    height: auto !important;
+
+    padding: 0 !important;
+
+}
+
+
+/* LEVEL TITLE */
+
+#leaders .level-title,
+#leaders .leader-level-title {
+
+    color: #164F94 !important;
+
+    margin-bottom: 12px !important;
+
+    font-size: 14px !important;
+
+}
+
+
+/* LEADER CARD */
+
+#leaders .leader-card,
+#leaders .leader-node,
+#leaders .leader-box {
+
+    width: 280px !important;
+
+    min-height: auto !important;
+
+    padding: 22px !important;
+
+    margin: 0 auto !important;
+
+    background: #ffffff !important;
+
+    border-radius: 16px !important;
+
+    border: 1px solid #E0D6CC !important;
+
+    border-top: 4px solid #164F94 !important;
+
+    box-shadow:
+        0 8px 20px rgba(0,0,0,.08) !important;
+
+}
+
+
+/* AVATAR */
+
+#leaders .leader-avatar {
+
+    width: 64px !important;
+
+    height: 64px !important;
+
+}
+
+
+/* ACTION BUTTONS */
+
+#leaders .leader-card button {
+
+    margin-top: 10px !important;
+
+}
+
+
+/* CONNECTION LINES */
+
+#leaders .connector,
+#leaders .line {
+
+    opacity: .35;
+
+}
+
+
+/* MOBILE */
+
+@media(max-width:768px){
+
+    #leaders .leader-card,
+    #leaders .leader-node,
+    #leaders .leader-box {
+
+        width: 100% !important;
+
+        max-width: 280px !important;
+
+    }
+
+}
+
+/* =========================================================
+   LEADERS PAGE - REMOVE BLUE BOX BACKGROUND
+========================================================= */
+
+
+/* REMOVE LARGE BLUE LEVEL BACKGROUNDS */
+
+#leaders .leader-level,
+#leaders .level-section,
+#leaders .leader-section,
+#leaders .org-level {
+
+    background: transparent !important;
+
+    background-color: transparent !important;
+
+}
+
+
+/* REMOVE BLUE CONTAINERS */
+
+#leaders .leader-chart,
+#leaders .organization-chart,
+#leaders .org-chart {
+
+    background: transparent !important;
+
+}
+
+
+/* LEVEL HEADER CLEAN */
+
+#leaders .level-header,
+#leaders .leader-level-header {
+
+    background: transparent !important;
+
+    color: #164F94 !important;
+
+}
+
+
+/* KEEP CARDS WHITE */
+
+#leaders .leader-card,
+#leaders .leader-node,
+#leaders .leader-box {
+
+    background: #FFFFFF !important;
+
+    border:
+        1px solid #DDD6CE !important;
+
+    border-top:
+        4px solid #164F94 !important;
+
+    box-shadow:
+        0 8px 20px rgba(0,0,0,.08) !important;
+
+}
+
+
+/* LEVEL TITLES */
+
+#leaders .level-title,
+#leaders .leader-level-title {
+
+    color: #164F94 !important;
+
+}
+
+
+/* CONNECTION LINES */
+
+#leaders .connector,
+#leaders .line {
+
+    background: #DBCBB9 !important;
+
+    opacity: .5;
+
+}
+
+/* =========================================================
+   LEADERS PAGE - REMOVE BLUE LEVEL BACKGROUND
+========================================================= */
+
+.leaders-level-group {
+
+    background: transparent !important;
+
+    background-color: transparent !important;
+
+    box-shadow: none !important;
+
+}
+
+
+/* REMOVE BLUE ONLY FROM LEVEL GROUP */
+
+.leaders-level-group[data-level="1"],
+.leaders-level-group[data-level="2"],
+.leaders-level-group[data-level="3"] {
+
+    background:
+        transparent !important;
+
+}
+
+
+/* KEEP LEADER CARDS CLEAN */
+
+.leaders-level-group .leader-card,
+.leaders-level-group .leader-node,
+.leaders-level-group .leader-box {
+
+    background:
+        #ffffff !important;
+
+}
