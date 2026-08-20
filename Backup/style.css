@@ -11318,3 +11318,3157 @@ button[onclick^="openEditSongModal("]:active {
     background: #DBCBB9 !important;
     color: #103B70 !important;
 }   
+
+/* =========================================================
+   LEADERS PAGE LAYOUT FIX
+========================================================= */
+
+#leaders .leadership-container,
+#leaders .leaders-container,
+#leaders .org-chart {
+
+    background: transparent !important;
+
+    padding: 20px !important;
+
+}
+
+
+/* LEVEL SECTIONS */
+
+#leaders .leader-level,
+#leaders .level-section {
+
+    min-height: auto !important;
+
+    padding: 25px 20px !important;
+
+    margin-bottom: 30px !important;
+
+    background: transparent !important;
+
+}
+
+
+/* REMOVE HUGE BLUE AREA */
+
+#leaders .level-header {
+
+    background: transparent !important;
+
+    height: auto !important;
+
+    padding: 0 !important;
+
+}
+
+
+/* LEVEL TITLE */
+
+#leaders .level-title,
+#leaders .leader-level-title {
+
+    color: #164F94 !important;
+
+    margin-bottom: 12px !important;
+
+    font-size: 14px !important;
+
+}
+
+
+/* LEADER CARD */
+
+#leaders .leader-card,
+#leaders .leader-node,
+#leaders .leader-box {
+
+    width: 280px !important;
+
+    min-height: auto !important;
+
+    padding: 22px !important;
+
+    margin: 0 auto !important;
+
+    background: #ffffff !important;
+
+    border-radius: 16px !important;
+
+    border: 1px solid #E0D6CC !important;
+
+    border-top: 4px solid #164F94 !important;
+
+    box-shadow:
+        0 8px 20px rgba(0,0,0,.08) !important;
+
+}
+
+
+/* AVATAR */
+
+#leaders .leader-avatar {
+
+    width: 64px !important;
+
+    height: 64px !important;
+
+}
+
+
+/* ACTION BUTTONS */
+
+#leaders .leader-card button {
+
+    margin-top: 10px !important;
+
+}
+
+
+/* CONNECTION LINES */
+
+#leaders .connector,
+#leaders .line {
+
+    opacity: .35;
+
+}
+
+
+/* MOBILE */
+
+@media(max-width:768px){
+
+    #leaders .leader-card,
+    #leaders .leader-node,
+    #leaders .leader-box {
+
+        width: 100% !important;
+
+        max-width: 280px !important;
+
+    }
+
+}
+
+/* =========================================================
+   LEADERS PAGE - REMOVE BLUE BOX BACKGROUND
+========================================================= */
+
+
+/* REMOVE LARGE BLUE LEVEL BACKGROUNDS */
+
+#leaders .leader-level,
+#leaders .level-section,
+#leaders .leader-section,
+#leaders .org-level {
+
+    background: transparent !important;
+
+    background-color: transparent !important;
+
+}
+
+
+/* REMOVE BLUE CONTAINERS */
+
+#leaders .leader-chart,
+#leaders .organization-chart,
+#leaders .org-chart {
+
+    background: transparent !important;
+
+}
+
+
+/* LEVEL HEADER CLEAN */
+
+#leaders .level-header,
+#leaders .leader-level-header {
+
+    background: transparent !important;
+
+    color: #164F94 !important;
+
+}
+
+
+/* KEEP CARDS WHITE */
+
+#leaders .leader-card,
+#leaders .leader-node,
+#leaders .leader-box {
+
+    background: #FFFFFF !important;
+
+    border:
+        1px solid #DDD6CE !important;
+
+    border-top:
+        4px solid #164F94 !important;
+
+    box-shadow:
+        0 8px 20px rgba(0,0,0,.08) !important;
+
+}
+
+
+/* LEVEL TITLES */
+
+#leaders .level-title,
+#leaders .leader-level-title {
+
+    color: #164F94 !important;
+
+}
+
+
+/* CONNECTION LINES */
+
+#leaders .connector,
+#leaders .line {
+
+    background: #DBCBB9 !important;
+
+    opacity: .5;
+
+}
+
+/* =========================================================
+   LEADERS PAGE - REMOVE BLUE LEVEL BACKGROUND
+========================================================= */
+
+.leaders-level-group {
+
+    background: transparent !important;
+
+    background-color: transparent !important;
+
+    box-shadow: none !important;
+
+}
+
+
+/* REMOVE BLUE ONLY FROM LEVEL GROUP */
+
+.leaders-level-group[data-level="1"],
+.leaders-level-group[data-level="2"],
+.leaders-level-group[data-level="3"] {
+
+    background:
+        transparent !important;
+
+}
+
+
+/* KEEP LEADER CARDS CLEAN */
+
+.leaders-level-group .leader-card,
+.leaders-level-group .leader-node,
+.leaders-level-group .leader-box {
+
+    background:
+        #ffffff !important;
+
+}
+
+
+/* =========================================================
+   GLOBAL MODAL RESPONSIVE FIX
+   AUTO FIT + INTERNAL SCROLL
+========================================================= */
+
+.modal {
+    padding: 20px !important;
+
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+
+    align-items: center !important;
+}
+
+
+/* ALL MODAL CONTENT */
+
+.modal-content {
+    width: min(650px, 100%) !important;
+
+    max-width: 100% !important;
+
+    max-height: calc(100vh - 40px) !important;
+
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+
+    box-sizing: border-box !important;
+
+    margin: auto !important;
+
+    overscroll-behavior: contain;
+}
+
+
+/* =========================================================
+   KEEP HEADER VISIBLE WHILE SCROLLING
+========================================================= */
+
+.modal-content .modal-header {
+    position: sticky;
+
+    top: 0;
+
+    z-index: 10;
+
+    background: #ffffff;
+
+    padding-top: 4px;
+
+}
+
+
+/* =========================================================
+   KEEP FOOTER ACCESSIBLE
+========================================================= */
+
+.modal-content .modal-footer {
+    position: sticky;
+
+    bottom: 0;
+
+    z-index: 10;
+
+    background: #ffffff;
+
+    padding-bottom: 4px;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+
+    .modal {
+        padding: 10px !important;
+
+        align-items: flex-start !important;
+    }
+
+
+    .modal-content {
+        width: 100% !important;
+
+        max-width: 100% !important;
+
+        max-height: calc(100vh - 20px) !important;
+
+        margin: 0 auto !important;
+
+        padding: 20px 16px !important;
+
+        border-radius: 14px !important;
+
+        overflow-y: auto !important;
+    }
+
+
+    /* FORCE TWO-COLUMN FORMS TO ONE COLUMN */
+
+    .modal-content .form-row {
+        display: grid !important;
+
+        grid-template-columns: 1fr !important;
+
+        gap: 12px !important;
+    }
+
+
+    /* PREVENT INPUT OVERFLOW */
+
+    .modal-content input,
+    .modal-content select,
+    .modal-content textarea {
+        width: 100% !important;
+
+        max-width: 100% !important;
+
+        min-width: 0 !important;
+
+        box-sizing: border-box !important;
+    }
+
+
+    /* MOBILE-FRIENDLY INPUT SIZE */
+
+    .modal-content input,
+    .modal-content select,
+    .modal-content textarea {
+        font-size: 16px !important;
+    }
+
+
+    /* BUTTONS CAN WRAP */
+
+    .modal-content .modal-footer {
+        display: flex !important;
+
+        flex-wrap: wrap !important;
+
+        gap: 8px !important;
+    }
+
+}
+
+
+/* =========================================================
+   SMALL PHONES
+========================================================= */
+
+@media (max-width: 480px) {
+
+    .modal {
+        padding: 6px !important;
+    }
+
+
+    .modal-content {
+        max-height: calc(100vh - 12px) !important;
+
+        padding: 18px 14px !important;
+
+        border-radius: 12px !important;
+    }
+
+
+    .modal-header h2 {
+        font-size: 18px !important;
+    }
+
+
+    .modal-content .form-group {
+        margin-bottom: 12px !important;
+    }
+
+}
+
+/* =========================================
+   DASHBOARD MULTIMEDIA QUICK LINKS
+========================================= */
+
+.dashboard-multimedia-links {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+
+    margin-bottom: 14px;
+}
+
+
+/* BUTTON */
+
+.multimedia-link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 7px 11px;
+
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+
+    color: #334155;
+    text-decoration: none;
+
+    font-size: 11px;
+    font-weight: 600;
+
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease,
+        border-color 0.15s ease;
+}
+
+
+.multimedia-link-btn:hover {
+    transform: translateY(-1px);
+
+    border-color: #cbd5e1;
+
+    box-shadow:
+        0 3px 8px rgba(0, 0, 0, 0.08);
+}
+
+
+/* ICON */
+
+.multimedia-link-icon {
+    width: 25px;
+    height: 25px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 6px;
+
+    font-size: 14px;
+    font-weight: 700;
+}
+
+
+/* TEXT */
+
+.multimedia-link-text {
+    display: flex;
+    flex-direction: column;
+
+    line-height: 1.15;
+}
+
+
+.multimedia-link-text small {
+    margin-bottom: 2px;
+
+    color: #94a3b8;
+
+    font-size: 8px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+
+/* FACEBOOK */
+
+.facebook-live-btn
+.multimedia-link-icon {
+    background: #1877f2;
+    color: #ffffff;
+}
+
+
+/* YOUTUBE */
+
+.youtube-live-btn
+.multimedia-link-icon {
+    background: #ff0000;
+    color: #ffffff;
+}
+
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+
+    .dashboard-multimedia-links {
+        justify-content: stretch;
+    }
+
+    .multimedia-link-btn {
+        flex: 1;
+        justify-content: center;
+    }
+}
+
+.leader-card-avatar {
+    width: 90px;
+    height: 90px;
+
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    overflow: hidden;
+
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.leader-card-avatar img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+    border-radius: 50%;
+
+    display: block;
+}
+
+/* =====================================================
+   LEADER CARD AVATAR - PHOTO FIX
+===================================================== */
+
+.leader-card-avatar {
+    width: 96px !important;
+    height: 96px !important;
+    min-width: 96px !important;
+    min-height: 96px !important;
+
+    margin: 0 auto 14px !important;
+
+    border-radius: 50% !important;
+    overflow: hidden !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    position: relative !important;
+
+    font-size: 26px !important;
+    font-weight: 700 !important;
+
+    flex-shrink: 0 !important;
+}
+
+
+/* ACTUAL LEADER PHOTO */
+
+.leader-card-avatar img {
+    width: 100% !important;
+    height: 100% !important;
+
+    display: block !important;
+
+    object-fit: cover !important;
+    object-position: center !important;
+
+    border-radius: 50% !important;
+}
+
+
+/* KEEP LEADER INFORMATION BELOW PHOTO */
+
+.leader-card {
+    overflow: hidden;
+}
+
+.leader-card-info {
+    position: relative !important;
+
+    width: 100% !important;
+
+    text-align: center !important;
+
+    display: block !important;
+}
+
+
+
+/* =====================================================
+   PLANNER TASK CARD - FINAL SIZE FIX
+===================================================== */
+
+.task-card {
+    height: auto !important;
+    min-height: 220px !important;
+    max-height: none !important;
+
+    padding: 16px !important;
+
+    display: block !important;
+
+    overflow: visible !important;
+
+    box-sizing: border-box !important;
+
+    border-radius: 12px !important;
+}
+
+
+/* HEADER / TITLE AREA */
+
+.task-card > div:first-child {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+
+    width: 100% !important;
+
+    margin-bottom: 12px !important;
+
+    overflow: visible !important;
+}
+
+
+/* TITLE */
+
+.task-card h4 {
+    flex: 1 !important;
+    min-width: 0 !important;
+
+    margin: 0 !important;
+
+    font-size: 16px !important;
+    line-height: 1.35 !important;
+
+    white-space: normal !important;
+    overflow: visible !important;
+
+    overflow-wrap: anywhere !important;
+}
+
+
+/* TASK DETAILS */
+
+.task-card p {
+    display: block !important;
+
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+
+    margin: 5px 0 !important;
+
+    padding: 0 !important;
+
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+
+    white-space: normal !important;
+
+    overflow: visible !important;
+}
+
+
+/* EDIT / DELETE AREA */
+
+.task-card > div:first-child > div {
+    flex-shrink: 0 !important;
+
+    display: flex !important;
+    gap: 8px !important;
+
+    overflow: visible !important;
+}
+
+
+/* PRIORITY BADGE */
+
+.task-card .priority-badge,
+.task-card .task-priority {
+    position: static !important;
+
+    width: 100% !important;
+    height: auto !important;
+
+    margin-top: 12px !important;
+
+    box-sizing: border-box !important;
+}
+
+/* =====================================================
+   PLANNER TASK CARD - FINAL CLEAN VERSION
+===================================================== */
+
+#planner .task-card {
+    width: 100% !important;
+
+    height: auto !important;
+    min-height: 190px !important;
+    max-height: none !important;
+
+    padding: 16px !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+
+    overflow: visible !important;
+
+    box-sizing: border-box !important;
+
+    background: #ffffff;
+    border-radius: 12px;
+    border-left: 5px solid #2563eb;
+
+    box-shadow: 0 4px 10px rgba(0,0,0,.08);
+}
+
+
+/* ===============================
+   TOP: TITLE + BUTTONS
+================================ */
+
+#planner .task-card > div:first-child {
+    width: 100% !important;
+
+    display: flex !important;
+    align-items: flex-start !important;
+
+    gap: 10px !important;
+
+    margin-bottom: 10px !important;
+
+    overflow: visible !important;
+}
+
+
+/* TITLE */
+
+#planner .task-card h4 {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+
+    margin: 0 !important;
+
+    font-size: 16px !important;
+    line-height: 1.35 !important;
+
+    white-space: normal !important;
+
+    overflow: visible !important;
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+}
+
+
+/* EDIT + DELETE BUTTON CONTAINER */
+
+#planner .task-card > div:first-child > div {
+    display: flex !important;
+    align-items: center !important;
+
+    gap: 6px !important;
+
+    flex: 0 0 auto !important;
+
+    overflow: visible !important;
+}
+
+
+/* BUTTONS */
+
+#planner .task-card button {
+    flex-shrink: 0 !important;
+}
+
+
+/* ===============================
+   TASK INFORMATION
+================================ */
+
+#planner .task-card p {
+    display: block !important;
+
+    flex: none !important;
+
+    width: 100% !important;
+
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+
+    margin: 3px 0 !important;
+    padding: 0 !important;
+
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+
+    white-space: normal !important;
+
+    overflow: visible !important;
+
+    -webkit-line-clamp: unset !important;
+    -webkit-box-orient: initial !important;
+}
+
+
+/* ===============================
+   PRIORITY
+================================ */
+
+#planner .task-card .priority {
+    display: flex !important;
+
+    width: 100% !important;
+    height: auto !important;
+
+    margin-top: 10px !important;
+
+    padding: 5px 10px !important;
+
+    align-items: center !important;
+
+    border-radius: 20px !important;
+
+    font-size: 11px !important;
+    font-weight: 700 !important;
+
+    flex-shrink: 0 !important;
+
+    position: static !important;
+
+    box-sizing: border-box !important;
+}
+
+
+/* ===============================
+   TASK LIST
+================================ */
+
+#planner .task-list {
+    display: flex !important;
+    flex-direction: column !important;
+
+    gap: 15px !important;
+
+    overflow: visible !important;
+}
+
+/* =====================================================
+   PLANNER COLUMN - FINAL SCROLL FIX
+===================================================== */
+
+#planner .planner-board {
+    align-items: stretch !important;
+}
+
+
+/* COLUMN */
+
+#planner .planner-column {
+    height: 520px !important;
+    min-height: 520px !important;
+    max-height: 520px !important;
+
+    padding: 14px !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+
+    overflow: hidden !important;
+
+    box-sizing: border-box !important;
+}
+
+
+/* HEADER STAYS AT TOP */
+
+#planner .column-header {
+    flex: 0 0 auto !important;
+
+    margin-bottom: 14px !important;
+}
+
+
+/* ONLY TASKS SCROLL */
+
+#planner .task-list {
+    flex: 1 1 auto !important;
+
+    min-height: 0 !important;
+    max-height: none !important;
+
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+
+    padding-right: 6px !important;
+    padding-bottom: 6px !important;
+
+    box-sizing: border-box !important;
+}
+
+
+/* TASK CARDS MUST STAY INSIDE LIST */
+
+#planner .task-card {
+    flex: 0 0 auto !important;
+}
+
+
+/* CLEAN SCROLLBAR */
+
+#planner .task-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+#planner .task-list::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+#planner .task-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+
+/* SPACE BEFORE ANNUAL ACTIVITIES */
+
+#planner .annual-activities-section {
+    position: relative !important;
+    clear: both !important;
+
+    margin-top: 30px !important;
+}
+
+/* =====================================================
+   SETTINGS - BACKUP & RESET SIDE BY SIDE
+===================================================== */
+
+.settings-data-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+
+    width: 100%;
+    margin-top: 20px;
+
+    align-items: stretch;
+}
+
+
+.settings-data-card {
+    min-width: 0;
+    width: 100%;
+}
+
+
+.settings-data-card .song-card {
+    height: 100%;
+    box-sizing: border-box;
+    margin: 0 !important;
+}
+
+
+/* MOBILE */
+
+@media (max-width: 850px) {
+
+    .settings-data-row {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+/* =========================================================
+   CHURCHHQ AUDIT LOG
+   FINAL BLUE + BEIGE PROFESSIONAL STYLE
+========================================================= */
+
+
+/* =========================================================
+   AUDIT MAIN CARD
+========================================================= */
+
+#settings .audit-log-card,
+#settings .audit-card {
+
+    background:
+        var(--church-white);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-top:
+        5px solid
+        var(--church-blue);
+
+    border-radius:
+        14px;
+
+    padding:
+        22px;
+
+    box-shadow:
+        0 5px 18px
+        rgba(25,27,30,.06);
+
+}
+
+
+/* =========================================================
+   AUDIT TITLE
+========================================================= */
+
+#settings .audit-log-card h3,
+#settings .audit-card h3 {
+
+    color:
+        var(--church-blue-dark) !important;
+
+    font-size:
+        18px;
+
+    font-weight:
+        700;
+
+    margin-bottom:
+        6px;
+
+}
+
+
+#settings .audit-log-card p,
+#settings .audit-card p {
+
+    color:
+        var(--church-gray);
+
+}
+
+
+/* =========================================================
+   AUDIT FILTER AREA
+========================================================= */
+
+#settings .audit-filters {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        minmax(220px, 2fr)
+        repeat(3, minmax(140px, 1fr));
+
+    gap:
+        12px;
+
+    margin:
+        18px 0;
+
+    padding:
+        16px;
+
+    background:
+        var(--church-cream);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-radius:
+        12px;
+
+}
+
+
+/* =========================================================
+   AUDIT SEARCH / SELECT / DATE
+========================================================= */
+
+#settings #auditSearch,
+#settings #auditRoleFilter,
+#settings #auditModuleFilter,
+#settings #auditDateFilter {
+
+    width:
+        100%;
+
+    min-height:
+        42px;
+
+    padding:
+        10px 12px;
+
+    background:
+        var(--church-white);
+
+    color:
+        var(--church-dark);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-radius:
+        9px;
+
+    font-size:
+        13px;
+
+    outline:
+        none;
+
+}
+
+
+#settings #auditSearch:focus,
+#settings #auditRoleFilter:focus,
+#settings #auditModuleFilter:focus,
+#settings #auditDateFilter:focus {
+
+    border-color:
+        var(--church-blue) !important;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(22,79,148,.10);
+
+}
+
+
+/* =========================================================
+   AUDIT TABLE WRAPPER
+========================================================= */
+
+#settings .audit-table-wrapper,
+#settings .audit-table-container {
+
+    width:
+        100%;
+
+    overflow-x:
+        auto;
+
+    background:
+        var(--church-white);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-radius:
+        12px;
+
+}
+
+
+/* =========================================================
+   AUDIT TABLE
+========================================================= */
+
+#settings .audit-table {
+
+    width:
+        100%;
+
+    border-collapse:
+        collapse;
+
+    background:
+        var(--church-white);
+
+}
+
+
+/* HEADER */
+
+#settings .audit-table thead,
+#settings .audit-table thead tr {
+
+    background:
+        var(--church-blue) !important;
+
+}
+
+
+#settings .audit-table th {
+
+    padding:
+        13px 12px;
+
+    background:
+        var(--church-blue) !important;
+
+    color:
+        #ffffff !important;
+
+    font-size:
+        12px;
+
+    font-weight:
+        700;
+
+    text-align:
+        left;
+
+    white-space:
+        nowrap;
+
+    border:
+        none;
+
+}
+
+
+/* BODY */
+
+#settings .audit-table td {
+
+    padding:
+        12px;
+
+    color:
+        var(--church-dark);
+
+    font-size:
+        12px;
+
+    border-bottom:
+        1px solid
+        var(--church-border);
+
+    vertical-align:
+        middle;
+
+}
+
+
+/* ALTERNATING ROW */
+
+#settings .audit-table tbody tr:nth-child(even) {
+
+    background:
+        var(--church-cream);
+
+}
+
+
+/* HOVER */
+
+#settings .audit-table tbody tr:hover {
+
+    background:
+        var(--church-beige-light);
+
+}
+
+
+/* LAST ROW */
+
+#settings .audit-table tbody tr:last-child td {
+
+    border-bottom:
+        none;
+
+}
+
+
+/* =========================================================
+   ACTION TEXT
+========================================================= */
+
+#settings .audit-table td strong {
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    padding:
+        5px 9px;
+
+    background:
+        rgba(22,79,148,.10);
+
+    color:
+        var(--church-blue-dark);
+
+    border:
+        1px solid
+        rgba(22,79,148,.15);
+
+    border-radius:
+        20px;
+
+    font-size:
+        11px;
+
+    font-weight:
+        700;
+
+}
+
+
+/* =========================================================
+   PAGINATION
+========================================================= */
+
+#settings .audit-pagination {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    gap:
+        10px;
+
+    margin-top:
+        18px;
+
+}
+
+
+#settings .audit-pagination button {
+
+    min-width:
+        38px;
+
+    min-height:
+        38px;
+
+    padding:
+        8px 13px;
+
+    background:
+        var(--church-white);
+
+    color:
+        var(--church-blue);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-radius:
+        9px;
+
+    font-weight:
+        600;
+
+}
+
+
+#settings .audit-pagination button:hover:not(:disabled) {
+
+    background:
+        var(--church-blue);
+
+    color:
+        #ffffff;
+
+    border-color:
+        var(--church-blue);
+
+}
+
+
+#settings .audit-pagination button:disabled {
+
+    opacity:
+        .45;
+
+    cursor:
+        not-allowed;
+
+}
+
+
+#settings .audit-pagination .active {
+
+    background:
+        var(--church-blue);
+
+    color:
+        #ffffff;
+
+    border-color:
+        var(--church-blue);
+
+}
+
+
+/* =========================================================
+   CLEAR AUDIT LOG BUTTON
+========================================================= */
+
+#settings .clear-audit-btn {
+
+    background:
+        #fff;
+
+    color:
+        #A84242;
+
+    border:
+        1px solid
+        #E6B8B8;
+
+    border-radius:
+        9px;
+
+    padding:
+        10px 16px;
+
+    font-weight:
+        600;
+
+}
+
+
+#settings .clear-audit-btn:hover {
+
+    background:
+        #F8EAEA;
+
+    border-color:
+        #D89B9B;
+
+}
+
+
+/* =========================================================
+   MOBILE / TABLET
+========================================================= */
+
+@media (max-width: 900px) {
+
+    #settings .audit-filters {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    #settings .audit-log-card,
+    #settings .audit-card {
+
+        padding:
+            16px;
+
+    }
+
+
+    #settings .audit-filters {
+
+        grid-template-columns:
+            1fr;
+
+        padding:
+            12px;
+
+    }
+
+
+    #settings .audit-table {
+
+        min-width:
+            850px;
+
+    }
+
+
+    #settings .audit-pagination {
+
+        flex-wrap:
+            wrap;
+
+    }
+
+}
+
+
+/* =========================================================
+   DARK MODE
+========================================================= */
+
+body.dark #settings .audit-log-card,
+body.dark #settings .audit-card,
+body.dark #settings .audit-table-wrapper,
+body.dark #settings .audit-table-container {
+
+    background:
+        #19232D;
+
+    border-color:
+        #34414C;
+
+}
+
+
+body.dark #settings .audit-filters {
+
+    background:
+        #111820;
+
+    border-color:
+        #34414C;
+
+}
+
+
+body.dark #settings #auditSearch,
+body.dark #settings #auditRoleFilter,
+body.dark #settings #auditModuleFilter,
+body.dark #settings #auditDateFilter {
+
+    background:
+        #111820;
+
+    color:
+        #ffffff;
+
+    border-color:
+        #46525E;
+
+}
+
+
+body.dark #settings .audit-table {
+
+    background:
+        #19232D;
+
+}
+
+
+body.dark #settings .audit-table td {
+
+    color:
+        #F6F2ED;
+
+    border-color:
+        #34414C;
+
+}
+
+
+body.dark #settings .audit-table tbody tr:nth-child(even) {
+
+    background:
+        #16202A;
+
+}
+
+
+body.dark #settings .audit-table tbody tr:hover {
+
+    background:
+        #22303C;
+
+}
+
+/* =========================================================
+   CHURCHHQ AUDIT LOG
+   FINAL BLUE PROFESSIONAL DESIGN
+========================================================= */
+
+
+/* =========================================================
+   MAIN AUDIT CARD
+========================================================= */
+
+#settings .audit-log-card {
+
+    width: 100%;
+    box-sizing: border-box;
+
+    margin-top: 30px;
+
+    padding: 22px;
+
+    background:
+        var(--church-white);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-top:
+        5px solid
+        var(--church-blue);
+
+    border-radius:
+        14px;
+
+    box-shadow:
+        0 5px 18px
+        rgba(25,27,30,.06);
+
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+#settings .audit-log-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content:
+        space-between;
+
+    gap: 20px;
+
+    margin-bottom:
+        20px;
+
+}
+
+
+#settings .audit-log-header h3 {
+
+    margin:
+        0;
+
+    color:
+        var(--church-blue-dark) !important;
+
+    font-size:
+        19px;
+
+    font-weight:
+        700;
+
+}
+
+
+#settings .audit-log-header p {
+
+    margin:
+        5px 0 0;
+
+    color:
+        var(--church-gray);
+
+    font-size:
+        12px;
+
+    line-height:
+        1.5;
+
+}
+
+
+#settings .audit-header-actions {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        10px;
+
+    flex-wrap:
+        wrap;
+
+}
+
+
+/* =========================================================
+   CLEAR AUDIT BUTTON
+========================================================= */
+
+#settings .clear-audit-btn {
+
+    color:
+        #A84242 !important;
+
+    background:
+        #ffffff !important;
+
+    border:
+        1px solid
+        #E6B8B8 !important;
+
+}
+
+
+#settings .clear-audit-btn:hover {
+
+    color:
+        #8F3030 !important;
+
+    background:
+        #F8EAEA !important;
+
+    border-color:
+        #D89B9B !important;
+
+}
+
+
+/* =========================================================
+   FILTER AREA
+========================================================= */
+
+#settings .audit-filters {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        minmax(200px, 2fr)
+        minmax(130px, 1fr)
+        minmax(150px, 1fr)
+        minmax(150px, 1fr)
+        auto;
+
+    align-items:
+        end;
+
+    gap:
+        12px;
+
+    margin-bottom:
+        18px;
+
+    padding:
+        16px;
+
+    background:
+        var(--church-cream);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-radius:
+        12px;
+
+}
+
+
+/* FILTER GROUP */
+
+#settings .audit-filters .control-group {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        6px;
+
+    min-width:
+        0;
+
+}
+
+
+/* FILTER LABEL */
+
+#settings .audit-filters label {
+
+    color:
+        var(--church-dark);
+
+    font-size:
+        12px;
+
+    font-weight:
+        600;
+
+}
+
+
+/* FILTER INPUTS */
+
+#settings #auditSearch,
+#settings #auditRoleFilter,
+#settings #auditModuleFilter,
+#settings #auditDateFilter {
+
+    width:
+        100%;
+
+    height:
+        42px;
+
+    box-sizing:
+        border-box;
+
+    padding:
+        9px 11px;
+
+    background:
+        var(--church-white);
+
+    color:
+        var(--church-dark);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-radius:
+        9px;
+
+    font-size:
+        13px;
+
+    outline:
+        none;
+
+}
+
+
+/* FOCUS */
+
+#settings #auditSearch:focus,
+#settings #auditRoleFilter:focus,
+#settings #auditModuleFilter:focus,
+#settings #auditDateFilter:focus {
+
+    border-color:
+        var(--church-blue) !important;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(22,79,148,.10);
+
+}
+
+
+/* CLEAR FILTER BUTTON */
+
+#settings .audit-filter-clear {
+
+    display:
+        flex;
+
+    align-items:
+        flex-end;
+
+}
+
+
+#settings .audit-filter-clear button {
+
+    min-height:
+        42px;
+
+}
+
+
+/* =========================================================
+   TABLE WRAPPER
+========================================================= */
+
+#settings .audit-table-wrapper {
+
+    width:
+        100%;
+
+    padding:
+        0 !important;
+
+    margin:
+        0;
+
+    overflow:
+        hidden;
+
+    background:
+        var(--church-white);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-radius:
+        12px;
+
+    box-shadow:
+        none;
+
+}
+
+
+#settings .audit-table-container {
+
+    width:
+        100%;
+
+    overflow-x:
+        auto;
+
+}
+
+
+/* =========================================================
+   AUDIT TABLE
+========================================================= */
+
+#settings .audit-table {
+
+    width:
+        100%;
+
+    min-width:
+        900px;
+
+    border-collapse:
+        collapse;
+
+    border-spacing:
+        0;
+
+    background:
+        var(--church-white);
+
+}
+
+
+/* =========================================================
+   TABLE HEADER
+========================================================= */
+
+#settings .audit-table thead,
+#settings .audit-table thead tr {
+
+    background:
+        var(--church-blue) !important;
+
+}
+
+
+#settings .audit-table th {
+
+    padding:
+        14px 12px;
+
+    background:
+        var(--church-blue) !important;
+
+    color:
+        #ffffff !important;
+
+    text-align:
+        left;
+
+    font-size:
+        12px;
+
+    font-weight:
+        700;
+
+    white-space:
+        nowrap;
+
+    border:
+        none;
+
+    opacity:
+        1 !important;
+
+    visibility:
+        visible !important;
+
+}
+
+
+/* =========================================================
+   TABLE BODY
+========================================================= */
+
+#settings .audit-table td {
+
+    padding:
+        12px;
+
+    color:
+        var(--church-dark) !important;
+
+    font-size:
+        12px;
+
+    line-height:
+        1.45;
+
+    vertical-align:
+        middle;
+
+    border-bottom:
+        1px solid
+        var(--church-border);
+
+}
+
+
+/* ALTERNATING ROW */
+
+#settings .audit-table tbody tr:nth-child(even) {
+
+    background:
+        var(--church-cream);
+
+}
+
+
+/* HOVER */
+
+#settings .audit-table tbody tr:hover {
+
+    background:
+        var(--church-beige-light);
+
+}
+
+
+/* LAST ROW */
+
+#settings .audit-table tbody tr:last-child td {
+
+    border-bottom:
+        none;
+
+}
+
+
+/* =========================================================
+   COLUMN WIDTHS
+========================================================= */
+
+#settings .audit-table th:nth-child(1) {
+
+    min-width:
+        150px;
+
+}
+
+
+#settings .audit-table th:nth-child(2) {
+
+    min-width:
+        180px;
+
+}
+
+
+#settings .audit-table th:nth-child(3) {
+
+    min-width:
+        90px;
+
+}
+
+
+#settings .audit-table th:nth-child(4) {
+
+    min-width:
+        90px;
+
+}
+
+
+#settings .audit-table th:nth-child(5) {
+
+    min-width:
+        130px;
+
+}
+
+
+#settings .audit-table th:nth-child(6) {
+
+    min-width:
+        240px;
+
+}
+
+
+/* =========================================================
+   ACTION BADGE
+========================================================= */
+
+#settings .audit-table td strong {
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    padding:
+        5px 10px;
+
+    background:
+        rgba(22,79,148,.10);
+
+    color:
+        var(--church-blue-dark) !important;
+
+    border:
+        1px solid
+        rgba(22,79,148,.16);
+
+    border-radius:
+        20px;
+
+    font-size:
+        11px;
+
+    font-weight:
+        700;
+
+}
+
+
+/* =========================================================
+   EMPTY TABLE
+========================================================= */
+
+#settings .audit-empty-row {
+
+    padding:
+        25px !important;
+
+    text-align:
+        center;
+
+    color:
+        var(--church-gray) !important;
+
+}
+
+
+/* =========================================================
+   PAGINATION
+========================================================= */
+
+#settings .audit-pagination {
+
+    display:
+        flex;
+
+    justify-content:
+        center;
+
+    align-items:
+        center;
+
+    gap:
+        15px;
+
+    margin-top:
+        18px;
+
+}
+
+
+#settings #auditPageInfo {
+
+    min-width:
+        110px;
+
+    text-align:
+        center;
+
+    color:
+        var(--church-blue-dark);
+
+    font-size:
+        13px;
+
+    font-weight:
+        700;
+
+}
+
+
+#settings .audit-pagination button {
+
+    min-height:
+        38px;
+
+    padding:
+        8px 14px;
+
+}
+
+
+#settings .audit-pagination button:not(:disabled):hover {
+
+    background:
+        var(--church-blue) !important;
+
+    color:
+        #ffffff !important;
+
+    border-color:
+        var(--church-blue) !important;
+
+}
+
+
+#settings .audit-pagination button:disabled {
+
+    opacity:
+        .45;
+
+    cursor:
+        not-allowed;
+
+}
+
+
+/* =========================================================
+   TABLE SCROLLBAR
+========================================================= */
+
+#settings .audit-table-container::-webkit-scrollbar {
+
+    height:
+        8px;
+
+}
+
+
+#settings .audit-table-container::-webkit-scrollbar-track {
+
+    background:
+        var(--church-cream);
+
+}
+
+
+#settings .audit-table-container::-webkit-scrollbar-thumb {
+
+    background:
+        var(--church-blue);
+
+    border-radius:
+        10px;
+
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 1000px) {
+
+    #settings .audit-filters {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+
+    }
+
+
+    #settings .audit-filter-clear {
+
+        grid-column:
+            span 2;
+
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 650px) {
+
+    #settings .audit-log-card {
+
+        padding:
+            15px;
+
+    }
+
+
+    #settings .audit-log-header {
+
+        flex-direction:
+            column;
+
+        align-items:
+            stretch;
+
+    }
+
+
+    #settings .audit-header-actions {
+
+        width:
+            100%;
+
+    }
+
+
+    #settings .audit-header-actions button {
+
+        flex:
+            1;
+
+    }
+
+
+    #settings .audit-filters {
+
+        grid-template-columns:
+            1fr;
+
+        padding:
+            12px;
+
+    }
+
+
+    #settings .audit-filter-clear {
+
+        grid-column:
+            auto;
+
+    }
+
+
+    #settings .audit-filter-clear button {
+
+        width:
+            100%;
+
+    }
+
+
+    #settings .audit-pagination {
+
+        gap:
+            8px;
+
+        flex-wrap:
+            wrap;
+
+    }
+
+}
+
+
+/* =========================================================
+   DARK MODE
+========================================================= */
+
+body.dark #settings .audit-log-card,
+body.dark #settings .audit-table-wrapper {
+
+    background:
+        #19232D;
+
+    border-color:
+        #34414C;
+
+}
+
+
+body.dark #settings .audit-filters {
+
+    background:
+        #111820;
+
+    border-color:
+        #34414C;
+
+}
+
+
+body.dark #settings .audit-filters label {
+
+    color:
+        #F6F2ED;
+
+}
+
+
+body.dark #settings #auditSearch,
+body.dark #settings #auditRoleFilter,
+body.dark #settings #auditModuleFilter,
+body.dark #settings #auditDateFilter {
+
+    background:
+        #111820;
+
+    color:
+        #ffffff;
+
+    border-color:
+        #46525E;
+
+}
+
+
+body.dark #settings .audit-table {
+
+    background:
+        #19232D;
+
+}
+
+
+body.dark #settings .audit-table td {
+
+    color:
+        #F6F2ED !important;
+
+    border-color:
+        #34414C;
+
+}
+
+
+body.dark #settings .audit-table tbody tr:nth-child(even) {
+
+    background:
+        #16202A;
+
+}
+
+
+body.dark #settings .audit-table tbody tr:hover {
+
+    background:
+        #22303C;
+
+}
+
+
+body.dark #settings #auditPageInfo {
+
+    color:
+        #F6F2ED;
+
+}
+
+/* =========================================================
+   CHURCHHQ 2026
+   FINAL MOBILE MODAL SYSTEM
+   ALL STANDARD MODALS
+========================================================= */
+
+
+/* =========================================================
+   DESKTOP / GLOBAL MODAL SAFETY
+========================================================= */
+
+.modal {
+    position: fixed !important;
+    inset: 0 !important;
+
+    width: 100% !important;
+    height: 100% !important;
+    height: 100dvh !important;
+
+    padding: 20px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+
+    box-sizing: border-box !important;
+
+    z-index: 9999 !important;
+
+    -webkit-overflow-scrolling: touch;
+}
+
+
+/* HIDDEN MODAL MUST REMAIN HIDDEN */
+
+.modal.hidden {
+    display: none !important;
+}
+
+
+/* =========================================================
+   STANDARD MODAL CONTENT
+========================================================= */
+
+.modal-content,
+.leader-modal-content,
+.file-folder-modal-content {
+
+    position: relative !important;
+
+    width: min(650px, 100%) !important;
+    max-width: 650px !important;
+
+    height: auto !important;
+    min-height: 0 !important;
+
+    max-height: calc(100dvh - 40px) !important;
+
+    margin: auto !important;
+
+    padding: 24px !important;
+
+    box-sizing: border-box !important;
+
+    background:
+        var(--church-white, #ffffff);
+
+    border:
+        1px solid
+        var(--church-border, #e2e8f0);
+
+    border-top:
+        5px solid
+        var(--church-blue, #164F94);
+
+    border-radius: 16px !important;
+
+    box-shadow:
+        0 20px 55px
+        rgba(15, 23, 42, .20);
+
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+
+    overscroll-behavior: contain;
+
+    -webkit-overflow-scrolling: touch;
+}
+
+
+/* =========================================================
+   MODAL HEADER
+========================================================= */
+
+.modal-content .modal-header,
+.leader-modal-content .modal-header,
+.file-folder-modal-content .modal-header {
+
+    position: sticky !important;
+
+    top: -24px !important;
+
+    z-index: 20 !important;
+
+    margin:
+        -4px 0 18px 0 !important;
+
+    padding:
+        10px 0 14px 0 !important;
+
+    background:
+        var(--church-white, #ffffff) !important;
+
+    border-bottom:
+        1px solid
+        var(--church-border, #e2e8f0) !important;
+
+}
+
+
+/* HEADER TEXT */
+
+.modal-content .modal-header h2,
+.modal-content .modal-header h3,
+.leader-modal-content .modal-header h2,
+.leader-modal-content .modal-header h3 {
+
+    margin: 0 !important;
+
+    color:
+        var(--church-blue-dark, #123F77) !important;
+
+    line-height: 1.25 !important;
+}
+
+
+/* =========================================================
+   CLOSE BUTTON
+========================================================= */
+
+.modal-content .close-btn,
+.modal-content .modal-close,
+.leader-modal-content .close-btn,
+.leader-modal-content .modal-close {
+
+    flex-shrink: 0 !important;
+
+    width: 34px !important;
+    height: 34px !important;
+
+    padding: 0 !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    border-radius: 50% !important;
+
+    line-height: 1 !important;
+}
+
+
+/* =========================================================
+   FORM SAFETY
+========================================================= */
+
+.modal-content .form-group,
+.leader-modal-content .form-group,
+.file-folder-modal-content .form-group {
+
+    min-width: 0 !important;
+}
+
+
+/* INPUTS MUST NEVER OVERFLOW */
+
+.modal-content input,
+.modal-content select,
+.modal-content textarea,
+.leader-modal-content input,
+.leader-modal-content select,
+.leader-modal-content textarea,
+.file-folder-modal-content input,
+.file-folder-modal-content select,
+.file-folder-modal-content textarea {
+
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+
+    box-sizing: border-box !important;
+}
+
+
+/* TEXTAREA */
+
+.modal-content textarea,
+.leader-modal-content textarea,
+.file-folder-modal-content textarea {
+
+    min-height: 90px !important;
+    max-height: 220px !important;
+
+    resize: vertical !important;
+}
+
+
+/* =========================================================
+   FOOTER / ACTION BUTTON AREA
+========================================================= */
+
+.modal-content .modal-footer,
+.modal-content .modal-actions,
+.leader-modal-content .modal-footer,
+.leader-modal-content .modal-actions,
+.file-folder-modal-content .modal-footer,
+.file-folder-modal-content .modal-actions {
+
+    position: sticky !important;
+
+    bottom: -24px !important;
+
+    z-index: 20 !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+
+    gap: 10px !important;
+
+    margin-top: 20px !important;
+
+    padding:
+        14px 0 10px 0 !important;
+
+    background:
+        var(--church-white, #ffffff) !important;
+
+    border-top:
+        1px solid
+        var(--church-border, #e2e8f0) !important;
+
+}
+
+
+/* =========================================================
+   TABLET + CELLPHONE
+========================================================= */
+
+@media (max-width: 768px) {
+
+    /* MODAL BACKDROP */
+
+    .modal {
+
+        padding:
+            max(8px, env(safe-area-inset-top))
+            8px
+            max(8px, env(safe-area-inset-bottom))
+            8px !important;
+
+        align-items:
+            flex-start !important;
+
+    }
+
+
+    /* MODAL BOX */
+
+    .modal-content,
+    .leader-modal-content,
+    .file-folder-modal-content {
+
+        width: 100% !important;
+        max-width: 100% !important;
+
+        height: auto !important;
+
+        max-height:
+            calc(
+                100dvh -
+                max(16px, env(safe-area-inset-top)) -
+                max(16px, env(safe-area-inset-bottom))
+            ) !important;
+
+        margin: 0 auto !important;
+
+        padding:
+            18px 14px !important;
+
+        border-radius:
+            14px !important;
+
+        overflow-y:
+            auto !important;
+
+        overflow-x:
+            hidden !important;
+
+    }
+
+
+    /* HEADER */
+
+    .modal-content .modal-header,
+    .leader-modal-content .modal-header,
+    .file-folder-modal-content .modal-header {
+
+        top:
+            -18px !important;
+
+        margin-bottom:
+            14px !important;
+
+        padding:
+            12px 0 !important;
+
+    }
+
+
+    .modal-content .modal-header h2,
+    .leader-modal-content .modal-header h2 {
+
+        font-size:
+            19px !important;
+
+    }
+
+
+    .modal-content .modal-header h3,
+    .leader-modal-content .modal-header h3 {
+
+        font-size:
+            17px !important;
+
+    }
+
+
+    /* =========================================
+       ALL TWO-COLUMN FORMS → ONE COLUMN
+    ========================================= */
+
+    .modal-content .form-row,
+    .leader-modal-content .form-row,
+    .file-folder-modal-content .form-row {
+
+        display:
+            grid !important;
+
+        grid-template-columns:
+            minmax(0, 1fr) !important;
+
+        gap:
+            12px !important;
+
+        width:
+            100% !important;
+
+    }
+
+
+    /* FORM GROUP */
+
+    .modal-content .form-group,
+    .leader-modal-content .form-group,
+    .file-folder-modal-content .form-group {
+
+        width:
+            100% !important;
+
+        margin-bottom:
+            14px !important;
+
+    }
+
+
+    /* INPUTS:
+       16PX PREVENTS IOS AUTO ZOOM */
+
+    .modal-content input,
+    .modal-content select,
+    .modal-content textarea,
+    .leader-modal-content input,
+    .leader-modal-content select,
+    .leader-modal-content textarea,
+    .file-folder-modal-content input,
+    .file-folder-modal-content select,
+    .file-folder-modal-content textarea {
+
+        width:
+            100% !important;
+
+        max-width:
+            100% !important;
+
+        min-width:
+            0 !important;
+
+        font-size:
+            16px !important;
+
+    }
+
+
+    /* =========================================
+       BUTTON AREA
+    ========================================= */
+
+    .modal-content .modal-footer,
+    .modal-content .modal-actions,
+    .leader-modal-content .modal-footer,
+    .leader-modal-content .modal-actions,
+    .file-folder-modal-content .modal-footer,
+    .file-folder-modal-content .modal-actions {
+
+        bottom:
+            -18px !important;
+
+        display:
+            grid !important;
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr)) !important;
+
+        gap:
+            8px !important;
+
+        padding:
+            12px 0 8px !important;
+
+    }
+
+
+    /* ACTION BUTTON */
+
+    .modal-content .modal-footer button,
+    .modal-content .modal-actions button,
+    .leader-modal-content .modal-footer button,
+    .leader-modal-content .modal-actions button,
+    .file-folder-modal-content .modal-footer button,
+    .file-folder-modal-content .modal-actions button {
+
+        width:
+            100% !important;
+
+        min-width:
+            0 !important;
+
+        min-height:
+            44px !important;
+
+        padding:
+            10px 12px !important;
+
+        white-space:
+            normal !important;
+
+    }
+
+}
+
+
+/* =========================================================
+   SMALL CELLPHONE
+========================================================= */
+
+@media (max-width: 480px) {
+
+    .modal {
+
+        padding:
+            5px !important;
+
+    }
+
+
+    .modal-content,
+    .leader-modal-content,
+    .file-folder-modal-content {
+
+        max-height:
+            calc(100dvh - 10px) !important;
+
+        padding:
+            16px 12px !important;
+
+        border-radius:
+            12px !important;
+
+    }
+
+
+    /* HEADER */
+
+    .modal-content .modal-header,
+    .leader-modal-content .modal-header,
+    .file-folder-modal-content .modal-header {
+
+        top:
+            -16px !important;
+
+        padding:
+            10px 0 !important;
+
+    }
+
+
+    /* SMALL CLOSE BUTTON */
+
+    .modal-content .close-btn,
+    .modal-content .modal-close,
+    .leader-modal-content .close-btn,
+    .leader-modal-content .modal-close {
+
+        width:
+            32px !important;
+
+        height:
+            32px !important;
+
+    }
+
+
+    /* FOOTER */
+
+    .modal-content .modal-footer,
+    .modal-content .modal-actions,
+    .leader-modal-content .modal-footer,
+    .leader-modal-content .modal-actions,
+    .file-folder-modal-content .modal-footer,
+    .file-folder-modal-content .modal-actions {
+
+        bottom:
+            -16px !important;
+
+        grid-template-columns:
+            1fr !important;
+
+    }
+
+
+    /* FULL WIDTH MOBILE BUTTONS */
+
+    .modal-content .modal-footer button,
+    .modal-content .modal-actions button,
+    .leader-modal-content .modal-footer button,
+    .leader-modal-content .modal-actions button,
+    .file-folder-modal-content .modal-footer button,
+    .file-folder-modal-content .modal-actions button {
+
+        width:
+            100% !important;
+
+    }
+
+}
+
+
+/* =========================================================
+   LANDSCAPE PHONE
+========================================================= */
+
+@media
+(max-width: 900px)
+and (orientation: landscape) {
+
+    .modal {
+
+        align-items:
+            flex-start !important;
+
+        padding:
+            6px !important;
+
+    }
+
+
+    .modal-content,
+    .leader-modal-content,
+    .file-folder-modal-content {
+
+        max-height:
+            calc(100dvh - 12px) !important;
+
+        padding:
+            14px !important;
+
+    }
+
+}
+
+
+/* =========================================================
+   DARK MODE
+========================================================= */
+
+body.dark .modal-content,
+body.dark .leader-modal-content,
+body.dark .file-folder-modal-content {
+
+    background:
+        #19232D !important;
+
+    border-color:
+        #34414C !important;
+
+}
+
+
+body.dark .modal-content .modal-header,
+body.dark .modal-content .modal-footer,
+body.dark .modal-content .modal-actions,
+body.dark .leader-modal-content .modal-header,
+body.dark .leader-modal-content .modal-footer,
+body.dark .leader-modal-content .modal-actions,
+body.dark .file-folder-modal-content .modal-header,
+body.dark .file-folder-modal-content .modal-footer,
+body.dark .file-folder-modal-content .modal-actions {
+
+    background:
+        #19232D !important;
+
+    border-color:
+        #34414C !important;
+
+}

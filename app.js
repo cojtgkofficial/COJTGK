@@ -15,6 +15,16 @@ const churchSupabase = window.supabase.createClient(
 let currentUser = null;
 let currentUserRole = null;
 
+// =====================================
+// AUDIT LOG GLOBAL DATA
+// =====================================
+
+let auditLogs = [];
+
+let auditCurrentPage = 1;
+
+const auditPageSize = 10;
+
 console.log("✅ ChurchHQ Supabase client created.");
 console.log(
     "Supabase .from():",
@@ -459,7 +469,7 @@ function openLeaderModal() {
 
     });
 
-
+    populateLeaderPhotoSelect();
     modal.classList.remove("hidden");
 
 }
@@ -475,6 +485,7 @@ function closeLeaderModal() {
         document.getElementById(
             "leaderModal"
         );
+
 
     if (modal) {
         modal.classList.add("hidden");
@@ -542,6 +553,186 @@ if (leaderMemberSelect) {
 
 let churchLeaders = [];
 
+// =====================================================
+// LEADER PHOTO LIST
+// Manual image list from images/leaders/
+// =====================================================
+
+const leaderImages = [
+
+    "Head Pastor.jpg",
+    "Pastor 1.jpg",
+    "Pastor 2.jpg",
+    "Pastor 3.jpg",
+    "Adult Ministry Leader.jpg",
+    "Womens Fellowship Leader.jpg",
+    "Mens Fellowship Leader.jpg",
+    "Youth Leader 1.jpg",
+    "Youth Leader 2.jpg",
+    "Young Pro Leader 1.jpg",
+    "Young Pro Leader 2.jpg",
+    "Children Ministry Leader.jpg",
+    "Music Ministry Leader.jpg",
+    "Prayer and Fasting Ministry Leader.jpg",
+    "Ushering and Follow up Ministry Leader.jpg",
+    "Security Ministry Leader.jpg",
+    "Secretary.jpg",
+    "Treasurer.jpg"
+
+];
+
+// =====================================================
+// POPULATE LEADER PHOTO SELECT
+// =====================================================
+
+function populateLeaderPhotoSelect(
+    selectedPath = ""
+) {
+
+    const select =
+        document.getElementById(
+            "leaderPhotoSelect"
+        );
+
+
+    if (!select) {
+        return;
+    }
+
+
+    select.innerHTML = `
+        <option value="">
+            No Photo / Use Initials
+        </option>
+    `;
+
+
+    leaderImages.forEach(
+        fileName => {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+
+            const fullPath =
+                `images/leaders/${fileName}`;
+
+
+            option.value =
+                fullPath;
+
+
+            option.textContent =
+                fileName;
+
+
+            if (
+                fullPath ===
+                selectedPath
+            ) {
+
+                option.selected =
+                    true;
+
+            }
+
+
+            select.appendChild(
+                option
+            );
+
+        }
+    );
+
+
+    updateLeaderPhotoPreview(
+        select.value
+    );
+
+}
+
+// =====================================================
+// LEADER PHOTO PREVIEW
+// =====================================================
+
+function updateLeaderPhotoPreview(
+    imagePath
+) {
+
+    const preview =
+        document.getElementById(
+            "leaderPhotoPreview"
+        );
+
+    const text =
+        document.getElementById(
+            "leaderPhotoPreviewText"
+        );
+
+
+    if (!preview) {
+        return;
+    }
+
+
+    if (!imagePath) {
+
+        preview.src = "";
+
+        preview.style.display =
+            "none";
+
+
+        if (text) {
+
+            text.textContent =
+                "No photo selected.";
+
+        }
+
+
+        return;
+    }
+
+
+    preview.src =
+        imagePath;
+
+    preview.style.display =
+        "block";
+
+
+    if (text) {
+
+        text.textContent =
+            imagePath;
+
+    }
+
+}
+
+const leaderPhotoSelect =
+    document.getElementById(
+        "leaderPhotoSelect"
+    );
+
+
+if (leaderPhotoSelect) {
+
+    leaderPhotoSelect.addEventListener(
+        "change",
+        function () {
+
+            updateLeaderPhotoPreview(
+                this.value
+            );
+
+        }
+    );
+
+}
 
 // =====================================================
 // LEADERS - SUPABASE READ
@@ -599,8 +790,9 @@ async function loadLeadersFromSupabase() {
                     level:
                         Number(
                             leader.level || 3
-                        )
-
+                        ),
+                        imagePath:
+    leader.image_path || ""
                 })
             );
 
@@ -667,7 +859,11 @@ async function saveLeaderToSupabase(leader) {
                         leader.slotKey,
 
                     level:
-                        leader.level || 3
+                        leader.level || 3,
+
+                        image_path:
+    leader.imagePath || ""
+
                 }])
                 .select()
                 .single();
@@ -762,6 +958,15 @@ async function saveLeaderAssignment() {
             ? slotInput.value
             : "";
 
+const photoSelect =
+    document.getElementById(
+        "leaderPhotoSelect"
+    );
+
+const imagePath =
+    photoSelect
+        ? photoSelect.value
+        : "";
 
     // =====================================
     // VALIDATION
@@ -845,7 +1050,10 @@ async function saveLeaderAssignment() {
                 churchLeaders[index].slotKey ||
                 `leader-${churchLeaders[index].id}`,
 
-            level
+            level,
+
+            imagePath:
+    imagePath || ""
 
         };
 
@@ -886,9 +1094,42 @@ async function saveLeaderAssignment() {
             level:
                 Number(
                     updatedLeader.level || 3
-                )
+                ),
+                imagePath:
+    updatedLeader.image_path || ""
 
         };
+
+// =====================================
+// AUDIT - EDIT LEADER
+// =====================================
+
+await writeAuditLog(
+    "EDIT",
+    "Leaders",
+    `Updated leader: ${updatedLeader.member_name || selectedMember.name}`,
+    updatedLeader.id,
+    {
+        memberName:
+            updatedLeader.member_name ||
+            selectedMember.name ||
+            "",
+
+        position:
+            updatedLeader.position ||
+            position,
+
+        level:
+            Number(
+                updatedLeader.level ||
+                level
+            ),
+
+        imagePath:
+            updatedLeader.image_path ||
+            ""
+    }
+);
 
     }
 
@@ -912,7 +1153,10 @@ async function saveLeaderAssignment() {
             level,
 
             slotKey:
-                `leader-${Date.now()}`
+                `leader-${Date.now()}`,
+
+                imagePath:
+        imagePath || ""
 
         };
 
@@ -953,9 +1197,42 @@ async function saveLeaderAssignment() {
             level:
                 Number(
                     savedLeader.level || 3
-                )
+                ),
+                imagePath:
+    savedLeader.image_path || ""
 
         });
+
+        // =====================================
+// AUDIT - ADD LEADER
+// =====================================
+
+await writeAuditLog(
+    "ADD",
+    "Leaders",
+    `Added leader: ${savedLeader.member_name || selectedMember.name}`,
+    savedLeader.id,
+    {
+        memberName:
+            savedLeader.member_name ||
+            selectedMember.name ||
+            "",
+
+        position:
+            savedLeader.position ||
+            position,
+
+        level:
+            Number(
+                savedLeader.level ||
+                level
+            ),
+
+        imagePath:
+            savedLeader.image_path ||
+            ""
+    }
+);
 
     }
 
@@ -981,70 +1258,6 @@ async function saveLeaderAssignment() {
     closeLeaderModal();
 
 }
-
-    // =====================================================
-// LEADERS - SUPABASE UPDATE
-// =====================================================
-
-async function updateLeaderInSupabase(leader) {
-
-    try {
-
-        const { data, error } =
-            await churchSupabase
-                .from("church_leaders")
-                .update({
-                    member_id:
-                        leader.memberId,
-
-                    member_name:
-                        leader.memberName || "",
-
-                    position:
-                        leader.position || "",
-
-                    slot_key:
-                        leader.slotKey || "",
-
-                    level:
-                        leader.level || 3
-                })
-                .eq("id", leader.id)
-                .select()
-                .single();
-
-
-        if (error) {
-
-            console.error(
-                "❌ Failed to update leader in Supabase:",
-                error
-            );
-
-            return null;
-        }
-
-
-        console.log(
-            "✅ Leader updated in Supabase:",
-            data
-        );
-
-
-        return data;
-
-    } catch (error) {
-
-        console.error(
-            "❌ Leader Supabase update error:",
-            error
-        );
-
-        return null;
-    }
-
-}
-
 
 
 
@@ -1410,71 +1623,79 @@ function renderLeaders() {
                         leader.id;
 
 
-                    card.dataset.level =
-                        levelNumber;
-
-
                     card.innerHTML = `
 
-                        <div class="leader-card">
+    <div class="leader-card">
 
-                            <div class="leader-card-avatar">
+        <div class="leader-card-avatar">
 
-                                ${initials}
+            ${
+                leader.imagePath
+                    ? `
+                        <img
+                            src="${leader.imagePath}"
+                            alt="Leader Photo"
+                            class="leader-photo"
+                        >
+                    `
+                    : `
+                        <span>
+                            ${initials}
+                        </span>
+                    `
+            }
 
-                            </div>
-
-
-                            <h3>
-
-                                ${memberName}
-
-                            </h3>
-
-
-                            <div class="leader-position">
-
-                                ${
-                                    leader.position ||
-                                    "Leader"
-                                }
-
-                            </div>
+        </div>
 
 
-                            <div class="leader-contact">
-
-                                ${contact}
-
-                            </div>
+        <h3>
+            ${memberName}
+        </h3>
 
 
-                            <div class="leader-card-actions">
+        <div class="leader-position">
 
-                                <button
-                                    type="button"
-                                    class="secondary-btn"
-                                    data-admin-only="true"
-                                    onclick="editLeader(${leader.id})"
-                                >
-                                    ✏️ Edit
-                                </button>
+            ${
+                leader.position ||
+                "Leader"
+            }
+
+        </div>
 
 
-                                <button
-                                    type="button"
-                                    class="secondary-btn leader-delete-btn"
-                                    data-admin-only="true"
-                                    onclick="deleteLeader(${leader.id})"
-                                >
-                                    ✖ Delete
-                                </button>
+        <div class="leader-contact">
 
-                            </div>
+            ${contact}
 
-                        </div>
+        </div>
 
-                    `;
+
+        <div class="leader-card-actions">
+
+            <button
+                type="button"
+                class="secondary-btn"
+                data-admin-only="true"
+                onclick="editLeader(${leader.id})"
+            >
+                ✏️ Edit
+            </button>
+
+
+            <button
+                type="button"
+                class="secondary-btn leader-delete-btn"
+                data-admin-only="true"
+                onclick="deleteLeader(${leader.id})"
+            >
+                ✖ Delete
+            </button>
+
+        </div>
+
+    </div>
+
+`;
 
 
                     levelRow.appendChild(
@@ -1605,6 +1826,9 @@ function editLeader(id) {
             "leaderModalTitle"
         );
 
+    populateLeaderPhotoSelect(
+    leader.imagePath || ""
+);
 
     const member =
         members.find(
@@ -1663,15 +1887,12 @@ function editLeader(id) {
 }
 
 
+
 // =====================================================
 // DELETE LEADER
 // =====================================================
 
 async function deleteLeader(id) {
-
-    if (!requireAdmin()) {
-        return;
-    }
 
     if (!requireAdmin()) {
         return;
@@ -1713,6 +1934,32 @@ async function deleteLeader(id) {
 
         return;
     }
+
+    // =====================================
+// AUDIT - DELETE LEADER
+// =====================================
+
+await writeAuditLog(
+    "DELETE",
+    "Leaders",
+    `Deleted leader: ${leader.memberName || "Unknown Leader"}`,
+    leader.id,
+    {
+        memberName:
+            leader.memberName || "",
+
+        position:
+            leader.position || "",
+
+        level:
+            Number(
+                leader.level || 3
+            ),
+
+        imagePath:
+            leader.imagePath || ""
+    }
+);
 
     churchLeaders =
         churchLeaders.filter(
@@ -1796,19 +2043,45 @@ async function updateLeaderInSupabase(leader) {
 
     try {
 
-        const { data, error } =
+        const {
+            data,
+            error
+        } =
             await churchSupabase
+
                 .from("church_leaders")
+
                 .update({
-                    member_id: leader.memberId,
-                    member_name: leader.memberName || "",
-                    position: leader.position || "",
-                    slot_key: leader.slotKey || "",
-                    level: leader.level || 3
+
+                    member_id:
+                        leader.memberId,
+
+                    member_name:
+                        leader.memberName || "",
+
+                    position:
+                        leader.position || "",
+
+                    slot_key:
+                        leader.slotKey || "",
+
+                    level:
+                        leader.level || 3,
+
+                    image_path:
+                        leader.imagePath || ""
+
                 })
-                .eq("id", leader.id)
+
+                .eq(
+                    "id",
+                    leader.id
+                )
+
                 .select()
+
                 .single();
+
 
         if (error) {
 
@@ -1820,12 +2093,15 @@ async function updateLeaderInSupabase(leader) {
             return null;
         }
 
+
         console.log(
             "✅ Leader updated in Supabase:",
             data
         );
 
+
         return data;
+
 
     } catch (error) {
 
@@ -1836,6 +2112,7 @@ async function updateLeaderInSupabase(leader) {
 
         return null;
     }
+
 }
 
 // =====================================
@@ -2230,26 +2507,193 @@ async function deleteAnnouncementFromSupabase(id) {
     }
 }
 
-// ---------- Navigation ----------
+// =====================================
+// PAGE NAVIGATION WITH ROLE ACCESS
+// =====================================
+
 function showPage(pageId) {
-    document.querySelectorAll('.page').forEach(page => {
-        page.classList.add('hidden');
-    });
 
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.classList.remove('active');
-    });
+    // =====================================
+    // VIEWER RESTRICTED PAGES
+    // =====================================
 
-    const targetPage = document.getElementById(pageId);
+    const viewerRestrictedPages = [
+
+        "members",
+        "leaders",
+        "attendance",
+        "reports",
+        "settings"
+
+    ];
+
+
+    if (
+        isViewerUser() &&
+        viewerRestrictedPages.includes(
+            pageId
+        )
+    ) {
+
+        console.warn(
+            "🚫 Viewer attempted to open restricted page:",
+            pageId
+        );
+
+
+        alert(
+            "You do not have permission to access this page."
+        );
+
+
+        pageId =
+            "dashboard";
+
+    }
+
+
+    // =====================================
+    // HIDE ALL PAGES
+    // =====================================
+
+    document
+        .querySelectorAll(
+            ".page"
+        )
+        .forEach(page => {
+
+            page.classList.add(
+                "hidden"
+            );
+
+        });
+
+
+    // =====================================
+    // REMOVE ACTIVE NAV
+    // =====================================
+
+    document
+        .querySelectorAll(
+            ".nav-item"
+        )
+        .forEach(item => {
+
+            item.classList.remove(
+                "active"
+            );
+
+        });
+
+
+    // =====================================
+    // SHOW TARGET PAGE
+    // =====================================
+
+    const targetPage =
+        document.getElementById(
+            pageId
+        );
+
+
     if (targetPage) {
-        targetPage.classList.remove('hidden');
+
+        targetPage.classList.remove(
+            "hidden"
+        );
+
     }
 
-    const activeNav = document.querySelector(`.nav-item[onclick*="${pageId}"]`);
-    if (activeNav) {
-        activeNav.classList.add('active');
-    }
+if (
+    pageId === "settings" &&
+    isAdminUser()
+) {
+
+    loadAuditLogsFromSupabase();
+
 }
+
+// =====================================
+// AUDIT - PAGE VIEW
+// =====================================
+
+if (
+    currentUser &&
+    currentUserRole
+) {
+
+    const pageNames = {
+
+        dashboard:
+            "Dashboard",
+
+        planner:
+            "Planner",
+
+        "sunday-service":
+            "Sunday Service",
+
+        "midweek-service":
+            "Midweek Service",
+
+        songs:
+            "Song Library",
+
+        members:
+            "Members",
+
+        leaders:
+            "Leaders",
+
+        attendance:
+            "Attendance",
+
+        files:
+            "Files",
+
+        reports:
+            "Reports",
+
+        settings:
+            "Settings"
+
+    };
+
+
+    const readablePageName =
+        pageNames[pageId] ||
+        pageId;
+
+
+    writeAuditLog(
+        "VIEW",
+        readablePageName,
+        `${currentUserRole} viewed ${readablePageName}.`
+    );
+
+}
+
+    // =====================================
+    // ACTIVE SIDEBAR ITEM
+    // =====================================
+
+    const activeNav =
+        document.querySelector(
+            `.nav-item[onclick*="${pageId}"]`
+        );
+
+
+    if (activeNav) {
+
+        activeNav.classList.add(
+            "active"
+        );
+
+    }
+
+}
+
+
 
 // ---------- Dark Mode ----------
 const themeBtn = document.getElementById("themeBtn");
@@ -2337,7 +2781,36 @@ const updatedInSupabase =
 
     targetArray[existingIndex] = serviceRecord;
 
-} else {
+// =====================================
+// AUDIT - EDIT SERVICE RECORD
+// =====================================
+
+await writeAuditLog(
+    "EDIT",
+    type === "sunday"
+        ? "Sunday Service"
+        : "Midweek Service",
+    `Updated ${
+        type === "sunday"
+            ? "Sunday"
+            : "Midweek"
+    } Service record for ${dateValue}`,
+    dateValue,
+    {
+        date: dateValue,
+        preacher:
+            serviceRecord.preacher || "",
+        messageTitle:
+            serviceRecord.messageTitle || "",
+        worshipLeader:
+            serviceRecord.worshipLeader || ""
+    }
+);
+
+} 
+
+
+else {
 
     const savedToSupabase =
         await saveServiceToSupabase(
@@ -2355,6 +2828,32 @@ const updatedInSupabase =
     }
 
     targetArray.push(serviceRecord);
+
+    // =====================================
+// AUDIT - ADD SERVICE RECORD
+// =====================================
+
+await writeAuditLog(
+    "ADD",
+    type === "sunday"
+        ? "Sunday Service"
+        : "Midweek Service",
+    `Added ${
+        type === "sunday"
+            ? "Sunday"
+            : "Midweek"
+    } Service record for ${dateValue}`,
+    dateValue,
+    {
+        date: dateValue,
+        preacher:
+            serviceRecord.preacher || "",
+        messageTitle:
+            serviceRecord.messageTitle || "",
+        worshipLeader:
+            serviceRecord.worshipLeader || ""
+    }
+);
 }
 
     targetArray.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -2414,51 +2913,284 @@ function loadServiceRecord(type, date) {
 }
 
 function renderServiceHistory(type) {
-    const listBody = document.getElementById(`${type}HistoryBody`);
-    if (!listBody) return;
 
-    const targetArray = type === "sunday" ? sundayServices : midweekServices;
-    listBody.innerHTML = "";
+    const listBody =
+        document.getElementById(
+            `${type}HistoryBody`
+        );
 
-    if (targetArray.length === 0) {
-        listBody.innerHTML = `<tr><td colspan="4" style="padding:15px; text-align:center; color:#9ca3af;">No saved records found.</td></tr>`;
+    if (!listBody) {
         return;
     }
 
-    targetArray.forEach(record => {
-        const tr = document.createElement("tr");
-        tr.style.borderBottom = "1px solid #f1f5f9";
 
-        tr.innerHTML = `
-            <td style="padding: 10px;"><b>${record.date}</b></td>
-            <td style="padding: 10px;">${record.worshipLeader || '-'}</td>
-            <td style="padding: 10px;">${record.preacher || '-'}</td>
-            <td style="padding: 10px; display:flex; gap:8px;">
-                <button
-    type="button"
-    class="secondary-btn"
-    data-admin-only="true"
-    style="padding: 3px 8px; font-size: 12px;"
-    onclick="loadServiceRecord('${type}', '${record.date}')"
->
-    ✏️ Load/Edit
-</button>
+    const targetArray =
+        type === "sunday"
+            ? sundayServices
+            : midweekServices;
 
-<button
-    type="button"
-    class="secondary-btn"
-    data-admin-only="true"
-    style="padding: 3px 8px; font-size: 12px; color:#ef4444; border-color:#fca5a5;"
-    onclick="deleteServiceRecord('${type}', '${record.date}')"
->
-    ❌ Delete
-</button>
-            </td>
+
+    listBody.innerHTML = "";
+
+
+    // =====================================
+    // NO RECORDS
+    // =====================================
+
+    if (targetArray.length === 0) {
+
+        const colspan =
+            type === "midweek"
+                ? 5
+                : 4;
+
+        listBody.innerHTML = `
+            <tr>
+                <td
+                    colspan="${colspan}"
+                    style="
+                        padding:15px;
+                        text-align:center;
+                        color:#9ca3af;
+                    "
+                >
+                    No saved records found.
+                </td>
+            </tr>
         `;
-        listBody.appendChild(tr);
-    });
-}
 
+        return;
+    }
+
+
+    // =====================================
+    // RENDER RECORDS
+    // =====================================
+
+    targetArray.forEach(
+        record => {
+
+            const tr =
+                document.createElement(
+                    "tr"
+                );
+
+
+            tr.style.borderBottom =
+                "1px solid #f1f5f9";
+
+
+            // =====================================
+            // MIDWEEK HISTORY
+            // =====================================
+
+            if (type === "midweek") {
+
+                const multimediaText = [
+
+                    record.pptOperator
+                        ? `PPT: ${record.pptOperator}`
+                        : "",
+
+                    record.soundEngineer
+                        ? `Sound: ${record.soundEngineer}`
+                        : "",
+
+                    record.liveStream
+                        ? `Live: ${record.liveStream}`
+                        : ""
+
+                ]
+                    .filter(Boolean)
+                    .join("<br>");
+
+
+                tr.innerHTML = `
+
+                    <td style="padding:10px;">
+                        <b>
+                            ${record.date || "-"}
+                        </b>
+                    </td>
+
+
+                    <td style="padding:10px; font-size:12px; line-height:1.6;">
+                        ${
+                            multimediaText ||
+                            "-"
+                        }
+                    </td>
+
+
+                    <td style="padding:10px;">
+                        ${
+                            record.preacher ||
+                            "-"
+                        }
+                    </td>
+
+
+                    <td style="padding:10px;">
+                        ${
+                            record.messageTitle ||
+                            "-"
+                        }
+                    </td>
+
+
+                    <td
+                        style="
+                            padding:10px;
+                            display:flex;
+                            gap:8px;
+                        "
+                    >
+
+                        <button
+                            type="button"
+                            class="secondary-btn"
+                            data-admin-only="true"
+                            style="
+                                padding:3px 8px;
+                                font-size:12px;
+                            "
+                            onclick="loadServiceRecord(
+                                'midweek',
+                                '${record.date}'
+                            )"
+                        >
+                            ✏️ Load/Edit
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="secondary-btn"
+                            data-admin-only="true"
+                            style="
+                                padding:3px 8px;
+                                font-size:12px;
+                                color:#ef4444;
+                                border-color:#fca5a5;
+                            "
+                            onclick="deleteServiceRecord(
+                                'midweek',
+                                '${record.date}'
+                            )"
+                        >
+                            ❌ Delete
+                        </button>
+
+                    </td>
+
+                `;
+
+            }
+
+
+            // =====================================
+            // SUNDAY HISTORY
+            // =====================================
+
+            else {
+
+                tr.innerHTML = `
+
+                    <td style="padding:10px;">
+                        <b>
+                            ${record.date || "-"}
+                        </b>
+                    </td>
+
+
+                    <td style="padding:10px;">
+                        ${
+                            record.worshipLeader ||
+                            "-"
+                        }
+                    </td>
+
+
+                    <td style="padding:10px;">
+                        ${
+                            record.preacher ||
+                            "-"
+                        }
+                    </td>
+
+
+                    <td
+                        style="
+                            padding:10px;
+                            display:flex;
+                            gap:8px;
+                        "
+                    >
+
+                        <button
+                            type="button"
+                            class="secondary-btn"
+                            data-admin-only="true"
+                            style="
+                                padding:3px 8px;
+                                font-size:12px;
+                            "
+                            onclick="loadServiceRecord(
+                                'sunday',
+                                '${record.date}'
+                            )"
+                        >
+                            ✏️ Load/Edit
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="secondary-btn"
+                            data-admin-only="true"
+                            style="
+                                padding:3px 8px;
+                                font-size:12px;
+                                color:#ef4444;
+                                border-color:#fca5a5;
+                            "
+                            onclick="deleteServiceRecord(
+                                'sunday',
+                                '${record.date}'
+                            )"
+                        >
+                            ❌ Delete
+                        </button>
+
+                    </td>
+
+                `;
+
+            }
+
+
+            listBody.appendChild(
+                tr
+            );
+
+        }
+    );
+
+
+    // =====================================
+    // RE-APPLY ROLE PERMISSIONS
+    // =====================================
+
+    if (
+        typeof applyRoleBasedUI ===
+        "function"
+    ) {
+
+        applyRoleBasedUI();
+
+    }
+
+}
 // =====================================
 // SUNDAY & MIDWEEK SERVICE - SUPABASE READ
 // =====================================
@@ -2744,6 +3476,27 @@ async function deleteServiceRecord(type, date) {
         return;
     }
 
+// =====================================
+// AUDIT - DELETE SERVICE RECORD
+// =====================================
+
+await writeAuditLog(
+    "DELETE",
+    type === "sunday"
+        ? "Sunday Service"
+        : "Midweek Service",
+    `Deleted ${
+        type === "sunday"
+            ? "Sunday"
+            : "Midweek"
+    } Service record for ${date}`,
+    date,
+    {
+        date: date,
+        serviceType: type
+    }
+);
+
     if (type === "sunday") {
 
         sundayServices =
@@ -2905,15 +3658,27 @@ const cancelTask = document.getElementById("cancelTask");
 
 function openTaskModal() { if (taskModal) taskModal.classList.remove("hidden"); }
 function closeTaskModal() { 
+
+
     if (taskModal) taskModal.classList.add("hidden"); 
     editingTaskId = null;
 }
 
 if (addTaskBtn) {
-    addTaskBtn.addEventListener("click", () => {
-        clearForm();
-        openTaskModal();
-    });
+
+    addTaskBtn.addEventListener(
+        "click",
+        () => {
+
+            clearForm();
+
+            populateTaskAssigneeSelect();
+
+            openTaskModal();
+
+        }
+    );
+
 }
 if (closeModal) closeModal.addEventListener("click", closeTaskModal);
 if (cancelTask) cancelTask.addEventListener("click", closeTaskModal);
@@ -2967,42 +3732,137 @@ async function saveTask() {
         return;
     }
 
-    const title = document.getElementById("taskTitle").value.trim();
-    const description = document.getElementById("taskDescription").value.trim();
-    const category = document.getElementById("taskCategory").value;
-    const priority = document.getElementById("taskPriority").value;
-    const dueDate = document.getElementById("taskDate").value;
-    const status = document.getElementById("taskStatus").value;
+
+    const title =
+        document
+            .getElementById(
+                "taskTitle"
+            )
+            .value
+            .trim();
+
+
+    const description =
+        document
+            .getElementById(
+                "taskDescription"
+            )
+            .value
+            .trim();
+
+
+    const category =
+        document.getElementById(
+            "taskCategory"
+        ).value;
+
+
+    const priority =
+        document.getElementById(
+            "taskPriority"
+        ).value;
+
+
+    const dueDate =
+        document.getElementById(
+            "taskDate"
+        ).value;
+
+
+    const status =
+        document.getElementById(
+            "taskStatus"
+        ).value;
+
+
+    const assignedSelect =
+        document.getElementById(
+            "taskAssignedTo"
+        );
+
+
+    const assignedMemberId =
+        assignedSelect
+            ? assignedSelect.value
+            : "";
+
+
+    const selectedMember =
+        members.find(
+            member =>
+                String(member.id) ===
+                String(assignedMemberId)
+        );
+
+
+    const assignedTo =
+        selectedMember
+            ? selectedMember.name || ""
+            : "";
+
 
     if (title === "") {
-        alert("Please enter task title.");
+
+        alert(
+            "Please enter task title."
+        );
+
         return;
     }
 
-    // =====================================
-    // EDIT EXISTING TASK
-    // =====================================
 
-    if (editingTaskId !== null) {
+ // =====================================
+// EDIT EXISTING TASK
+// =====================================
 
-    const index = tasks.findIndex(
-        task => task.id === editingTaskId
-    );
+if (
+    editingTaskId !== null
+) {
+
+    const index =
+        tasks.findIndex(
+            task =>
+                task.id ===
+                editingTaskId
+        );
+
 
     if (index !== -1) {
 
         const updatedTask = {
-            id: editingTaskId,
+
+            id:
+                editingTaskId,
+
             title,
+
             description,
+
             category,
+
             priority,
+
             dueDate,
-            status
+
+            status,
+
+            assignedMemberId:
+                assignedMemberId
+                    ? Number(
+                        assignedMemberId
+                    )
+                    : null,
+
+            assignedTo
+
         };
 
+
         const updatedInSupabase =
-            await updateTaskToSupabase(updatedTask);
+            await updateTaskToSupabase(
+                updatedTask
+            );
+
 
         if (!updatedInSupabase) {
 
@@ -3013,58 +3873,153 @@ async function saveTask() {
             return;
         }
 
-        tasks[index] = updatedTask;
 
-        console.log(
-            "✅ Planner task updated successfully:",
-            updatedTask
+        tasks[index] =
+            updatedTask;
+
+
+        // =====================================
+        // AUDIT - EDIT PLANNER TASK
+        // =====================================
+
+        await writeAuditLog(
+            "EDIT",
+            "Planner",
+            `Updated task: ${updatedTask.title}`,
+            updatedTask.id,
+            {
+                title:
+                    updatedTask.title,
+
+                category:
+                    updatedTask.category,
+
+                priority:
+                    updatedTask.priority,
+
+                dueDate:
+                    updatedTask.dueDate,
+
+                status:
+                    updatedTask.status,
+
+                assignedTo:
+                    updatedTask.assignedTo || ""
+            }
         );
+
     }
 
-    editingTaskId = null;
 
-    // =====================================
-    // ADD NEW TASK
-    // =====================================
+    editingTaskId =
+        null;
 
-    } else {
+}
 
-        const task = {
-            id: Date.now(),
-            title,
-            description,
-            category,
-            priority,
-            dueDate,
-            status
-        };
 
-        const savedToSupabase =
-            await saveTaskToSupabase(task);
+// =====================================
+// ADD NEW TASK
+// =====================================
 
-        if (!savedToSupabase) {
-            alert("❌ Task was not saved to Supabase.");
-            return;
-        }
+else {
 
-        tasks.push(task);
+    const task = {
 
-        console.log(
-            "✅ New Planner task added successfully:",
+        id:
+            Date.now(),
+
+        title,
+
+        description,
+
+        category,
+
+        priority,
+
+        dueDate,
+
+        status,
+
+        assignedMemberId:
+            assignedMemberId
+                ? Number(
+                    assignedMemberId
+                )
+                : null,
+
+        assignedTo
+
+    };
+
+
+    const savedToSupabase =
+        await saveTaskToSupabase(
             task
         );
+
+
+    if (!savedToSupabase) {
+
+        alert(
+            "❌ Task was not saved to Supabase."
+        );
+
+        return;
     }
 
+
+    tasks.push(
+        task
+    );
+
+
     // =====================================
-    // EXISTING UI / LOCAL STORAGE
+    // AUDIT - ADD PLANNER TASK
     // =====================================
 
-    saveToLocalStorage();
-    loadSavedTasks();
-    clearForm();
-    closeTaskModal();
+    await writeAuditLog(
+        "ADD",
+        "Planner",
+        `Added task: ${task.title}`,
+        task.id,
+        {
+            title:
+                task.title,
 
-    refreshDashboardStatus();
+            category:
+                task.category,
+
+            priority:
+                task.priority,
+
+            dueDate:
+                task.dueDate,
+
+            status:
+                task.status,
+
+            assignedTo:
+                task.assignedTo || ""
+        }
+    );
+
+}
+
+
+// =====================================
+// REFRESH
+// =====================================
+
+saveToLocalStorage();
+
+loadSavedTasks();
+
+clearForm();
+
+closeTaskModal();
+
+refreshDashboardStatus();
+
 }
 
 function openEditTaskModal(id) {
@@ -3073,19 +4028,86 @@ function openEditTaskModal(id) {
         return;
     }
 
-    const task = tasks.find(t => t.id === id);
-    if (!task) return;
 
-    editingTaskId = id;
+    const task =
+        tasks.find(
+            t => t.id === id
+        );
 
-    document.getElementById("taskTitle").value = task.title;
-    document.getElementById("taskDescription").value = task.description || "";
-    document.getElementById("taskCategory").value = task.category;
-    document.getElementById("taskPriority").value = task.priority;
-    document.getElementById("taskDate").value = task.dueDate || "";
-    document.getElementById("taskStatus").value = task.status;
+
+    if (!task) {
+        return;
+    }
+
+
+    editingTaskId =
+        id;
+
+
+    document.getElementById(
+        "taskTitle"
+    ).value =
+        task.title || "";
+
+
+    document.getElementById(
+        "taskDescription"
+    ).value =
+        task.description || "";
+
+
+    document.getElementById(
+        "taskCategory"
+    ).value =
+        task.category || "";
+
+
+    document.getElementById(
+        "taskPriority"
+    ).value =
+        task.priority || "";
+
+
+    document.getElementById(
+        "taskDate"
+    ).value =
+        task.dueDate || "";
+
+
+    document.getElementById(
+        "taskStatus"
+    ).value =
+        task.status || "todo";
+
+
+    // =====================================
+    // RESTORE ASSIGNED MEMBER
+    // =====================================
+
+    populateTaskAssigneeSelect(
+        task.assignedMemberId || ""
+    );
+
+
+    const searchInput =
+        document.getElementById(
+            "taskAssigneeSearch"
+        );
+
+
+    if (
+        searchInput &&
+        task.assignedTo
+    ) {
+
+        searchInput.value =
+            task.assignedTo;
+
+    }
+
 
     openTaskModal();
+
 }
 
 function saveToLocalStorage() {
@@ -3116,15 +4138,41 @@ async function loadTasksFromSupabase() {
             return false;
         }
 
-        tasks = (data || []).map(task => ({
-            id: task.id,
-            title: task.title || "",
-            description: task.description || "",
-            category: task.category || "",
-            priority: task.priority || "",
-            dueDate: task.due_date || "",
-            status: task.status || "todo"
-        }));
+       tasks = (data || []).map(task => ({
+
+    id:
+        task.id,
+
+    title:
+        task.title || "",
+
+    description:
+        task.description || "",
+
+    category:
+        task.category || "",
+
+    priority:
+        task.priority || "",
+
+    dueDate:
+        task.due_date || "",
+
+    status:
+        task.status || "todo",
+
+    assignedMemberId:
+        task.assigned_member_id || null,
+
+    assignedTo:
+        task.assigned_to || ""
+
+}));
+
+       localStorage.setItem(
+    "churchhq_tasks",
+    JSON.stringify(tasks)
+);
 
         // =====================================
         // RENDER PLANNER UI
@@ -3174,36 +4222,76 @@ async function loadTasksFromSupabase() {
 // PLANNER - SUPABASE INSERT
 // =====================================
 
-async function saveTaskToSupabase(task) {
+async function saveTaskToSupabase(
+    task
+) {
+
     try {
 
-        const { data, error } = await churchSupabase
-            .from("planner_tasks")
-            .insert([{
-                id: task.id,
-                title: task.title,
-                description: task.description || "",
-                category: task.category || "",
-                priority: task.priority || "",
-                due_date: task.dueDate || null,
-                status: task.status || "todo"
-            }])
-            .select();
+        const {
+            data,
+            error
+        } =
+            await churchSupabase
+
+                .from(
+                    "planner_tasks"
+                )
+
+                .insert([{
+
+                    id:
+                        task.id,
+
+                    title:
+                        task.title,
+
+                    description:
+                        task.description || "",
+
+                    category:
+                        task.category || "",
+
+                    priority:
+                        task.priority || "",
+
+                    due_date:
+                        task.dueDate || null,
+
+                    status:
+                        task.status || "todo",
+
+                    assigned_member_id:
+                        task.assignedMemberId ||
+                        null,
+
+                    assigned_to:
+                        task.assignedTo || ""
+
+                }])
+
+                .select();
+
 
         if (error) {
+
             console.error(
                 "❌ Failed to save task to Supabase:",
                 error
             );
+
             return false;
         }
+
 
         console.log(
             "✅ Planner task saved to Supabase:",
             data
         );
 
+
         return true;
+
 
     } catch (error) {
 
@@ -3213,7 +4301,96 @@ async function saveTaskToSupabase(task) {
         );
 
         return false;
+
     }
+
+}
+// =====================================
+// PLANNER - SUPABASE UPDATE
+// =====================================
+
+async function saveTaskToSupabase(
+    task
+) {
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await churchSupabase
+
+                .from(
+                    "planner_tasks"
+                )
+
+                .insert([{
+
+                    id:
+                        task.id,
+
+                    title:
+                        task.title,
+
+                    description:
+                        task.description || "",
+
+                    category:
+                        task.category || "",
+
+                    priority:
+                        task.priority || "",
+
+                    due_date:
+                        task.dueDate || null,
+
+                    status:
+                        task.status || "todo",
+
+                    assigned_member_id:
+                        task.assignedMemberId ||
+                        null,
+
+                    assigned_to:
+                        task.assignedTo || ""
+
+                }])
+
+                .select();
+
+
+        if (error) {
+
+            console.error(
+                "❌ Failed to save task to Supabase:",
+                error
+            );
+
+            return false;
+        }
+
+
+        console.log(
+            "✅ Planner task saved to Supabase:",
+            data
+        );
+
+
+        return true;
+
+
+    } catch (error) {
+
+        console.error(
+            "❌ Planner Supabase insert error:",
+            error
+        );
+
+        return false;
+
+    }
+
 }
 
 // =====================================
@@ -3224,18 +4401,49 @@ async function updateTaskToSupabase(task) {
 
     try {
 
-        const { data, error } = await churchSupabase
-            .from("planner_tasks")
-            .update({
-                title: task.title,
-                description: task.description || "",
-                category: task.category || "",
-                priority: task.priority || "",
-                due_date: task.dueDate || null,
-                status: task.status || "todo"
-            })
-            .eq("id", task.id)
-            .select();
+        const {
+            data,
+            error
+        } =
+            await churchSupabase
+
+                .from("planner_tasks")
+
+                .update({
+
+                    title:
+                        task.title,
+
+                    description:
+                        task.description || "",
+
+                    category:
+                        task.category || "",
+
+                    priority:
+                        task.priority || "",
+
+                    due_date:
+                        task.dueDate || null,
+
+                    status:
+                        task.status || "todo",
+
+                    assigned_member_id:
+                        task.assignedMemberId || null,
+
+                    assigned_to:
+                        task.assignedTo || ""
+
+                })
+
+                .eq(
+                    "id",
+                    task.id
+                )
+
+                .select();
+
 
         if (error) {
 
@@ -3245,14 +4453,18 @@ async function updateTaskToSupabase(task) {
             );
 
             return false;
+
         }
+
 
         console.log(
             "✅ Planner task updated in Supabase:",
             data
         );
 
+
         return true;
+
 
     } catch (error) {
 
@@ -3261,8 +4473,11 @@ async function updateTaskToSupabase(task) {
             error
         );
 
+
         return false;
+
     }
+
 }
 
 // =====================================
@@ -3305,6 +4520,228 @@ async function deleteTaskFromSupabase(taskId) {
 
         return false;
     }
+}
+
+// =====================================================
+// PLANNER - SEARCHABLE MEMBER ASSIGNEE
+// =====================================================
+
+function populateTaskAssigneeSelect(
+    selectedMemberId = ""
+) {
+
+    const select =
+        document.getElementById(
+            "taskAssignedTo"
+        );
+
+    const searchInput =
+        document.getElementById(
+            "taskAssigneeSearch"
+        );
+
+
+    if (
+        !select ||
+        !searchInput
+    ) {
+        return;
+    }
+
+
+    select.innerHTML = "";
+    select.style.display = "none";
+    searchInput.value = "";
+
+
+    // =====================================
+    // EXISTING ASSIGNEE DURING EDIT
+    // =====================================
+
+    if (selectedMemberId) {
+
+        const selectedMember =
+            members.find(
+                member =>
+                    String(member.id) ===
+                    String(selectedMemberId)
+            );
+
+
+        if (selectedMember) {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+            option.value =
+                selectedMember.id;
+
+            option.textContent =
+                selectedMember.name || "";
+
+            option.selected = true;
+
+            select.appendChild(
+                option
+            );
+
+
+            searchInput.value =
+                selectedMember.name || "";
+
+        }
+
+    }
+
+
+    // =====================================
+    // SEARCH RESULTS
+    // =====================================
+
+    function renderOptions(
+        searchText
+    ) {
+
+        const search =
+            String(searchText || "")
+                .trim()
+                .toLowerCase();
+
+
+        select.innerHTML = "";
+
+
+        if (!search) {
+
+            select.style.display =
+                "none";
+
+            return;
+
+        }
+
+
+        const sortedMembers =
+            Array.isArray(members)
+                ? [...members]
+                : [];
+
+
+        sortedMembers.sort(
+            (a, b) =>
+                String(a.name || "")
+                    .localeCompare(
+                        String(b.name || ""),
+                        undefined,
+                        {
+                            sensitivity:
+                                "base"
+                        }
+                    )
+        );
+
+
+        const filteredMembers =
+            sortedMembers.filter(
+                member =>
+                    String(
+                        member.name || ""
+                    )
+                        .toLowerCase()
+                        .includes(search)
+            );
+
+
+        select.style.display =
+            "block";
+
+
+        if (
+            filteredMembers.length === 0
+        ) {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+            option.value = "";
+
+            option.textContent =
+                "No member found";
+
+            option.disabled = true;
+
+            select.appendChild(
+                option
+            );
+
+            return;
+
+        }
+
+
+        filteredMembers.forEach(
+            member => {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+                option.value =
+                    member.id;
+
+                option.textContent =
+                    member.name ||
+                    "Unnamed Member";
+
+                select.appendChild(
+                    option
+                );
+
+            }
+        );
+
+    }
+
+
+    searchInput.oninput =
+        function () {
+
+            renderOptions(
+                this.value
+            );
+
+        };
+
+
+    select.onchange =
+        function () {
+
+            const member =
+                members.find(
+                    member =>
+                        String(member.id) ===
+                        String(this.value)
+                );
+
+
+            if (!member) {
+                return;
+            }
+
+
+            searchInput.value =
+                member.name || "";
+
+            select.style.display =
+                "none";
+
+        };
+
 }
 
 // =====================================================
@@ -4177,6 +5614,27 @@ async function saveAnnualActivity() {
 
     };
 
+    // =====================================
+// AUDIT - EDIT ANNUAL ACTIVITY
+// =====================================
+
+await writeAuditLog(
+    "EDIT",
+    "Annual Activities",
+    `Updated annual activity: ${updatedActivity.title || title}`,
+    updatedActivity.id,
+    {
+        title:
+            updatedActivity.title || title,
+
+        date:
+            updatedActivity.activity_date || date,
+
+        description:
+            updatedActivity.description || description || ""
+    }
+);
+
 
     selectedAnnualActivityYear =
         Number(
@@ -4256,6 +5714,27 @@ async function saveAnnualActivity() {
 
     });
 
+
+    // =====================================
+// AUDIT - ADD ANNUAL ACTIVITY
+// =====================================
+
+await writeAuditLog(
+    "ADD",
+    "Annual Activities",
+    `Added annual activity: ${savedActivity.title || title}`,
+    savedActivity.id,
+    {
+        title:
+            savedActivity.title || title,
+
+        date:
+            savedActivity.activity_date || date,
+
+        description:
+            savedActivity.description || description || ""
+    }
+);
 
     // =====================================
     // SWITCH TO ACTIVITY YEAR
@@ -4503,6 +5982,27 @@ async function deleteAnnualActivity(id) {
     }
 
 
+    // =====================================
+// AUDIT - DELETE ANNUAL ACTIVITY
+// =====================================
+
+await writeAuditLog(
+    "DELETE",
+    "Annual Activities",
+    `Deleted annual activity: ${activity.title || "Unknown Activity"}`,
+    activity.id,
+    {
+        title:
+            activity.title || "",
+
+        date:
+            activity.date || "",
+
+        description:
+            activity.description || ""
+    }
+);
+
     annualActivities =
         annualActivities.filter(
             item =>
@@ -4574,23 +6074,70 @@ async function loadSongsFromSupabase() {
 }
 
 function loadSavedTasks() {
+
     try {
-        const saved = localStorage.getItem("churchhq_tasks");
-        if (saved) tasks = JSON.parse(saved);
+
+        const saved =
+            localStorage.getItem(
+                "churchhq_tasks"
+            );
+
+        if (saved) {
+            tasks =
+                JSON.parse(saved);
+        }
+
     } catch (e) {
+
         tasks = [];
+
     }
-    
-    const todoCol = document.getElementById("todoColumn");
-    const progCol = document.getElementById("progressColumn");
-    const compCol = document.getElementById("completedColumn");
 
-    if (todoCol) todoCol.innerHTML = "";
-    if (progCol) progCol.innerHTML = "";
-    if (compCol) compCol.innerHTML = "";
 
-    tasks.forEach(task => renderTask(task));
+    const todoCol =
+        document.getElementById(
+            "todoColumn"
+        );
+
+    const progCol =
+        document.getElementById(
+            "progressColumn"
+        );
+
+    const compCol =
+        document.getElementById(
+            "completedColumn"
+        );
+
+
+    if (todoCol) {
+        todoCol.innerHTML = "";
+    }
+
+    if (progCol) {
+        progCol.innerHTML = "";
+    }
+
+    if (compCol) {
+        compCol.innerHTML = "";
+    }
+
+
+    tasks.forEach(
+        task =>
+            renderTask(task)
+    );
+
+
     updateCounters();
+
+
+    // =====================================
+    // RE-APPLY ROLE UI TO NEW TASK CARDS
+    // =====================================
+
+    applyRoleBasedUI();
+
 }
 
 function renderTask(task) {
@@ -4687,25 +6234,35 @@ function renderTask(task) {
     card.innerHTML = `
 
         <div
-            style="
-                display:flex;
-                justify-content:space-between;
-                align-items:flex-start;
-            "
-        >
+    style="
+        display:flex;
+        align-items:flex-start;
+        gap:10px;
+        width:100%;
+    "
+>
 
-            <h4>
-                ${task.title}
-            </h4>
+    <h4
+        style="
+            margin:0;
+            flex:1;
+            min-width:0;
+            overflow-wrap:anywhere;
+            word-break:break-word;
+        "
+    >
+        ${task.title}
+    </h4>
 
 
-            <div
-                style="
-                    display:flex;
-                    gap:6px;
-                    align-items:center;
-                "
-            >
+           <div
+    style="
+        display:flex;
+        gap:6px;
+        align-items:center;
+        flex-shrink:0;
+    "
+>
 
                 <button
                     type="button"
@@ -4716,7 +6273,13 @@ function renderTask(task) {
                         border:none;
                         color:#2563eb;
                         cursor:pointer;
-                        font-size:14px;
+                        font-size:18px;
+width:36px;
+height:36px;
+display:flex;
+align-items:center;
+justify-content:center;
+border-radius:50%;
                     "
                     title="Edit"
                 >
@@ -4734,7 +6297,13 @@ function renderTask(task) {
                         color:#ef4444;
                         cursor:pointer;
                         font-weight:bold;
-                        font-size:18px;
+                        font-size:20px;
+width:36px;
+height:36px;
+display:flex;
+align-items:center;
+justify-content:center;
+border-radius:50%;
                     "
                     title="Delete"
                 >
@@ -4755,6 +6324,12 @@ function renderTask(task) {
             📂 ${task.category || "-"}
         </p>
 
+        <p>
+            👤 Assigned to:
+            <strong>
+                ${task.assignedTo || "Unassigned"}
+            </strong>
+        </p>
 
         <p>
             📅 ${task.dueDate || "-"}
@@ -4844,12 +6419,43 @@ async function deleteTask(id) {
         return;
     }
 
-    if (!confirm("Are you sure you want to delete this task?")) {
+
+    // =====================================
+    // GET TASK BEFORE DELETE
+    // =====================================
+
+    const taskToDelete =
+        tasks.find(
+            task =>
+                String(task.id) ===
+                String(id)
+        );
+
+
+    const deletedTaskTitle =
+        taskToDelete
+            ? taskToDelete.title
+            : "Unknown Task";
+
+
+    if (
+        !confirm(
+            "Are you sure you want to delete this task?"
+        )
+    ) {
         return;
     }
 
+
+    // =====================================
+    // DELETE FROM SUPABASE
+    // =====================================
+
     const deletedFromSupabase =
-        await deleteTaskFromSupabase(id);
+        await deleteTaskFromSupabase(
+            id
+        );
+
 
     if (!deletedFromSupabase) {
 
@@ -4860,17 +6466,59 @@ async function deleteTask(id) {
         return;
     }
 
-    tasks = tasks.filter(
-        task => task.id !== id
+
+    // =====================================
+    // AUDIT - DELETE PLANNER TASK
+    // =====================================
+
+    await writeAuditLog(
+        "DELETE",
+        "Planner",
+        `Deleted task: ${deletedTaskTitle}`,
+        id,
+        {
+            title:
+                deletedTaskTitle,
+
+            category:
+                taskToDelete?.category || "",
+
+            priority:
+                taskToDelete?.priority || "",
+
+            dueDate:
+                taskToDelete?.dueDate || "",
+
+            assignedTo:
+                taskToDelete?.assignedTo || ""
+        }
     );
 
+
+    // =====================================
+    // REMOVE FROM LOCAL DATA
+    // =====================================
+
+    tasks =
+        tasks.filter(
+            task =>
+                String(task.id) !==
+                String(id)
+        );
+
+
     saveToLocalStorage();
+
     loadSavedTasks();
+
+    refreshDashboardStatus();
+
 
     console.log(
         "✅ Planner task deleted successfully:",
         id
     );
+
 }
 
 function updateCounters() {
@@ -4906,6 +6554,31 @@ function clearForm() {
     if (tPrio) tPrio.selectedIndex = 0;
     if (tDate) tDate.value = "";
     if (tStat) tStat.selectedIndex = 0;
+
+    const assigneeSearch =
+    document.getElementById(
+        "taskAssigneeSearch"
+    );
+
+const assigneeSelect =
+    document.getElementById(
+        "taskAssignedTo"
+    );
+
+
+if (assigneeSearch) {
+    assigneeSearch.value = "";
+}
+
+
+if (assigneeSelect) {
+
+    assigneeSelect.innerHTML = "";
+
+    assigneeSelect.style.display =
+        "none";
+
+}
 }
 
 /* =========================================
@@ -4948,66 +6621,258 @@ if (closeViewSongBtn) closeViewSongBtn.addEventListener("click", () => { if (vie
 
 if (saveSongBtn) saveSongBtn.addEventListener("click", saveSong);
 
-function saveSong() {
-    const title = document.getElementById("songTitle").value.trim();
-    const artist = document.getElementById("songArtist").value.trim();
-    const key = document.getElementById("songKey").value;
-    const category = document.getElementById("songCategory").value;
-    const lyrics = document.getElementById("songLyrics").value.trim();
+async function saveSong() {
 
-    if (title === "") {
-        alert("Please enter a song title.");
+    if (!requireAdmin()) {
         return;
     }
 
-if (editingSongId !== null) {
-    songs = songs.map(song => {
-        if (song.id === editingSongId) {
-            return {
-                ...song,
-                title,
-                artist: artist || "Unknown Artist",
-                key,
-                category,
-                lyrics
-            };
-        }
-        return song;
-    });
 
-    // Supabase UPDATE - existing songs only
-    const updatedSong = songs.find(
-        song => song.id === editingSongId
-    );
+    const title =
+        document
+            .getElementById("songTitle")
+            .value
+            .trim();
 
-    if (updatedSong) {
-        updateSongToSupabase(updatedSong);
+
+    const artist =
+        document
+            .getElementById("songArtist")
+            .value
+            .trim();
+
+
+    const key =
+        document
+            .getElementById("songKey")
+            .value;
+
+
+    const category =
+        document
+            .getElementById("songCategory")
+            .value;
+
+
+    const lyrics =
+        document
+            .getElementById("songLyrics")
+            .value
+            .trim();
+
+
+    if (title === "") {
+
+        alert(
+            "Please enter a song title."
+        );
+
+        return;
     }
 
-    editingSongId = null;
-}
+
+    // =====================================
+    // EDIT EXISTING SONG
+    // =====================================
+
+    if (
+        editingSongId !== null
+    ) {
+
+        const existingSong =
+            songs.find(
+                song =>
+                    song.id ===
+                    editingSongId
+            );
+
+
+        if (!existingSong) {
+
+            alert(
+                "❌ Song record not found."
+            );
+
+            return;
+        }
+
+
+        const updatedSong = {
+
+            ...existingSong,
+
+            title,
+
+            artist:
+                artist ||
+                "Unknown Artist",
+
+            key,
+
+            category,
+
+            lyrics
+
+        };
+
+
+        const updatedInSupabase =
+            await updateSongToSupabase(
+                updatedSong
+            );
+
+
+        if (!updatedInSupabase) {
+
+            alert(
+                "❌ Song was not updated in Supabase."
+            );
+
+            return;
+        }
+
+
+        const index =
+            songs.findIndex(
+                song =>
+                    song.id ===
+                    editingSongId
+            );
+
+
+        if (index !== -1) {
+
+            songs[index] =
+                updatedSong;
+
+        }
+
+
+        // =====================================
+        // AUDIT - EDIT SONG
+        // =====================================
+
+        await writeAuditLog(
+            "EDIT",
+            "Song Library",
+            `Updated song: ${updatedSong.title}`,
+            updatedSong.id,
+            {
+                title:
+                    updatedSong.title,
+
+                artist:
+                    updatedSong.artist,
+
+                key:
+                    updatedSong.key,
+
+                category:
+                    updatedSong.category
+            }
+        );
+
+
+        editingSongId =
+            null;
+
+    }
+
+
+    // =====================================
+    // ADD NEW SONG
+    // =====================================
+
     else {
-    const song = {
-        id: Date.now(),
-        title,
-        artist: artist || "Unknown Artist",
-        key,
-        category,
-        lyrics
-    };
 
-    songs.push(song);
+        const song = {
 
-    // Supabase INSERT - new songs only
-    saveSongToSupabase(song);
-}
+            id:
+                Date.now(),
+
+            title,
+
+            artist:
+                artist ||
+                "Unknown Artist",
+
+            key,
+
+            category,
+
+            lyrics
+
+        };
+
+
+        const savedToSupabase =
+            await saveSongToSupabase(
+                song
+            );
+
+
+        if (!savedToSupabase) {
+
+            alert(
+                "❌ Song was not saved to Supabase."
+            );
+
+            return;
+        }
+
+
+        songs.push(
+            song
+        );
+
+
+        // =====================================
+        // AUDIT - ADD SONG
+        // =====================================
+
+        await writeAuditLog(
+            "ADD",
+            "Song Library",
+            `Added song: ${song.title}`,
+            song.id,
+            {
+                title:
+                    song.title,
+
+                artist:
+                    song.artist,
+
+                key:
+                    song.key,
+
+                category:
+                    song.category
+            }
+        );
+
+    }
+
+
+    // =====================================
+    // REFRESH SONG LIBRARY
+    // =====================================
 
     saveSongsToLocalStorage();
-    loadSavedSongs();
-    clearSongForm();
-    if (songModal) songModal.classList.add("hidden");
-}
 
+    loadSavedSongs();
+
+    clearSongForm();
+
+
+    if (songModal) {
+
+        songModal.classList.add(
+            "hidden"
+        );
+
+    }
+
+}
 function openEditSongModal(id) {
 
     if (!requireAdmin()) {
@@ -5307,22 +7172,83 @@ async function deleteSong(id) {
         return;
     }
 
-    if (confirm("Are you sure you want to delete this song?")) {
 
-        const deletedFromSupabase =
-            await deleteSongFromSupabase(id);
+    const songToDelete =
+        songs.find(
+            song =>
+                String(song.id) ===
+                String(id)
+        );
 
-        if (!deletedFromSupabase) {
-            alert(
-                "❌ Failed to delete song from Supabase."
-            );
-            return;
-        }
 
-        songs = songs.filter(s => s.id !== id);
-        saveSongsToLocalStorage();
-        loadSavedSongs();
+    const deletedSongTitle =
+        songToDelete
+            ? songToDelete.title
+            : "Unknown Song";
+
+
+    if (
+        !confirm(
+            "Are you sure you want to delete this song?"
+        )
+    ) {
+        return;
     }
+
+
+    const deletedFromSupabase =
+        await deleteSongFromSupabase(
+            id
+        );
+
+
+    if (!deletedFromSupabase) {
+
+        alert(
+            "❌ Failed to delete song from Supabase."
+        );
+
+        return;
+    }
+
+
+    // =====================================
+    // AUDIT - DELETE SONG
+    // =====================================
+
+    await writeAuditLog(
+        "DELETE",
+        "Song Library",
+        `Deleted song: ${deletedSongTitle}`,
+        id,
+        {
+            title:
+                deletedSongTitle,
+
+            artist:
+                songToDelete?.artist || "",
+
+            key:
+                songToDelete?.key || "",
+
+            category:
+                songToDelete?.category || ""
+        }
+    );
+
+
+    songs =
+        songs.filter(
+            song =>
+                String(song.id) !==
+                String(id)
+        );
+
+
+    saveSongsToLocalStorage();
+
+    loadSavedSongs();
+
 }
 
 function clearSongForm() {
@@ -5490,9 +7416,9 @@ function getSelectedMemberMinistries() {
 
 async function saveMember() {
 
-    if (!requireAdmin()) {
-        return;
-    }
+    if (!requireMemberManager()) {
+    return;
+}
 
     const editId = document.getElementById("editMemberId").value;
     const name = document.getElementById("memberName").value.trim();
@@ -5547,6 +7473,17 @@ async function saveMember() {
                 "✅ Member updated successfully:",
                 updatedMember
             );
+            await writeAuditLog(
+    "EDIT",
+    "Members",
+    `Updated member: ${updatedMember.name}`,
+    updatedMember.id,
+    {
+        name: updatedMember.name,
+        ministries: updatedMember.ministries,
+        role: updatedMember.role
+    }
+);
         }
 
     // =====================================
@@ -5568,6 +7505,18 @@ async function saveMember() {
         const savedToSupabase =
             await saveMemberToSupabase(member);
 
+            const saveBtn =
+    document.getElementById(
+        "saveMember"
+    );
+
+if (saveBtn) {
+
+    saveBtn.textContent =
+        "Save Changes";
+
+}
+
         if (!savedToSupabase) {
             alert("❌ Member was not saved to Supabase.");
             return;
@@ -5579,6 +7528,18 @@ async function saveMember() {
             "✅ New member added successfully:",
             member
         );
+
+        await writeAuditLog(
+    "ADD",
+    "Members",
+    `Added new member: ${member.name}`,
+    member.id,
+    {
+        name: member.name,
+        ministries: member.ministries,
+        role: member.role
+    }
+);
     }
 
     // =====================================
@@ -5588,6 +7549,7 @@ async function saveMember() {
     saveMembersToLocalStorage();
     loadSavedMembers();
     loadDashboardBirthdays();
+    renderAttendanceList();
     clearMemberForm();
     refreshDashboardStatus();
     filterMembers();
@@ -6559,32 +8521,52 @@ function renderMemberCard(member) {
 
         <div style="display:flex; justify-content:space-between; margin-top:15px;">
             <button
-                type="button"
-                class="secondary-btn"
-                style="padding: 4px 10px; font-size: 12px;"
-                onclick="editMember(${member.id})"
-            >
-                ✏️ Edit
-            </button>
+    type="button"
+    class="secondary-btn"
+    data-member-manage="true"
+    style="
+        padding:4px 10px;
+        font-size:12px;
+    "
+    onclick="editMember(${member.id})"
+>
+    ✏️ Edit
+</button>
 
-            <button
-                type="button"
-                onclick="deleteMember(${member.id})"
-                style="background:none; border:none; color:#ef4444; cursor:pointer; font-size: 16px; font-weight:bold;"
-            >
-                &times;
-            </button>
+
+<button
+    type="button"
+    data-member-manage="true"
+    onclick="deleteMember(${member.id})"
+    style="
+        background:none;
+        border:none;
+        color:#ef4444;
+        cursor:pointer;
+        font-size:16px;
+        font-weight:bold;
+    "
+>
+    &times;
+</button>
         </div>
     `;
 
     membersGrid.appendChild(card);
+
+    if (
+    typeof applyRoleBasedUI === "function"
+) {
+    applyRoleBasedUI();
+}
+
 }
 
 function editMember(id) {
 
-    if (!requireAdmin()) {
-        return;
-    }
+if (!requireMemberManager()) {
+    return;
+}
 
     const member = members.find(m => m.id === id);
     if (!member) return;
@@ -6603,6 +8585,18 @@ function editMember(id) {
     if (mName) mName.value = member.name;
     if (mContact) mContact.value = member.contact;
     if (mStatus) mStatus.value = member.status;
+
+const saveBtn =
+    document.getElementById(
+        "saveMember"
+    );
+
+if (saveBtn) {
+
+    saveBtn.textContent =
+        "Save Changes";
+
+}
 
     // =====================================
     // LOAD MEMBER MINISTRIES
@@ -7468,32 +9462,87 @@ alert(
 
 async function deleteMember(id) {
 
-    if (!requireAdmin()) {
+    if (!requireMemberManager()) {
         return;
     }
 
-    if (!confirm("Are you sure you want to delete this member?")) {
+
+    const memberToDelete =
+        members.find(
+            member =>
+                String(member.id) ===
+                String(id)
+        );
+
+
+    const deletedMemberName =
+        memberToDelete
+            ? memberToDelete.name
+            : "Unknown Member";
+
+
+    if (
+        !confirm(
+            "Are you sure you want to delete this member?"
+        )
+    ) {
         return;
     }
+
 
     const deletedFromSupabase =
-        await deleteMemberFromSupabase(id);
+        await deleteMemberFromSupabase(
+            id
+        );
+
 
     if (!deletedFromSupabase) {
-        alert("❌ Member was not deleted from Supabase.");
+
+        alert(
+            "❌ Member was not deleted from Supabase."
+        );
+
         return;
     }
 
-    members = members.filter(m => m.id !== id);
+
+    // =====================================
+    // AUDIT - DELETE MEMBER
+    // =====================================
+
+    await writeAuditLog(
+        "DELETE",
+        "Members",
+        `Deleted member: ${deletedMemberName}`,
+        id,
+        {
+            name: deletedMemberName
+        }
+    );
+
+
+    members =
+        members.filter(
+            m =>
+                String(m.id) !==
+                String(id)
+        );
+
 
     saveMembersToLocalStorage();
+
     loadSavedMembers();
+
     loadDashboardBirthdays();
+
     refreshDashboardStatus();
+
+
     console.log(
         "✅ Member deleted successfully:",
         id
     );
+
 }
 
 function clearMemberForm() {
@@ -7522,6 +9571,84 @@ function clearMemberForm() {
 
     if (mRole) mRole.value = "";
     if (mBirthday) mBirthday.value = "";
+}
+
+// =====================================================
+// ATTENDANCE - OPEN ADD MEMBER MODAL
+// =====================================================
+
+function openAttendanceAddMember() {
+
+    if (!requireMemberManager()) {
+        return;
+    }
+
+
+    clearMemberForm();
+
+    const saveBtn =
+    document.getElementById(
+        "saveMember"
+    );
+
+if (saveBtn) {
+
+    saveBtn.textContent =
+        "Add Member";
+
+}
+
+    const modal =
+        document.getElementById(
+            "memberModal"
+        );
+
+    const modalTitle =
+        document.getElementById(
+            "memberModalTitle"
+        );
+
+    const editId =
+        document.getElementById(
+            "editMemberId"
+        );
+
+
+    if (modalTitle) {
+
+        modalTitle.textContent =
+            "Add New Member";
+
+    }
+
+
+
+    if (editId) {
+
+        editId.value = "";
+
+    }
+
+
+    // Reload current ministries
+    if (
+        typeof renderMemberMinistries ===
+        "function"
+    ) {
+
+        renderMemberMinistries([]);
+
+    }
+
+
+    if (modal) {
+
+        modal.classList.remove(
+            "hidden"
+        );
+
+    }
+
 }
 
 
@@ -7998,10 +10125,13 @@ async function saveAttendance() {
     // EXISTING RECORD
     // =====================================
 
-    if (index !== -1) {
+if (index !== -1) {
 
     const updatedInSupabase =
-        await updateAttendanceToSupabase(recordData);
+        await updateAttendanceToSupabase(
+            recordData
+        );
+
 
     if (!updatedInSupabase) {
 
@@ -8012,27 +10142,86 @@ async function saveAttendance() {
         return;
     }
 
+
     attendanceRecords[index] = {
         ...recordData,
         id: attendanceRecords[index].id
     };
 
+
+    // =====================================
+    // AUDIT - UPDATE ATTENDANCE
+    // =====================================
+
+    await writeAuditLog(
+        "EDIT",
+        "Attendance",
+        `Updated ${
+            serviceType === "midweek"
+                ? "Midweek"
+                : "Sunday"
+        } attendance: ${eventName} (${date})`,
+        attendanceRecords[index].id,
+        {
+            date: date,
+            eventName: eventName,
+            serviceType: serviceType,
+            presentCount:
+                recordData.presentCount,
+            totalMembers:
+                recordData.totalMembers
+        }
+    );
+
+
 } else {
 
-        const savedToSupabase =
-            await saveAttendanceToSupabase(recordData);
+    const savedToSupabase =
+        await saveAttendanceToSupabase(
+            recordData
+        );
 
-        if (!savedToSupabase) {
 
-            alert(
-                "❌ Attendance was not saved to Supabase."
-            );
+    if (!savedToSupabase) {
 
-            return;
-        }
+        alert(
+            "❌ Attendance was not saved to Supabase."
+        );
 
-        attendanceRecords.push(recordData);
+        return;
     }
+
+
+    attendanceRecords.push(
+        recordData
+    );
+
+
+    // =====================================
+    // AUDIT - NEW ATTENDANCE
+    // =====================================
+
+    await writeAuditLog(
+        "ADD",
+        "Attendance",
+        `Saved ${
+            serviceType === "midweek"
+                ? "Midweek"
+                : "Sunday"
+        } attendance: ${eventName} (${date})`,
+        date,
+        {
+            date: date,
+            eventName: eventName,
+            serviceType: serviceType,
+            presentCount:
+                recordData.presentCount,
+            totalMembers:
+                recordData.totalMembers
+        }
+    );
+
+}
 
     localStorage.setItem(
     "churchhq_attendance",
@@ -9552,13 +11741,15 @@ function calculateMemberStatusAlerts() {
 
 // =========================================
 // PLANNER STATUS ALERTS
+// Due Soon + Due Today + Overdue
 // =========================================
 
 function calculatePlannerStatusAlerts() {
 
     const alerts = [];
 
-    const today = new Date();
+    const today =
+        new Date();
 
     today.setHours(
         0,
@@ -9571,11 +11762,15 @@ function calculatePlannerStatusAlerts() {
     tasks.forEach(task => {
 
         const status =
-            String(task.status || "")
+            String(
+                task.status || ""
+            )
                 .trim()
                 .toLowerCase();
 
 
+        // Ignore tasks without due date
+        // and completed tasks
         if (
             !task.dueDate ||
             status === "completed"
@@ -9591,39 +11786,139 @@ function calculatePlannerStatusAlerts() {
 
 
         if (
-            isNaN(dueDate.getTime()) ||
-            dueDate >= today
+            isNaN(
+                dueDate.getTime()
+            )
         ) {
             return;
         }
 
 
-        const overdueDays =
-            Math.floor(
+        // =====================================
+        // DAYS DIFFERENCE
+        // Positive = future
+        // 0 = today
+        // Negative = overdue
+        // =====================================
+
+        const daysDifference =
+            Math.round(
                 (
-                    today.getTime() -
-                    dueDate.getTime()
+                    dueDate.getTime() -
+                    today.getTime()
                 ) /
                 86400000
             );
 
 
-        alerts.push({
+        const assignedText =
+            task.assignedTo
+                ? ` Assigned to: ${task.assignedTo}.`
+                : "";
 
-            module: "Planner",
 
-            name:
-                task.title ||
-                "Untitled Task",
+        // =====================================
+        // OVERDUE
+        // =====================================
 
-            type: "overdue-task",
+        if (
+            daysDifference < 0
+        ) {
 
-            level: "warning",
+            const overdueDays =
+                Math.abs(
+                    daysDifference
+                );
 
-            message:
-                `Task is overdue by ${overdueDays} day${overdueDays === 1 ? "" : "s"}.`
 
-        });
+            alerts.push({
+
+                module:
+                    "Planner",
+
+                name:
+                    task.title ||
+                    "Untitled Task",
+
+                type:
+                    "overdue-task",
+
+                level:
+                    "warning",
+
+                message:
+                    `Task is overdue by ${overdueDays} day${overdueDays === 1 ? "" : "s"}.${assignedText}`
+
+            });
+
+
+            return;
+        }
+
+
+        // =====================================
+        // DUE TODAY
+        // =====================================
+
+        if (
+            daysDifference === 0
+        ) {
+
+            alerts.push({
+
+                module:
+                    "Planner",
+
+                name:
+                    task.title ||
+                    "Untitled Task",
+
+                type:
+                    "task-due-today",
+
+                level:
+                    "warning",
+
+                message:
+                    `Task is due today.${assignedText}`
+
+            });
+
+
+            return;
+        }
+
+
+        // =====================================
+        // DUE SOON
+        // Show starting 3 days before due date
+        // =====================================
+
+        if (
+            daysDifference <= 3
+        ) {
+
+            alerts.push({
+
+                module:
+                    "Planner",
+
+                name:
+                    task.title ||
+                    "Untitled Task",
+
+                type:
+                    "task-due-soon",
+
+                level:
+                    "info",
+
+                message:
+                    `Task is due in ${daysDifference} day${daysDifference === 1 ? "" : "s"}.${assignedText}`
+
+            });
+
+        }
 
     });
 
@@ -9652,37 +11947,38 @@ function calculateServiceStatusAlerts() {
                 record.date ||
                 "Unknown Date";
 
+// =====================================
+// MISSING WORSHIP LEADER
+// SUNDAY ONLY
+// =====================================
 
-            // =====================================
-            // MISSING WORSHIP LEADER
-            // =====================================
+if (
+    serviceLabel === "Sunday Service" &&
+    !String(
+        record.worshipLeader || ""
+    ).trim()
+) {
 
-            if (
-                !String(
-                    record.worshipLeader || ""
-                ).trim()
-            ) {
+    alerts.push({
 
-                alerts.push({
+        module:
+            serviceLabel,
 
-                    module:
-                        serviceLabel,
+        name:
+            date,
 
-                    name:
-                        date,
+        type:
+            "missing-worship-leader",
 
-                    type:
-                        "missing-worship-leader",
+        level:
+            "warning",
 
-                    level:
-                        "warning",
+        message:
+            "No Worship Leader assigned."
 
-                    message:
-                        "No Worship Leader assigned."
+    });
 
-                });
-
-            }
+}
 
 
             // =====================================
@@ -10974,19 +13270,102 @@ refreshDashboardStatus();
     );
 }
 
-async function deleteAttendanceFromSupabase(date, serviceType) {
+async function deleteAttendance(
+    date,
+    serviceType
+) {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
+
+    if (
+        !confirm(
+            `Are you sure you want to delete the attendance record for ${date}?`
+        )
+    ) {
+        return;
+    }
+
+
+    const actualServiceType =
+        serviceType || "sunday";
+
+
+    // =====================================
+    // GET RECORD BEFORE DELETE
+    // =====================================
+
+    const attendanceToDelete =
+        attendanceRecords.find(
+            record =>
+                record.date === date &&
+                (
+                    record.serviceType ||
+                    "sunday"
+                ) === actualServiceType
+        );
+
+
+    const deletedEventName =
+        attendanceToDelete
+            ? attendanceToDelete.eventName
+            : "Attendance";
+
+
+    // =====================================
+    // DELETE FROM SUPABASE
+    // =====================================
+
+    const deletedFromSupabase =
+        await deleteAttendanceFromSupabase(
+            date,
+            actualServiceType
+        );
+
+
+    if (!deletedFromSupabase) {
+
+        alert(
+            "❌ Failed to delete the attendance record in Supabase."
+        );
+
+        return;
+    }
+
+// =====================================
+// ATTENDANCE - SUPABASE DELETE
+// =====================================
+
+async function deleteAttendanceFromSupabase(
+    date,
+    serviceType
+) {
+
     try {
 
-        const actualServiceType = serviceType || "sunday";
+        const actualServiceType =
+            serviceType || "sunday";
 
-        const { data, error } = await churchSupabase
-            .from("attendance_records")
-            .delete()
-            .eq("date", date)
-            .eq("service_type", actualServiceType)
-            .select();
+
+        const { data, error } =
+            await churchSupabase
+                .from("attendance_records")
+                .delete()
+                .eq(
+                    "date",
+                    date
+                )
+                .eq(
+                    "service_type",
+                    actualServiceType
+                )
+                .select();
+
 
         if (error) {
+
             console.error(
                 "❌ Failed to delete attendance from Supabase:",
                 error
@@ -10995,25 +13374,33 @@ async function deleteAttendanceFromSupabase(date, serviceType) {
             return false;
         }
 
-        // Walang record na aktuwal na nabura
-        if (!data || data.length === 0) {
+
+        if (
+            !data ||
+            data.length === 0
+        ) {
+
             console.error(
                 "❌ No attendance record was deleted.",
                 {
                     date,
-                    serviceType: actualServiceType
+                    serviceType:
+                        actualServiceType
                 }
             );
 
             return false;
         }
 
+
         console.log(
             "✅ Attendance deleted from Supabase:",
             data
         );
 
+
         return true;
+
 
     } catch (error) {
 
@@ -11024,6 +13411,86 @@ async function deleteAttendanceFromSupabase(date, serviceType) {
 
         return false;
     }
+
+}
+
+    // =====================================
+    // AUDIT - DELETE ATTENDANCE
+    // =====================================
+
+    await writeAuditLog(
+        "DELETE",
+        "Attendance",
+        `Deleted ${
+            actualServiceType === "midweek"
+                ? "Midweek"
+                : "Sunday"
+        } attendance: ${deletedEventName} (${date})`,
+        attendanceToDelete
+            ? attendanceToDelete.id
+            : date,
+        {
+            date: date,
+            eventName:
+                deletedEventName,
+            serviceType:
+                actualServiceType
+        }
+    );
+
+
+    // =====================================
+    // REMOVE LOCAL RECORD
+    // =====================================
+
+    attendanceRecords =
+        attendanceRecords.filter(
+            record =>
+                !(
+                    record.date === date &&
+                    (
+                        record.serviceType ||
+                        "sunday"
+                    ) === actualServiceType
+                )
+        );
+
+
+    localStorage.setItem(
+        "churchhq_attendance",
+        JSON.stringify(
+            attendanceRecords
+        )
+    );
+
+
+    // =====================================
+    // REFRESH ATTENDANCE UI
+    // =====================================
+
+    renderAttendanceHistory();
+
+    loadAttendanceForDate();
+
+    renderAttendanceSummary(
+        document.getElementById(
+            "attendanceSummarySearch"
+        )?.value || ""
+    );
+
+    renderTopAttendance();
+
+    refreshDashboardStatus();
+
+
+    alert(
+        `✅ ${
+            actualServiceType === "midweek"
+                ? "Midweek"
+                : "Sunday"
+        } attendance from ${date} is successfully deleted.`
+    );
+
 }
 // =====================================
 // ATTENDANCE HISTORY RENDER
@@ -13153,6 +15620,24 @@ if (!saved) {
     return;
 }
 
+// =====================================
+// AUDIT - ADD ACTIVITY
+// =====================================
+
+await writeAuditLog(
+    "ADD",
+    "Activities",
+    `Added activity: ${newActivity.title}`,
+    newActivity.id,
+    {
+        title:
+            newActivity.title,
+
+        date:
+            newActivity.date
+    }
+);
+
     activities.sort(
         (a, b) => new Date(a.date) - new Date(b.date)
     );
@@ -13208,36 +15693,126 @@ function editActivityItem(id) {
     document.getElementById("editActTitleInput").value = act.title;
     document.getElementById("editActDateInput").value = act.date;
 
-    document.getElementById("saveEditBtn").onclick = function() {
-        let newTitle = document.getElementById("editActTitleInput").value.trim();
-        let newDate = document.getElementById("editActDateInput").value.trim();
+    document.getElementById(
+    "saveEditBtn"
+).onclick =
+    async function() {
 
-        if (!newTitle || !newDate) {
-            alert("Pakipunan ang pamagat at petsa.");
+        let newTitle =
+            document
+                .getElementById(
+                    "editActTitleInput"
+                )
+                .value
+                .trim();
+
+
+        let newDate =
+            document
+                .getElementById(
+                    "editActDateInput"
+                )
+                .value
+                .trim();
+
+
+        if (
+            !newTitle ||
+            !newDate
+        ) {
+
+            alert(
+                "Pakipunan ang pamagat at petsa."
+            );
+
             return;
         }
 
-        act.title = newTitle;
-        act.date = newDate;
 
-        // Supabase UPDATE
-        updateActivityToSupabase(act);
+        act.title =
+            newTitle;
 
-        activities.sort((a, b) => new Date(a.date) - new Date(b.date));
-        localStorage.setItem("churchhq_activities", JSON.stringify(activities));
-        
-        customModal.style.display = "none";
+        act.date =
+            newDate;
+
+
+        // =====================================
+        // SUPABASE UPDATE
+        // =====================================
+
+        const updated =
+            await updateActivityToSupabase(
+                act
+            );
+
+
+        if (!updated) {
+
+            alert(
+                "❌ Failed to update activity in Supabase."
+            );
+
+            return;
+        }
+
+
+        // =====================================
+        // AUDIT - EDIT ACTIVITY
+        // =====================================
+
+        await writeAuditLog(
+            "EDIT",
+            "Activities",
+            `Updated activity: ${act.title}`,
+            act.id,
+            {
+                title:
+                    act.title,
+
+                date:
+                    act.date
+            }
+        );
+
+
+        activities.sort(
+            (a, b) =>
+                new Date(a.date) -
+                new Date(b.date)
+        );
+
+
+        localStorage.setItem(
+            "churchhq_activities",
+            JSON.stringify(
+                activities
+            )
+        );
+
+
+        customModal.style.display =
+            "none";
+
+
         renderManageModalContent();
+
         renderDashboardLists();
+
         refreshDashboardStatus();
+
     };
 
-    document.getElementById("cancelEditBtn").onclick = function() {
-        customModal.style.display = "none";
-    };
+    document.getElementById(
+        "cancelEditBtn"
+    ).onclick =
+        function() {
+
+            customModal.style.display =
+                "none";
+
+        };
+
 }
-
-
 
 async function deleteActivityItem(id) {
 
@@ -13245,13 +15820,40 @@ async function deleteActivityItem(id) {
         return;
     }
 
+    let activityToDelete = null;
+
+try {
+
+    const savedActivities =
+        JSON.parse(
+            localStorage.getItem(
+                "churchhq_activities"
+            )
+        ) || [];
+
+
+    activityToDelete =
+        savedActivities.find(
+            activity =>
+                String(activity.id) ===
+                String(id)
+        ) || null;
+
+} catch (e) {
+
+    activityToDelete = null;
+
+}
+
     if (
         !confirm(
             "Are you sure you want to delete this?"
         )
     ) {
+
         return;
     }
+
 
 
     const deletedFromSupabase =
@@ -13267,6 +15869,26 @@ async function deleteActivityItem(id) {
         return;
     }
 
+    // =====================================
+// AUDIT - DELETE ACTIVITY
+// =====================================
+
+await writeAuditLog(
+    "DELETE",
+    "Activities",
+    `Deleted activity: ${
+        activityToDelete?.title ||
+        "Unknown Activity"
+    }`,
+    id,
+    {
+        title:
+            activityToDelete?.title || "",
+
+        date:
+            activityToDelete?.date || ""
+    }
+);
 
     let activities = [];
 
@@ -13308,7 +15930,7 @@ async function deleteActivityItem(id) {
 
 }
 
-function addNewAnnouncementItem() {
+async function addNewAnnouncementItem() {
     if (!requireAdmin()) {
     return;
 }
@@ -13331,7 +15953,36 @@ function addNewAnnouncementItem() {
 announcements.push(newAnnouncement);
 
 // Supabase INSERT
-saveAnnouncementToSupabase(newAnnouncement);
+const saved =
+    await saveAnnouncementToSupabase(
+        newAnnouncement
+    );
+
+
+if (!saved) {
+
+    alert(
+        "❌ Failed to save announcement."
+    );
+
+    return;
+}
+
+
+// =====================================
+// AUDIT - ADD ANNOUNCEMENT
+// =====================================
+
+await writeAuditLog(
+    "ADD",
+    "Announcements",
+    `Added announcement: ${newAnnouncement.text}`,
+    newAnnouncement.id,
+    {
+        text:
+            newAnnouncement.text
+    }
+);
     localStorage.setItem("churchhq_announcements", JSON.stringify(announcements));
     renderManageModalContent();
     renderDashboardLists();
@@ -13438,6 +16089,21 @@ function editAnnouncementItem(id) {
                 return;
             }
 
+            // =====================================
+// AUDIT - EDIT ANNOUNCEMENT
+// =====================================
+
+await writeAuditLog(
+    "EDIT",
+    "Announcements",
+    `Updated announcement: ${ann.text}`,
+    ann.id,
+    {
+        text:
+            ann.text
+    }
+);
+
             // LOCAL STORAGE
             localStorage.setItem(
                 "churchhq_announcements",
@@ -13464,6 +16130,34 @@ async function deleteAnnouncementItem(id) {
 }
     if (!confirm("Are you sure you want to delete this")) return;
 
+    let announcementToDelete = null;
+
+try {
+
+    const savedAnnouncements =
+        JSON.parse(
+            localStorage.getItem(
+                "churchhq_announcements"
+            )
+        ) || [];
+
+
+    announcementToDelete =
+        savedAnnouncements.find(
+            announcement =>
+                String(
+                    announcement.id
+                ) ===
+                String(id)
+        ) || null;
+
+} catch (e) {
+
+    announcementToDelete =
+        null;
+
+}
+
     // SUPABASE DELETE
     const deleted =
         await deleteAnnouncementFromSupabase(id);
@@ -13474,6 +16168,24 @@ async function deleteAnnouncementItem(id) {
         );
         return;
     }
+
+    // =====================================
+// AUDIT - DELETE ANNOUNCEMENT
+// =====================================
+
+await writeAuditLog(
+    "DELETE",
+    "Announcements",
+    `Deleted announcement: ${
+        announcementToDelete?.text ||
+        "Unknown Announcement"
+    }`,
+    id,
+    {
+        text:
+            announcementToDelete?.text || ""
+    }
+);
 
     let announcements = [];
 
@@ -13879,80 +16591,257 @@ function generateMidweekStreamContent() {
 }
 
 function generateCOJTGKMidweekStreamDetailsFromSaved() {
-    const midSelect = document.getElementById('midGenDateSelect');
+
+    const midSelect =
+        document.getElementById(
+            "midGenDateSelect"
+        );
+
     let serviceData = null;
 
-    if (midSelect && midSelect.value !== "") {
-        const index = Number(midSelect.value);
-        serviceData = midweekServices[index];
+
+    // =====================================
+    // GET SAVED MIDWEEK RECORD
+    // =====================================
+
+    if (
+        midSelect &&
+        midSelect.value !== ""
+    ) {
+
+        const index =
+            Number(
+                midSelect.value
+            );
+
+        serviceData =
+            midweekServices[index];
+
     }
+
+
+    // =====================================
+    // FALLBACK TO CURRENT FORM
+    // =====================================
 
     const prefix = "mid_";
-    const getVal = (fieldId) => {
-        const el = document.getElementById(prefix + fieldId);
-        return el ? el.value.trim() : "";
-    };
 
-    const dateVal = serviceData ? serviceData.date : getVal("serviceDate");
-    let formattedDate = dateVal;
-    
+
+    const getVal =
+        (fieldId) => {
+
+            const el =
+                document.getElementById(
+                    prefix + fieldId
+                );
+
+            return el
+                ? el.value.trim()
+                : "";
+
+        };
+
+
+    // =====================================
+    // VALUES
+    // =====================================
+
+    const dateVal =
+        serviceData
+            ? serviceData.date
+            : getVal(
+                "serviceDate"
+            );
+
+
+    const pptOperator =
+        serviceData
+            ? (
+                serviceData.pptOperator ||
+                ""
+            )
+            : getVal(
+                "pptOperator"
+            );
+
+
+    const soundEngineer =
+        serviceData
+            ? (
+                serviceData.soundEngineer ||
+                ""
+            )
+            : getVal(
+                "soundEngineer"
+            );
+
+
+    const liveStream =
+        serviceData
+            ? (
+                serviceData.liveStream ||
+                ""
+            )
+            : getVal(
+                "liveStream"
+            );
+
+
+    const speaker =
+        serviceData
+            ? (
+                serviceData.preacher ||
+                "To be announced"
+            )
+            : (
+                getVal("preacher") ||
+                "To be announced"
+            );
+
+
+    const messageTitle =
+        serviceData
+            ? (
+                serviceData.messageTitle ||
+                "Midweek Message"
+            )
+            : (
+                getVal("messageTitle") ||
+                "Midweek Message"
+            );
+
+
+    // =====================================
+    // FORMAT DATE
+    // =====================================
+
+    let formattedDate = "";
+
+
     if (dateVal) {
-        const parsedDate = new Date(dateVal);
-        if (!isNaN(parsedDate)) {
-            formattedDate = parsedDate.toLocaleDateString('en-US', { 
-                month: 'long', 
-                day: 'numeric', 
-                year: 'numeric' 
-            });
+
+        const parsedDate =
+            new Date(
+                dateVal + "T00:00:00"
+            );
+
+
+        if (
+            !isNaN(
+                parsedDate.getTime()
+            )
+        ) {
+
+            formattedDate =
+                parsedDate
+                    .toLocaleDateString(
+                        "en-US",
+                        {
+                            month:
+                                "long",
+
+                            day:
+                                "numeric",
+
+                            year:
+                                "numeric"
+                        }
+                    );
+
         }
-    } else {
-        formattedDate = new Date().toLocaleDateString('en-US', { 
-            month: 'long', 
-            day: 'numeric', 
-            year: 'numeric' 
-        });
+
     }
 
-    const worshipLeader = serviceData ? (serviceData.worshipLeader || "Eslee Abregana") : (getVal("worshipLeader") || "Eslee Abregana");
-    const speaker = serviceData ? (serviceData.preacher || "Ptr. Apolinario 'Jun' Bañez") : (getVal("preacher") || "Ptr. Apolinario 'Jun' Bañez");
-    const messageTitle = serviceData ? (serviceData.messageTitle || "Midweek Message") : (getVal("messageTitle") || "Midweek Message");
-    const rawSongs = serviceData ? serviceData.songsLineup : getVal("songsLineup");
 
-    const streamTitle = `COJTGK Midweek Service - ${formattedDate}`;
+    if (!formattedDate) {
 
-    let songsListText = "• Pagsamba at Pagpupuri";
-    if (rawSongs) {
-        const songLines = rawSongs.split("\n").filter(s => s.trim() !== "");
-        songsListText = songLines.map(s => s.startsWith("•") ? s : `• ${s}`).join("\n");
+        formattedDate =
+            new Date()
+                .toLocaleDateString(
+                    "en-US",
+                    {
+                        month:
+                            "long",
+
+                        day:
+                            "numeric",
+
+                        year:
+                            "numeric"
+                    }
+                );
+
     }
 
-    const streamDesc = 
+
+    // =====================================
+    // STREAM TITLE
+    // =====================================
+
+    const streamTitle =
+        `COJTGK Midweek Service - ${formattedDate}`;
+
+
+
+    // =====================================
+    // STREAM DESCRIPTION
+    // =====================================
+
+    const streamDesc =
 `COJTGK Midweek Service - ${formattedDate}
 ——————————
-𝗪𝗲𝗹𝗰𝗼𝗺𝗲 𝘁𝗼 𝗼𝘂𝗿 𝗠𝗶𝗱𝘄𝗲𝗲𝗸 𝗦𝗲𝗿𝘃𝗶𝗰𝗲! 
-Join us as we gather together to study God's Word, worship Him, and lift up one another in prayer.
 
-𝐏𝐑𝐀𝐈𝐒𝐄 & 𝐖𝐎𝐑𝐒𝐇𝐈𝐏 𝑙𝑒𝑑 𝑏𝑦 ${worshipLeader}
-${songsListText}
+𝗪𝗲𝗹𝗰𝗼𝗺𝗲 𝘁𝗼 𝗼𝘂𝗿 𝗠𝗶𝗱𝘄𝗲𝗲𝗸 𝗦𝗲𝗿𝘃𝗶𝗰𝗲!
+
+Join us as we gather together to study God's Word, pray, and encourage one another in faith.
 
 𝐓𝐎𝐃𝐀𝐘'𝐒 𝐌𝐄𝐒𝐒𝐀𝐆𝐄
- 𝘚𝘱𝘦𝘢𝘬𝘦𝘳: ${speaker}
- 𝘛𝘪𝘵𝘭𝗲: ${messageTitle} 
+Speaker: ${speaker}
+Title: ${messageTitle}
 
 Church of Jesus the Glorious King, Inc. (COJTGK)
-Recorded Live  ||  Midweek Service  || ${formattedDate}
+Recorded Live || Midweek Service || ${formattedDate}
+
 ——————————
- 𝑺𝑻𝑨𝒀 𝑪𝑶𝑵𝑵𝑬𝑪𝑻𝑬𝑫
- 𝘍𝘉: facebook.com/COJTGKofficial
- 𝘠𝘛: youtube.com/@cojtgkofficial
-#COJTGK #MidweekService #Worship2026`;
+𝑺𝑻𝑨𝒀 𝑪𝑶𝑵𝑵𝑬𝑪𝑻𝑬𝑫
+FB: facebook.com/COJTGKofficial
+YT: youtube.com/@cojtgkofficial
 
-    const outTitle = document.getElementById("outputMidweekTitle");
-    const outDesc = document.getElementById("outputMidweekDesc");
-    if (outTitle) outTitle.value = streamTitle;
-    if (outDesc) outDesc.value = streamDesc;
+#COJTGK #MidweekService #WordOfGod`;
+
+
+    // =====================================
+    // OUTPUT
+    // =====================================
+
+    const outTitle =
+        document.getElementById(
+            "outputMidweekTitle"
+        );
+
+
+    const outDesc =
+        document.getElementById(
+            "outputMidweekDesc"
+        );
+
+
+    if (outTitle) {
+
+        outTitle.value =
+            streamTitle;
+
+    }
+
+
+    if (outDesc) {
+
+        outDesc.value =
+            streamDesc;
+
+    }
+
 }
-
 function populateMidweekGeneratorFields() {
     const midSelect = document.getElementById('midGenDateSelect');
     if (!midSelect || midSelect.value === "") return;
@@ -14652,20 +17541,757 @@ async function loginUser(){
 
 
 
-    console.log(
-        "✅ Login successful:",
-        data
-    );
+console.log(
+    "✅ Login successful:",
+    data
+);
 
 
 showChurchApp();
 
 await loadCurrentUserRole();
 
+
+// =====================================
+// AUDIT - LOGIN
+// =====================================
+
+const loginAuditSaved =
+    await writeAuditLog(
+        "LOGIN",
+        "Authentication",
+        `${currentUserRole || "Unknown"} account logged in.`
+    );
+
+
+console.log(
+    "LOGIN AUDIT RESULT:",
+    loginAuditSaved
+);
+
+
 applyRoleBasedUI();
 
-initializeChurchHQ();
+await initializeChurchHQ();
 
+
+}
+
+
+// =====================================================
+// LOAD AUDIT LOGS FROM SUPABASE
+// ADMIN ONLY
+// =====================================================
+
+async function loadAuditLogsFromSupabase() {
+
+    if (!isAdminUser()) {
+        return false;
+    }
+
+
+    try {
+
+        const { data, error } =
+            await churchSupabase
+                .from("audit_logs")
+                .select("*")
+                .order(
+                    "created_at",
+                    {
+                        ascending: false
+                    }
+                )
+                .limit(500);
+
+
+        if (error) {
+
+            console.error(
+                "❌ Failed to load audit logs:",
+                error
+            );
+
+            return false;
+        }
+
+
+        auditLogs =
+            Array.isArray(data)
+                ? data
+                : [];
+
+
+        console.log(
+            "✅ Audit logs loaded:",
+            auditLogs.length
+        );
+
+
+        if (
+            typeof populateAuditModuleFilter ===
+            "function"
+        ) {
+
+            populateAuditModuleFilter();
+
+        }
+
+
+        if (
+            typeof renderAuditLogs ===
+            "function"
+        ) {
+
+            renderAuditLogs();
+
+        }
+
+
+        return true;
+
+
+    } catch (error) {
+
+        console.error(
+            "❌ Audit log read error:",
+            error
+        );
+
+        return false;
+    }
+
+}
+
+// =====================================================
+// POPULATE AUDIT MODULE FILTER
+// =====================================================
+
+function populateAuditModuleFilter() {
+
+    const select =
+        document.getElementById(
+            "auditModuleFilter"
+        );
+
+    if (!select) {
+        return;
+    }
+
+
+    const currentValue =
+        select.value;
+
+
+    const modules =
+        [
+            ...new Set(
+                auditLogs
+                    .map(
+                        log =>
+                            log.module || ""
+                    )
+                    .filter(Boolean)
+            )
+        ]
+        .sort();
+
+
+    select.innerHTML = `
+        <option value="">
+            All Modules
+        </option>
+    `;
+
+
+    modules.forEach(module => {
+
+        const option =
+            document.createElement(
+                "option"
+            );
+
+        option.value =
+            module;
+
+        option.textContent =
+            module;
+
+        select.appendChild(
+            option
+        );
+
+    });
+
+
+    if (
+        modules.includes(
+            currentValue
+        )
+    ) {
+        select.value =
+            currentValue;
+    }
+
+}
+
+// =====================================================
+// RENDER AUDIT LOGS
+// =====================================================
+
+function renderAuditLogs() {
+
+    const body =
+        document.getElementById(
+            "auditLogBody"
+        );
+
+    if (!body) {
+        console.warn(
+            "⚠️ auditLogBody not found."
+        );
+        return;
+    }
+
+
+    const search =
+        (
+            document.getElementById(
+                "auditSearch"
+            )?.value || ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    const roleFilter =
+        document.getElementById(
+            "auditRoleFilter"
+        )?.value || "";
+
+
+    const moduleFilter =
+        document.getElementById(
+            "auditModuleFilter"
+        )?.value || "";
+
+
+    const dateFilter =
+        document.getElementById(
+            "auditDateFilter"
+        )?.value || "";
+
+
+    // =====================================
+    // FILTER
+    // =====================================
+
+    const filteredLogs =
+        auditLogs.filter(log => {
+
+            const searchText =
+                [
+                    log.user_email || "",
+                    log.user_role || "",
+                    log.action || "",
+                    log.module || "",
+                    log.description || ""
+                ]
+                .join(" ")
+                .toLowerCase();
+
+
+            const matchesSearch =
+                !search ||
+                searchText.includes(search);
+
+
+            const matchesRole =
+                !roleFilter ||
+                log.user_role === roleFilter;
+
+
+            const matchesModule =
+                !moduleFilter ||
+                log.module === moduleFilter;
+
+
+            let matchesDate = true;
+
+
+            if (
+                dateFilter &&
+                log.created_at
+            ) {
+
+                const d =
+                    new Date(
+                        log.created_at
+                    );
+
+                const localDate =
+                    `${d.getFullYear()}-${String(
+                        d.getMonth() + 1
+                    ).padStart(2, "0")}-${String(
+                        d.getDate()
+                    ).padStart(2, "0")}`;
+
+                matchesDate =
+                    localDate === dateFilter;
+            }
+
+
+            return (
+                matchesSearch &&
+                matchesRole &&
+                matchesModule &&
+                matchesDate
+            );
+
+        });
+
+
+    // =====================================
+    // PAGINATION
+    // =====================================
+
+    const totalPages =
+        Math.max(
+            1,
+            Math.ceil(
+                filteredLogs.length /
+                auditPageSize
+            )
+        );
+
+
+    if (
+        auditCurrentPage >
+        totalPages
+    ) {
+        auditCurrentPage =
+            totalPages;
+    }
+
+
+    if (
+        auditCurrentPage < 1
+    ) {
+        auditCurrentPage = 1;
+    }
+
+
+    const startIndex =
+        (auditCurrentPage - 1) *
+        auditPageSize;
+
+
+    const visibleLogs =
+        filteredLogs.slice(
+            startIndex,
+            startIndex +
+            auditPageSize
+        );
+
+
+    // =====================================
+    // CLEAR TABLE
+    // =====================================
+
+    body.innerHTML = "";
+
+
+    // =====================================
+    // EMPTY STATE
+    // =====================================
+
+    if (
+        filteredLogs.length === 0
+    ) {
+
+        body.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="6"
+                    style="
+                        padding:20px;
+                        text-align:center;
+                        color:#9ca3af;
+                    "
+                >
+                    No audit records found.
+                </td>
+
+            </tr>
+
+        `;
+
+
+        const pageInfo =
+            document.getElementById(
+                "auditPageInfo"
+            );
+
+
+        if (pageInfo) {
+            pageInfo.textContent =
+                "Page 1 of 1";
+        }
+
+
+        console.log(
+            "📋 Audit rows rendered: 0"
+        );
+
+        return;
+    }
+
+
+    // =====================================
+    // RENDER CURRENT PAGE ONLY
+    // =====================================
+
+    visibleLogs.forEach(log => {
+
+        const tr =
+            document.createElement(
+                "tr"
+            );
+
+
+        tr.style.borderBottom =
+            "1px solid #e5e7eb";
+
+
+        const dateText =
+            log.created_at
+                ? new Date(
+                    log.created_at
+                ).toLocaleString()
+                : "-";
+
+
+        tr.innerHTML = `
+
+            <td style="padding:12px;">
+                ${dateText}
+            </td>
+
+            <td style="padding:12px;">
+                ${log.user_email || "-"}
+            </td>
+
+            <td style="padding:12px;">
+                ${log.user_role || "-"}
+            </td>
+
+            <td style="padding:12px;">
+                <strong>
+                    ${log.action || "-"}
+                </strong>
+            </td>
+
+            <td style="padding:12px;">
+                ${log.module || "-"}
+            </td>
+
+            <td style="padding:12px;">
+                ${log.description || "-"}
+            </td>
+
+        `;
+
+
+        body.appendChild(
+            tr
+        );
+
+    });
+
+
+    // =====================================
+    // PAGE INFO
+    // =====================================
+
+    const pageInfo =
+        document.getElementById(
+            "auditPageInfo"
+        );
+
+
+    if (pageInfo) {
+
+        pageInfo.textContent =
+            `Page ${auditCurrentPage} of ${totalPages}`;
+
+    }
+
+
+    console.log(
+        "📋 Audit rows rendered:",
+        visibleLogs.length,
+        "of",
+        filteredLogs.length
+    );
+
+}
+
+function changeAuditPage(direction) {
+
+    const search =
+        (
+            document.getElementById(
+                "auditSearch"
+            )?.value || ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    const roleFilter =
+        document.getElementById(
+            "auditRoleFilter"
+        )?.value || "";
+
+
+    const moduleFilter =
+        document.getElementById(
+            "auditModuleFilter"
+        )?.value || "";
+
+
+    const dateFilter =
+        document.getElementById(
+            "auditDateFilter"
+        )?.value || "";
+
+
+    const filteredLogs =
+        auditLogs.filter(log => {
+
+            const searchText =
+                [
+                    log.user_email || "",
+                    log.user_role || "",
+                    log.action || "",
+                    log.module || "",
+                    log.description || ""
+                ]
+                .join(" ")
+                .toLowerCase();
+
+
+            const matchesSearch =
+                !search ||
+                searchText.includes(search);
+
+
+            const matchesRole =
+                !roleFilter ||
+                log.user_role === roleFilter;
+
+
+            const matchesModule =
+                !moduleFilter ||
+                log.module === moduleFilter;
+
+
+            let matchesDate = true;
+
+
+            if (
+                dateFilter &&
+                log.created_at
+            ) {
+
+                const d =
+                    new Date(
+                        log.created_at
+                    );
+
+
+                const localDate =
+                    `${d.getFullYear()}-${String(
+                        d.getMonth() + 1
+                    ).padStart(2, "0")}-${String(
+                        d.getDate()
+                    ).padStart(2, "0")}`;
+
+
+                matchesDate =
+                    localDate === dateFilter;
+
+            }
+
+
+            return (
+                matchesSearch &&
+                matchesRole &&
+                matchesModule &&
+                matchesDate
+            );
+
+        });
+
+
+    const totalPages =
+        Math.max(
+            1,
+            Math.ceil(
+                filteredLogs.length /
+                auditPageSize
+            )
+        );
+
+
+    auditCurrentPage += direction;
+
+
+    if (auditCurrentPage < 1) {
+        auditCurrentPage = 1;
+    }
+
+
+    if (
+        auditCurrentPage >
+        totalPages
+    ) {
+        auditCurrentPage = totalPages;
+    }
+
+
+    renderAuditLogs();
+
+}
+
+// =====================================================
+// CLEAR ALL AUDIT LOGS
+// ADMIN ONLY
+// =====================================================
+
+async function clearAuditLogs() {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
+
+    const confirmed =
+        confirm(
+            "Clear all audit logs?\n\n" +
+            "This action cannot be undone."
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    try {
+
+        const { error } =
+            await churchSupabase
+                .from("audit_logs")
+                .delete()
+                .neq("id", 0);
+
+
+        if (error) {
+
+            console.error(
+                "❌ Failed to clear audit logs:",
+                error
+            );
+
+            alert(
+                "❌ Failed to clear audit logs."
+            );
+
+            return;
+        }
+
+
+        auditLogs = [];
+
+        auditCurrentPage = 1;
+
+
+        renderAuditLogs();
+
+
+        alert(
+            "✅ Audit logs cleared successfully."
+        );
+
+
+        console.log(
+            "🗑️ Audit logs cleared."
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "❌ Clear audit logs error:",
+            error
+        );
+
+        alert(
+            "❌ Failed to clear audit logs."
+        );
+
+    }
+
+}
+
+// =====================================================
+// CLEAR AUDIT FILTERS
+// =====================================================
+
+function clearAuditFilters() {
+
+    const search =
+        document.getElementById(
+            "auditSearch"
+        );
+
+    const role =
+        document.getElementById(
+            "auditRoleFilter"
+        );
+
+    const module =
+        document.getElementById(
+            "auditModuleFilter"
+        );
+
+    const date =
+        document.getElementById(
+            "auditDateFilter"
+        );
+
+
+    if (search) {
+        search.value = "";
+    }
+
+    if (role) {
+        role.value = "";
+    }
+
+    if (module) {
+        module.value = "";
+    }
+
+    if (date) {
+        date.value = "";
+    }
+
+
+    renderAuditLogs();
 
 }
 
@@ -14832,6 +18458,119 @@ function requireAdmin(){
 
 }
 
+// =====================================================
+// CHURCHHQ AUDIT LOGGER
+// =====================================================
+
+async function writeAuditLog(
+    action,
+    module,
+    description = "",
+    recordId = null,
+    metadata = {}
+) {
+
+    try {
+
+        if (!currentUser) {
+
+            console.warn(
+                "⚠️ Audit skipped: no authenticated user."
+            );
+
+            return false;
+        }
+
+
+        const { error } =
+            await churchSupabase.rpc(
+                "write_audit_log",
+                {
+                    p_action:
+                        action,
+
+                    p_module:
+                        module,
+
+                    p_record_id:
+                        recordId !== null
+                            ? String(recordId)
+                            : null,
+
+                    p_description:
+                        description || null,
+
+                    p_metadata:
+                        metadata || {}
+                }
+            );
+
+
+        if (error) {
+
+            console.error(
+                "❌ Audit log failed:",
+                error
+            );
+
+            return false;
+        }
+
+
+        console.log(
+            "📝 Audit log saved:",
+            action,
+            module
+        );
+
+
+        return true;
+
+    } catch (error) {
+
+        console.error(
+            "❌ Audit logger error:",
+            error
+        );
+
+        return false;
+    }
+
+}
+
+// =====================================
+// MEMBER MANAGEMENT PERMISSION
+// Admin + Attendance account
+// =====================================
+
+function canManageMembers() {
+
+    return (
+        isAdminUser() ||
+        isAttendanceUser()
+    );
+
+}
+
+
+function requireMemberManager() {
+
+    if (!canManageMembers()) {
+
+        alert(
+            "You do not have permission to manage members."
+        );
+
+        return false;
+    }
+
+    return true;
+}
+
+// =====================================
+// ROLE-BASED UI
+// =====================================
+
 function applyRoleBasedUI() {
 
     console.log(
@@ -14869,7 +18608,7 @@ function applyRoleBasedUI() {
 
     // =====================================
     // ATTENDANCE MANAGEMENT CONTROLS
-    // Admin + Attendance role
+    // Admin + Attendance
     // =====================================
 
     const attendanceControls =
@@ -14896,6 +18635,81 @@ function applyRoleBasedUI() {
 
 
     // =====================================
+    // MEMBER MANAGEMENT CONTROLS
+    // Admin + Attendance
+    // =====================================
+
+    const memberControls =
+        document.querySelectorAll(
+            '[data-member-manage="true"]'
+        );
+
+
+    memberControls.forEach(element => {
+
+        if (canManageMembers()) {
+
+            element.style.display = "";
+            element.disabled = false;
+
+        } else {
+
+            element.style.display = "none";
+            element.disabled = true;
+
+        }
+
+    });
+
+
+    // =====================================
+    // VIEWER SIDEBAR RESTRICTIONS
+    // =====================================
+
+    const viewerRestrictedPages = [
+
+        "members",
+        "leaders",
+        "attendance",
+        "reports",
+        "settings"
+
+    ];
+
+
+    viewerRestrictedPages.forEach(pageId => {
+
+        const navItem =
+            document.querySelector(
+                `.nav-item[onclick*="showPage('${pageId}')"]`
+            );
+
+
+        if (!navItem) {
+            return;
+        }
+
+
+        if (isViewerUser()) {
+
+            navItem.style.setProperty(
+                "display",
+                "none",
+                "important"
+            );
+
+        } else {
+
+            navItem.style.removeProperty(
+                "display"
+            );
+
+        }
+
+    });
+
+
+    // =====================================
     // ROLE LOG
     // =====================================
 
@@ -14911,7 +18725,7 @@ function applyRoleBasedUI() {
             "📋 Attendance UI enabled"
         );
 
-    } else {
+    } else if (isViewerUser()) {
 
         console.log(
             "👁️ Viewer UI enabled"
@@ -14922,36 +18736,46 @@ function applyRoleBasedUI() {
 }
 
 
-function showChurchApp(){
+// =====================================
+// SHOW CHURCH APP
+// =====================================
+
+function showChurchApp() {
 
     const login =
-    document.getElementById("loginScreen");
+        document.getElementById(
+            "loginScreen"
+        );
 
 
     const app =
-    document.getElementById("churchApp");
+        document.getElementById(
+            "churchApp"
+        );
 
 
-    if(login)
-        login.style.display="none";
+    if (login) {
+
+        login.style.display =
+            "none";
+
+    }
 
 
-    if(app)
-        app.style.display="block";
+    if (app) {
+
+        app.style.display =
+            "block";
+
+    }
 
 
     console.log(
         "✅ ChurchHQ App unlocked"
     );
 
-
 }
 
-
-
-// CHECK EXISTING SESSION
-
-// CHECK EXISTING SESSION
 
 async function checkLoginSession(){
 
@@ -14998,6 +18822,19 @@ document.addEventListener(
 
 async function logoutUser(){
 
+
+    // =====================================
+    // AUDIT - LOGOUT
+    // Must run BEFORE signOut
+    // =====================================
+
+    await writeAuditLog(
+        "LOGOUT",
+        "Authentication",
+        `${currentUserRole || "Unknown"} account logged out.`
+    );
+
+
     const { error } =
         await churchSupabase.auth.signOut();
 
@@ -15016,6 +18853,8 @@ async function logoutUser(){
     console.log(
         "✅ Logged out"
     );
+
+
 
 currentUser = null;
 currentUserRole = null;
