@@ -13652,8 +13652,9 @@ if (!canManageAttendance()) {
 }
 
 // =====================================================
-// SETTINGS & BACKUP ENGINE
-// SUPABASE EXPORT BACKUP
+// CHURCHHQ SETTINGS
+// COMPLETE SUPABASE BACKUP
+// VERSION 6.0
 // =====================================================
 
 async function exportChurchData() {
@@ -13662,15 +13663,16 @@ async function exportChurchData() {
         return;
     }
 
+
     try {
 
         console.log(
-            "📦 Creating ChurchHQ Supabase backup..."
+            "📦 Creating ChurchHQ Backup v6..."
         );
 
 
         // =====================================
-        // LOAD ALL DATABASE TABLES
+        // LOAD ALL OPERATIONAL TABLES
         // =====================================
 
         const [
@@ -13680,6 +13682,7 @@ async function exportChurchData() {
             songsResult,
             servicesResult,
             attendanceResult,
+            activitiesResult,
             annualActivitiesResult,
             announcementsResult,
             fileFoldersResult,
@@ -13709,6 +13712,10 @@ async function exportChurchData() {
                 .select("*"),
 
             churchSupabase
+                .from("activities")
+                .select("*"),
+
+            churchSupabase
                 .from("annual_activities")
                 .select("*"),
 
@@ -13732,12 +13739,15 @@ async function exportChurchData() {
 
 
         // =====================================
-        // CHECK FOR SUPABASE ERRORS
+        // CHECK SUPABASE ERRORS
         // =====================================
 
         const results = [
 
-            ["members", membersResult],
+            [
+                "members",
+                membersResult
+            ],
 
             [
                 "planner_tasks",
@@ -13757,6 +13767,11 @@ async function exportChurchData() {
             [
                 "attendance_records",
                 attendanceResult
+            ],
+
+            [
+                "activities",
+                activitiesResult
             ],
 
             [
@@ -13795,13 +13810,15 @@ async function exportChurchData() {
             if (result.error) {
 
                 console.error(
-                    `❌ Failed to export ${tableName}:`,
+                    `❌ Backup failed on ${tableName}:`,
                     result.error
                 );
+
 
                 alert(
                     `❌ Backup failed while reading ${tableName}.`
                 );
+
 
                 return;
             }
@@ -13819,7 +13836,7 @@ async function exportChurchData() {
                 "ChurchHQ",
 
             version:
-                "5.2",
+                "6.0",
 
             source:
                 "Supabase",
@@ -13845,6 +13862,9 @@ async function exportChurchData() {
                 attendance_records:
                     attendanceResult.data || [],
 
+                activities:
+                    activitiesResult.data || [],
+
                 annual_activities:
                     annualActivitiesResult.data || [],
 
@@ -13866,7 +13886,7 @@ async function exportChurchData() {
 
 
         // =====================================
-        // CREATE JSON FILE
+        // CREATE JSON DOWNLOAD
         // =====================================
 
         const jsonData =
@@ -13913,7 +13933,7 @@ async function exportChurchData() {
 
 
         downloadAnchor.download =
-            `churchhq_backup_v5_${today}.json`;
+            `churchhq_backup_v6_${today}.json`;
 
 
         document.body.appendChild(
@@ -13933,59 +13953,7 @@ async function exportChurchData() {
 
 
         // =====================================
-        // CONSOLE BACKUP SUMMARY
-        // =====================================
-
-        console.log(
-            "✅ ChurchHQ backup created:",
-            {
-
-                members:
-                    backupData.data
-                        .members.length,
-
-                planner_tasks:
-                    backupData.data
-                        .planner_tasks.length,
-
-                songs:
-                    backupData.data
-                        .songs.length,
-
-                service_records:
-                    backupData.data
-                        .service_records.length,
-
-                attendance_records:
-                    backupData.data
-                        .attendance_records.length,
-
-                annual_activities:
-                    backupData.data
-                        .annual_activities.length,
-
-                announcements:
-                    backupData.data
-                        .announcements.length,
-
-                file_folders:
-                    backupData.data
-                        .file_folders.length,
-
-                church_leaders:
-                    backupData.data
-                        .church_leaders.length,
-
-                ministries:
-                    backupData.data
-                        .ministries.length
-
-            }
-        );
-
-
-        // =====================================
-        // SAVE LAST BACKUP TIME
+        // SAVE LAST BACKUP DATE
         // =====================================
 
         const backupTime =
@@ -14002,8 +13970,109 @@ async function exportChurchData() {
         updateLastBackupDisplay();
 
 
+        // =====================================
+        // AUDIT - EXPORT
+        // =====================================
+
+        if (
+            typeof writeAuditLog ===
+            "function"
+        ) {
+
+            await writeAuditLog(
+                "EXPORT",
+                "Settings",
+                "Exported complete ChurchHQ backup.",
+                null,
+                {
+                    version:
+                        "6.0",
+
+                    members:
+                        backupData.data.members.length,
+
+                    plannerTasks:
+                        backupData.data.planner_tasks.length,
+
+                    songs:
+                        backupData.data.songs.length,
+
+                    services:
+                        backupData.data.service_records.length,
+
+                    attendance:
+                        backupData.data.attendance_records.length,
+
+                    activities:
+                        backupData.data.activities.length,
+
+                    annualActivities:
+                        backupData.data.annual_activities.length,
+
+                    announcements:
+                        backupData.data.announcements.length,
+
+                    fileFolders:
+                        backupData.data.file_folders.length,
+
+                    churchLeaders:
+                        backupData.data.church_leaders.length,
+
+                    ministries:
+                        backupData.data.ministries.length
+                }
+            );
+
+        }
+
+
+        // =====================================
+        // CONSOLE SUMMARY
+        // =====================================
+
+        console.log(
+            "✅ ChurchHQ Backup v6 created:",
+            {
+
+                members:
+                    backupData.data.members.length,
+
+                planner_tasks:
+                    backupData.data.planner_tasks.length,
+
+                songs:
+                    backupData.data.songs.length,
+
+                service_records:
+                    backupData.data.service_records.length,
+
+                attendance_records:
+                    backupData.data.attendance_records.length,
+
+                activities:
+                    backupData.data.activities.length,
+
+                annual_activities:
+                    backupData.data.annual_activities.length,
+
+                announcements:
+                    backupData.data.announcements.length,
+
+                file_folders:
+                    backupData.data.file_folders.length,
+
+                church_leaders:
+                    backupData.data.church_leaders.length,
+
+                ministries:
+                    backupData.data.ministries.length
+
+            }
+        );
+
+
         alert(
-            "✅ ChurchHQ backup downloaded successfully!"
+            "✅ ChurchHQ complete backup downloaded successfully!"
         );
 
 
@@ -14016,7 +14085,8 @@ async function exportChurchData() {
 
 
         alert(
-            "❌ Failed to create ChurchHQ backup."
+            "❌ Failed to create ChurchHQ backup.\n\n" +
+            error.message
         );
 
     }
@@ -14024,8 +14094,9 @@ async function exportChurchData() {
 }
 
 // =====================================================
-// SETTINGS & BACKUP ENGINE
-// SUPABASE IMPORT / RESTORE
+// CHURCHHQ SETTINGS
+// IMPORT / RESTORE COMPLETE BACKUP
+// SUPPORTS OLD + NEW BACKUPS
 // =====================================================
 
 async function importChurchData(event) {
@@ -14035,8 +14106,13 @@ async function importChurchData(event) {
     }
 
 
+    const input =
+        event.target;
+
+
     const file =
-        event.target.files[0];
+        input.files &&
+        input.files[0];
 
 
     if (!file) {
@@ -14053,6 +14129,10 @@ async function importChurchData(event) {
 
             try {
 
+                // =====================================
+                // READ JSON
+                // =====================================
+
                 const importedJSON =
                     JSON.parse(
                         e.target.result
@@ -14067,79 +14147,135 @@ async function importChurchData(event) {
                     !importedJSON ||
                     importedJSON.app !==
                         "ChurchHQ" ||
-                    !importedJSON.data
+                    !importedJSON.data ||
+                    typeof importedJSON.data !==
+                        "object"
                 ) {
 
                     alert(
                         "❌ Invalid ChurchHQ backup file."
                     );
 
-                    event.target.value =
+                    input.value =
                         "";
 
                     return;
                 }
 
 
-                const backup =
+                const rawBackup =
                     importedJSON.data;
 
 
                 // =====================================
-                // VALIDATE REQUIRED ARRAYS
+                // REQUIRED CORE TABLES
                 // =====================================
 
                 const validBackup =
 
                     Array.isArray(
-                        backup.members
+                        rawBackup.members
                     ) &&
 
                     Array.isArray(
-                        backup.planner_tasks
+                        rawBackup.planner_tasks
                     ) &&
 
                     Array.isArray(
-                        backup.songs
+                        rawBackup.songs
                     ) &&
 
                     Array.isArray(
-                        backup.service_records
+                        rawBackup.service_records
                     ) &&
 
                     Array.isArray(
-                        backup.attendance_records
-                    ) &&
-
-                    Array.isArray(
-                        backup.annual_activities
-                    ) &&
-
-                    Array.isArray(
-                        backup.announcements
-                    ) &&
-
-                    Array.isArray(
-                        backup.church_leaders
-                    ) &&
-
-                    Array.isArray(
-                        backup.ministries
+                        rawBackup.attendance_records
                     );
 
 
                 if (!validBackup) {
 
                     alert(
-                        "❌ This is not a valid ChurchHQ v5 backup."
+                        "❌ This is not a valid ChurchHQ backup file."
                     );
 
-                    event.target.value =
+                    input.value =
                         "";
 
                     return;
                 }
 
+
+                // =====================================
+                // BACKWARD COMPATIBILITY
+                // =====================================
+
+                const backup = {
+
+                    members:
+                        rawBackup.members || [],
+
+                    planner_tasks:
+                        rawBackup.planner_tasks || [],
+
+                    songs:
+                        rawBackup.songs || [],
+
+                    service_records:
+                        rawBackup.service_records || [],
+
+                    attendance_records:
+                        rawBackup.attendance_records || [],
+
+                    activities:
+                        Array.isArray(
+                            rawBackup.activities
+                        )
+                            ? rawBackup.activities
+                            : [],
+
+                    annual_activities:
+                        Array.isArray(
+                            rawBackup.annual_activities
+                        )
+                            ? rawBackup.annual_activities
+                            : [],
+
+                    announcements:
+                        Array.isArray(
+                            rawBackup.announcements
+                        )
+                            ? rawBackup.announcements
+                            : [],
+
+                    file_folders:
+                        Array.isArray(
+                            rawBackup.file_folders
+                        )
+                            ? rawBackup.file_folders
+                            : [],
+
+                    church_leaders:
+                        Array.isArray(
+                            rawBackup.church_leaders
+                        )
+                            ? rawBackup.church_leaders
+                            : [],
+
+                    ministries:
+                        Array.isArray(
+                            rawBackup.ministries
+                        )
+                            ? rawBackup.ministries
+                            : []
+
+                };
+
+
+                // =====================================
+                // CONFIRM RESTORE
+                // =====================================
 
                 const confirmed =
                     confirm(
@@ -14148,20 +14284,30 @@ async function importChurchData(event) {
 
                         "Existing records with the same IDs will be updated.\n" +
 
-                        "Records not currently in the database will be added.\n\n" +
+                        "Missing records from this backup will be added.\n\n" +
 
-                        "This backup includes:\n" +
+                        "Backup Version: " +
+                        (
+                            importedJSON.version ||
+                            "Legacy"
+                        ) +
+                        "\n\n" +
+
+                        "This restore can include:\n" +
 
                         "• Members\n" +
                         "• Planner Tasks\n" +
                         "• Songs\n" +
-                        "• Services\n" +
+                        "• Sunday & Midweek Services\n" +
                         "• Attendance\n" +
+                        "• Dashboard Activities\n" +
                         "• Annual Activities\n" +
                         "• Announcements\n" +
                         "• File Folders\n" +
                         "• Church Leaders\n" +
                         "• Ministries\n\n" +
+
+                        "User accounts, roles and Audit Logs will NOT be replaced.\n\n" +
 
                         "Continue?"
 
@@ -14170,7 +14316,7 @@ async function importChurchData(event) {
 
                 if (!confirmed) {
 
-                    event.target.value =
+                    input.value =
                         "";
 
                     return;
@@ -14183,25 +14329,36 @@ async function importChurchData(event) {
 
 
                 // =====================================
-                // RESTORE MINISTRIES FIRST
+                // RESTORE HELPER
                 // =====================================
 
-                if (
-                    backup.ministries.length > 0
+                async function restoreTable(
+                    tableName,
+                    records
                 ) {
 
-                    const {
-                        error:
-                            ministriesError
-                    } =
+                    if (
+                        !Array.isArray(
+                            records
+                        ) ||
+                        records.length === 0
+                    ) {
+
+                        console.log(
+                            `ℹ️ ${tableName}: no records to restore.`
+                        );
+
+                        return;
+                    }
+
+
+                    const { error } =
                         await churchSupabase
-
                             .from(
-                                "ministries"
+                                tableName
                             )
-
                             .upsert(
-                                backup.ministries,
+                                records,
                                 {
                                     onConflict:
                                         "id"
@@ -14209,404 +14366,172 @@ async function importChurchData(event) {
                             );
 
 
-                    if (ministriesError) {
+                    if (error) {
 
                         throw new Error(
-                            "Ministries restore failed: " +
-                            ministriesError.message
+                            `${tableName} restore failed: ${error.message}`
                         );
 
                     }
+
+
+                    console.log(
+                        `✅ Restored ${tableName}:`,
+                        records.length
+                    );
 
                 }
 
 
                 // =====================================
-                // RESTORE MEMBERS
+                // RESTORE ORDER
                 // =====================================
 
-                if (
-                    backup.members.length > 0
-                ) {
+                await restoreTable(
+                    "ministries",
+                    backup.ministries
+                );
 
-                    const {
-                        error:
-                            membersError
-                    } =
-                        await churchSupabase
+                await restoreTable(
+                    "members",
+                    backup.members
+                );
 
-                            .from(
-                                "members"
-                            )
-
-                            .upsert(
-                                backup.members,
-                                {
-                                    onConflict:
-                                        "id"
-                                }
-                            );
-
-
-                    if (membersError) {
-
-                        throw new Error(
-                            "Members restore failed: " +
-                            membersError.message
-                        );
-
-                    }
-
-                }
-
-
-                // =====================================
-                // RESTORE PLANNER TASKS
-                // =====================================
-
-                if (
+                await restoreTable(
+                    "planner_tasks",
                     backup.planner_tasks
-                        .length > 0
-                ) {
+                );
 
-                    const {
-                        error:
-                            tasksError
-                    } =
-                        await churchSupabase
+                await restoreTable(
+                    "songs",
+                    backup.songs
+                );
 
-                            .from(
-                                "planner_tasks"
-                            )
-
-                            .upsert(
-                                backup.planner_tasks,
-                                {
-                                    onConflict:
-                                        "id"
-                                }
-                            );
-
-
-                    if (tasksError) {
-
-                        throw new Error(
-                            "Planner tasks restore failed: " +
-                            tasksError.message
-                        );
-
-                    }
-
-                }
-
-
-                // =====================================
-                // RESTORE SONGS
-                // =====================================
-
-                if (
-                    backup.songs.length > 0
-                ) {
-
-                    const {
-                        error:
-                            songsError
-                    } =
-                        await churchSupabase
-
-                            .from(
-                                "songs"
-                            )
-
-                            .upsert(
-                                backup.songs,
-                                {
-                                    onConflict:
-                                        "id"
-                                }
-                            );
-
-
-                    if (songsError) {
-
-                        throw new Error(
-                            "Songs restore failed: " +
-                            songsError.message
-                        );
-
-                    }
-
-                }
-
-
-                // =====================================
-                // RESTORE SERVICES
-                // =====================================
-
-                if (
+                await restoreTable(
+                    "service_records",
                     backup.service_records
-                        .length > 0
-                ) {
+                );
 
-                    const {
-                        error:
-                            servicesError
-                    } =
-                        await churchSupabase
-
-                            .from(
-                                "service_records"
-                            )
-
-                            .upsert(
-                                backup.service_records,
-                                {
-                                    onConflict:
-                                        "id"
-                                }
-                            );
-
-
-                    if (servicesError) {
-
-                        throw new Error(
-                            "Service records restore failed: " +
-                            servicesError.message
-                        );
-
-                    }
-
-                }
-
-
-                // =====================================
-                // RESTORE ATTENDANCE
-                // =====================================
-
-                if (
+                await restoreTable(
+                    "attendance_records",
                     backup.attendance_records
-                        .length > 0
-                ) {
+                );
 
-                    const {
-                        error:
-                            attendanceError
-                    } =
-                        await churchSupabase
+                await restoreTable(
+                    "activities",
+                    backup.activities
+                );
 
-                            .from(
-                                "attendance_records"
-                            )
-
-                            .upsert(
-                                backup.attendance_records,
-                                {
-                                    onConflict:
-                                        "id"
-                                }
-                            );
-
-
-                    if (attendanceError) {
-
-                        throw new Error(
-                            "Attendance restore failed: " +
-                            attendanceError.message
-                        );
-
-                    }
-
-                }
-
-
-                // =====================================
-                // RESTORE ANNUAL ACTIVITIES
-                // =====================================
-
-                if (
+                await restoreTable(
+                    "annual_activities",
                     backup.annual_activities
-                        .length > 0
-                ) {
+                );
 
-                    const {
-                        error:
-                            annualActivitiesError
-                    } =
-                        await churchSupabase
-
-                            .from(
-                                "annual_activities"
-                            )
-
-                            .upsert(
-                                backup.annual_activities,
-                                {
-                                    onConflict:
-                                        "id"
-                                }
-                            );
-
-
-                    if (
-                        annualActivitiesError
-                    ) {
-
-                        throw new Error(
-                            "Annual Activities restore failed: " +
-                            annualActivitiesError.message
-                        );
-
-                    }
-
-                }
-
-
-                // =====================================
-                // RESTORE ANNOUNCEMENTS
-                // =====================================
-
-                if (
+                await restoreTable(
+                    "announcements",
                     backup.announcements
-                        .length > 0
-                ) {
+                );
 
-                    const {
-                        error:
-                            announcementsError
-                    } =
-                        await churchSupabase
-
-                            .from(
-                                "announcements"
-                            )
-
-                            .upsert(
-                                backup.announcements,
-                                {
-                                    onConflict:
-                                        "id"
-                                }
-                            );
-
-
-                    if (
-                        announcementsError
-                    ) {
-
-                        throw new Error(
-                            "Announcements restore failed: " +
-                            announcementsError.message
-                        );
-
-                    }
-
-                }
-
-
-                // =====================================
-                // RESTORE FILE FOLDERS
-                // =====================================
-
-                if (
-                    Array.isArray(
-                        backup.file_folders
-                    ) &&
+                await restoreTable(
+                    "file_folders",
                     backup.file_folders
-                        .length > 0
-                ) {
+                );
 
-                    const {
-                        error:
-                            fileFoldersError
-                    } =
-                        await churchSupabase
-
-                            .from(
-                                "file_folders"
-                            )
-
-                            .upsert(
-                                backup.file_folders,
-                                {
-                                    onConflict:
-                                        "id"
-                                }
-                            );
-
-
-                    if (
-                        fileFoldersError
-                    ) {
-
-                        throw new Error(
-                            "File folders restore failed: " +
-                            fileFoldersError.message
-                        );
-
-                    }
-
-                }
+                await restoreTable(
+                    "church_leaders",
+                    backup.church_leaders
+                );
 
 
                 // =====================================
-                // RESTORE CHURCH LEADERS LAST
+                // AUDIT - IMPORT
                 // =====================================
 
                 if (
-                    backup.church_leaders
-                        .length > 0
+                    typeof writeAuditLog ===
+                    "function"
                 ) {
 
-                    const {
-                        error:
-                            leadersError
-                    } =
-                        await churchSupabase
+                    await writeAuditLog(
+                        "IMPORT",
+                        "Settings",
+                        "Restored ChurchHQ backup.",
+                        null,
+                        {
+                            backupVersion:
+                                importedJSON.version ||
+                                "Legacy",
 
-                            .from(
-                                "church_leaders"
-                            )
+                            members:
+                                backup.members.length,
 
-                            .upsert(
-                                backup.church_leaders,
-                                {
-                                    onConflict:
-                                        "id"
-                                }
-                            );
+                            plannerTasks:
+                                backup.planner_tasks.length,
 
+                            songs:
+                                backup.songs.length,
 
-                    if (leadersError) {
+                            services:
+                                backup.service_records.length,
 
-                        throw new Error(
-                            "Church Leaders restore failed: " +
-                            leadersError.message
-                        );
+                            attendance:
+                                backup.attendance_records.length,
 
-                    }
+                            activities:
+                                backup.activities.length,
+
+                            annualActivities:
+                                backup.annual_activities.length,
+
+                            announcements:
+                                backup.announcements.length,
+
+                            fileFolders:
+                                backup.file_folders.length,
+
+                            churchLeaders:
+                                backup.church_leaders.length,
+
+                            ministries:
+                                backup.ministries.length
+                        }
+                    );
 
                 }
-
-
-                console.log(
-                    "✅ ChurchHQ Supabase restore completed."
-                );
-
-
-                alert(
-                    "✅ ChurchHQ backup restored successfully!"
-                );
-
-
-                event.target.value =
-                    "";
 
 
                 // =====================================
                 // RELOAD DATA
                 // =====================================
 
-                await initializeChurchHQ();
+                if (
+                    typeof initializeChurchHQ ===
+                    "function"
+                ) {
+
+                    await initializeChurchHQ();
+
+                }
+
+
+                if (
+                    typeof loadActivitiesFromSupabase ===
+                    "function"
+                ) {
+
+                    await loadActivitiesFromSupabase();
+
+                }
+
+
+                if (
+                    typeof loadAnnouncementsFromSupabase ===
+                    "function"
+                ) {
+
+                    await loadAnnouncementsFromSupabase();
+
+                }
 
 
                 if (
@@ -14639,7 +14564,38 @@ async function importChurchData(event) {
                 }
 
 
-                refreshDashboardStatus();
+                if (
+                    typeof loadFileFoldersFromSupabase ===
+                    "function"
+                ) {
+
+                    await loadFileFoldersFromSupabase();
+
+                }
+
+
+                if (
+                    typeof refreshDashboardStatus ===
+                    "function"
+                ) {
+
+                    refreshDashboardStatus();
+
+                }
+
+
+                input.value =
+                    "";
+
+
+                console.log(
+                    "✅ ChurchHQ restore completed."
+                );
+
+
+                alert(
+                    "✅ ChurchHQ backup restored successfully!"
+                );
 
 
             } catch (error) {
@@ -14656,10 +14612,29 @@ async function importChurchData(event) {
                 );
 
 
-                event.target.value =
+                input.value =
                     "";
 
             }
+
+        };
+
+
+    reader.onerror =
+        function() {
+
+            console.error(
+                "❌ Failed to read backup file."
+            );
+
+
+            alert(
+                "❌ Unable to read the selected backup file."
+            );
+
+
+            input.value =
+                "";
 
         };
 
@@ -14708,8 +14683,14 @@ function updateLastBackupDisplay() {
 }
 
 // =====================================================
-// CLEAR ALL CHURCH DATA
-// SUPABASE DATABASE RESET
+// CHURCHHQ SETTINGS
+// CLEAR ALL OPERATIONAL CHURCH DATA
+// FINAL VERSION 6.0
+//
+// PRESERVED:
+// - AUTH / LOGIN ACCOUNTS
+// - USER ROLES
+// - AUDIT LOGS
 // =====================================================
 
 async function clearAllChurchData() {
@@ -14726,45 +14707,57 @@ async function clearAllChurchData() {
     const firstConfirm =
         confirm(
 
-            "🚨 WARNING!\n\n" +
+            "🚨 WARNING - CLEAR ALL CHURCH DATA\n\n" +
 
-            "This will permanently delete ALL ChurchHQ records from the Supabase database.\n\n" +
+            "This will permanently delete all ChurchHQ operational records.\n\n" +
 
-            "This includes:\n" +
+            "DATA TO BE DELETED:\n\n" +
 
             "• Members\n" +
             "• Planner Tasks\n" +
             "• Songs\n" +
             "• Sunday & Midweek Services\n" +
-            "• Attendance\n" +
+            "• Attendance Records\n" +
+            "• Dashboard Activities\n" +
             "• Annual Activities\n" +
             "• Announcements\n" +
             "• File Folders\n" +
             "• Church Leaders\n" +
             "• Ministries\n\n" +
 
-            "Your login account will NOT be deleted.\n\n" +
+            "THE FOLLOWING WILL NOT BE DELETED:\n\n" +
 
-            "Make sure you exported a backup first.\n\n" +
+            "• Login Accounts\n" +
+            "• User Roles\n" +
+            "• Audit Logs\n\n" +
 
-            "Continue?"
+            "Make sure you downloaded a backup first.\n\n" +
+
+            "Do you want to continue?"
 
         );
 
 
     if (!firstConfirm) {
+
+        console.log(
+            "ℹ️ System reset cancelled."
+        );
+
         return;
     }
 
 
     // =====================================
-    // FINAL CONFIRMATION
+    // SECOND / FINAL CONFIRMATION
     // =====================================
 
     const confirmationText =
         prompt(
 
             "⚠️ FINAL CONFIRMATION\n\n" +
+
+            "This action cannot be undone without a backup.\n\n" +
 
             "Type exactly:\n\n" +
 
@@ -14779,8 +14772,15 @@ async function clearAllChurchData() {
     ) {
 
         alert(
-            "❌ Database reset cancelled."
+            "❌ System reset cancelled.\n\n" +
+            "Confirmation text did not match."
         );
+
+
+        console.log(
+            "ℹ️ System reset cancelled."
+        );
+
 
         return;
     }
@@ -14789,15 +14789,15 @@ async function clearAllChurchData() {
     try {
 
         console.log(
-            "🗑️ Clearing ChurchHQ Supabase database..."
+            "🗑️ Starting ChurchHQ System Reset..."
         );
 
 
         // =====================================
-        // DELETE ORDER
+        // TABLES TO CLEAR
         //
-        // Child/dependent records first.
-        // Members before ministry master list.
+        // IMPORTANT:
+        // Dependent records are deleted first.
         // =====================================
 
         const tables = [
@@ -14811,6 +14811,8 @@ async function clearAllChurchData() {
             "planner_tasks",
 
             "songs",
+
+            "activities",
 
             "annual_activities",
 
@@ -14826,7 +14828,7 @@ async function clearAllChurchData() {
 
 
         // =====================================
-        // DELETE EACH TABLE
+        // DELETE SUPABASE RECORDS
         // =====================================
 
         for (
@@ -14835,19 +14837,16 @@ async function clearAllChurchData() {
         ) {
 
             console.log(
-                `Deleting ${tableName}...`
+                `🗑️ Clearing ${tableName}...`
             );
 
 
             const { error } =
                 await churchSupabase
-
                     .from(
                         tableName
                     )
-
                     .delete()
-
                     .not(
                         "id",
                         "is",
@@ -14878,7 +14877,7 @@ async function clearAllChurchData() {
 
 
         // =====================================
-        // CLEAR LOCAL CHURCHHQ CACHE
+        // CLEAR LOCAL STORAGE CACHE
         // =====================================
 
         const localKeys = [
@@ -14903,7 +14902,11 @@ async function clearAllChurchData() {
 
             "churchhq_leaders",
 
-            "churchhq_ministries"
+            "churchhq_ministries",
+
+            "churchhq_annual_activities",
+
+            "churchhq_file_folders"
 
         ];
 
@@ -14927,7 +14930,49 @@ async function clearAllChurchData() {
             typeof members !==
             "undefined"
         ) {
+
             members = [];
+
+        }
+
+
+        if (
+            typeof tasks !==
+            "undefined"
+        ) {
+
+            tasks = [];
+
+        }
+
+
+        if (
+            typeof songs !==
+            "undefined"
+        ) {
+
+            songs = [];
+
+        }
+
+
+        if (
+            typeof activities !==
+            "undefined"
+        ) {
+
+            activities = [];
+
+        }
+
+
+        if (
+            typeof announcements !==
+            "undefined"
+        ) {
+
+            announcements = [];
+
         }
 
 
@@ -14935,7 +14980,9 @@ async function clearAllChurchData() {
             typeof churchLeaders !==
             "undefined"
         ) {
+
             churchLeaders = [];
+
         }
 
 
@@ -14943,7 +14990,9 @@ async function clearAllChurchData() {
             typeof annualActivities !==
             "undefined"
         ) {
+
             annualActivities = [];
+
         }
 
 
@@ -14951,7 +15000,9 @@ async function clearAllChurchData() {
             typeof ministries !==
             "undefined"
         ) {
+
             ministries = [];
+
         }
 
 
@@ -14959,7 +15010,9 @@ async function clearAllChurchData() {
             typeof sundayServices !==
             "undefined"
         ) {
+
             sundayServices = [];
+
         }
 
 
@@ -14967,7 +15020,9 @@ async function clearAllChurchData() {
             typeof midweekServices !==
             "undefined"
         ) {
+
             midweekServices = [];
+
         }
 
 
@@ -14975,20 +15030,82 @@ async function clearAllChurchData() {
             typeof attendanceRecords !==
             "undefined"
         ) {
+
             attendanceRecords = [];
+
         }
 
 
+        if (
+            typeof fileFolders !==
+            "undefined"
+        ) {
+
+            fileFolders = [];
+
+        }
+
+
+        // =====================================
+        // AUDIT - SYSTEM RESET
+        //
+        // IMPORTANT:
+        // audit_logs table was NOT cleared.
+        // This records who performed the reset.
+        // =====================================
+
+        if (
+            typeof writeAuditLog ===
+            "function"
+        ) {
+
+            await writeAuditLog(
+                "RESET",
+                "Settings",
+                "Cleared all ChurchHQ operational data.",
+                null,
+                {
+
+                    version:
+                        "6.0",
+
+                    clearedTables:
+                        tables,
+
+                    preserved: [
+
+                        "Authentication Users",
+
+                        "User Roles",
+
+                        "Audit Logs"
+
+                    ]
+
+                }
+            );
+
+        }
+
+
+        // =====================================
+        // SUCCESS
+        // =====================================
+
         console.log(
-            "✅ ChurchHQ database and local cache cleared."
+            "✅ ChurchHQ System Reset completed."
         );
 
 
         alert(
 
-            "✅ ChurchHQ database has been completely cleared.\n\n" +
+            "✅ ChurchHQ data has been cleared successfully.\n\n" +
 
-            "Your login account was NOT deleted."
+            "Login Accounts were preserved.\n" +
+
+            "User Roles were preserved.\n" +
+
+            "Audit Logs were preserved."
 
         );
 
@@ -15003,25 +15120,30 @@ async function clearAllChurchData() {
     } catch (error) {
 
         console.error(
-            "❌ Database reset failed:",
+            "❌ ChurchHQ System Reset failed:",
             error
         );
 
 
         alert(
 
-            "❌ Database reset failed.\n\n" +
+            "❌ System Reset failed.\n\n" +
 
             error.message +
 
-            "\n\nSome tables may not have been cleared."
+            "\n\n" +
+
+            "IMPORTANT:\n" +
+
+            "Some tables may already have been cleared.\n" +
+
+            "Do not press Clear All again until the error is checked."
 
         );
 
     }
 
 }
-
 /* =========================================
    REPORTS & ANALYTICS ENGINE
    SUPABASE SOURCE OF TRUTH
