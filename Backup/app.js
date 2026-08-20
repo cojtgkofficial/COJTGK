@@ -13652,9 +13652,14 @@ if (!canManageAttendance()) {
 }
 
 // =====================================================
+<<<<<<< HEAD
 // CHURCHHQ SETTINGS
 // COMPLETE SUPABASE BACKUP
 // VERSION 6.0
+=======
+// SETTINGS & BACKUP ENGINE
+// SUPABASE EXPORT BACKUP
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
 // =====================================================
 
 async function exportChurchData() {
@@ -13667,12 +13672,20 @@ async function exportChurchData() {
     try {
 
         console.log(
+<<<<<<< HEAD
             "📦 Creating ChurchHQ Backup v6..."
+=======
+            "📦 Creating ChurchHQ Supabase backup..."
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
         );
 
 
         // =====================================
+<<<<<<< HEAD
         // LOAD ALL OPERATIONAL TABLES
+=======
+        // LOAD ALL DATABASE TABLES
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
         // =====================================
 
         const [
@@ -13682,7 +13695,10 @@ async function exportChurchData() {
             songsResult,
             servicesResult,
             attendanceResult,
+<<<<<<< HEAD
             activitiesResult,
+=======
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
             annualActivitiesResult,
             announcementsResult,
             fileFoldersResult,
@@ -13712,7 +13728,7 @@ async function exportChurchData() {
                 .select("*"),
 
             churchSupabase
-                .from("activities")
+                .from("annual_activities")
                 .select("*"),
 
             churchSupabase
@@ -13739,15 +13755,23 @@ async function exportChurchData() {
 
 
         // =====================================
+<<<<<<< HEAD
         // CHECK SUPABASE ERRORS
+=======
+        // CHECK FOR SUPABASE ERRORS
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
         // =====================================
 
         const results = [
 
+<<<<<<< HEAD
             [
                 "members",
                 membersResult
             ],
+=======
+            ["members", membersResult],
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
 
             [
                 "planner_tasks",
@@ -13770,11 +13794,14 @@ async function exportChurchData() {
             ],
 
             [
+<<<<<<< HEAD
                 "activities",
                 activitiesResult
             ],
 
             [
+=======
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
                 "annual_activities",
                 annualActivitiesResult
             ],
@@ -13836,7 +13863,11 @@ async function exportChurchData() {
                 "ChurchHQ",
 
             version:
+<<<<<<< HEAD
                 "6.0",
+=======
+                "5.2",
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
 
             source:
                 "Supabase",
@@ -13862,8 +13893,8 @@ async function exportChurchData() {
                 attendance_records:
                     attendanceResult.data || [],
 
-                activities:
-                    activitiesResult.data || [],
+                annual_activities:
+                    annualActivitiesResult.data || [],
 
                 annual_activities:
                     annualActivitiesResult.data || [],
@@ -13886,7 +13917,11 @@ async function exportChurchData() {
 
 
         // =====================================
+<<<<<<< HEAD
         // CREATE JSON DOWNLOAD
+=======
+        // CREATE JSON FILE
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
         // =====================================
 
         const jsonData =
@@ -13933,7 +13968,11 @@ async function exportChurchData() {
 
 
         downloadAnchor.download =
+<<<<<<< HEAD
             `churchhq_backup_v6_${today}.json`;
+=======
+            `churchhq_backup_v5_${today}.json`;
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
 
 
         document.body.appendChild(
@@ -13953,6 +13992,7 @@ async function exportChurchData() {
 
 
         // =====================================
+<<<<<<< HEAD
         // SAVE LAST BACKUP DATE
         // =====================================
 
@@ -14032,33 +14072,48 @@ async function exportChurchData() {
 
         console.log(
             "✅ ChurchHQ Backup v6 created:",
+=======
+        // CONSOLE BACKUP SUMMARY
+        // =====================================
+
+        console.log(
+            "✅ ChurchHQ backup created:",
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
             {
 
                 members:
-                    backupData.data.members.length,
+                    backupData.data
+                        .members.length,
 
                 planner_tasks:
-                    backupData.data.planner_tasks.length,
+                    backupData.data
+                        .planner_tasks.length,
 
                 songs:
-                    backupData.data.songs.length,
+                    backupData.data
+                        .songs.length,
 
                 service_records:
-                    backupData.data.service_records.length,
+                    backupData.data
+                        .service_records.length,
 
                 attendance_records:
-                    backupData.data.attendance_records.length,
+                    backupData.data
+                        .attendance_records.length,
 
-                activities:
-                    backupData.data.activities.length,
+                annual_activities:
+                    backupData.data
+                        .annual_activities.length,
 
                 annual_activities:
                     backupData.data.annual_activities.length,
 
                 announcements:
-                    backupData.data.announcements.length,
+                    backupData.data
+                        .announcements.length,
 
                 file_folders:
+<<<<<<< HEAD
                     backupData.data.file_folders.length,
 
                 church_leaders:
@@ -14066,13 +14121,49 @@ async function exportChurchData() {
 
                 ministries:
                     backupData.data.ministries.length
+=======
+                    backupData.data
+                        .file_folders.length,
+
+                church_leaders:
+                    backupData.data
+                        .church_leaders.length,
+
+                ministries:
+                    backupData.data
+                        .ministries.length
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
 
             }
         );
 
+<<<<<<< HEAD
 
         alert(
             "✅ ChurchHQ complete backup downloaded successfully!"
+=======
+
+        // =====================================
+        // SAVE LAST BACKUP TIME
+        // =====================================
+
+        const backupTime =
+            new Date()
+                .toISOString();
+
+
+        localStorage.setItem(
+            "churchhq_last_backup",
+            backupTime
+        );
+
+
+        updateLastBackupDisplay();
+
+
+        alert(
+            "✅ ChurchHQ backup downloaded successfully!"
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
         );
 
 
@@ -14085,8 +14176,12 @@ async function exportChurchData() {
 
 
         alert(
+<<<<<<< HEAD
             "❌ Failed to create ChurchHQ backup.\n\n" +
             error.message
+=======
+            "❌ Failed to create ChurchHQ backup."
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
         );
 
     }
@@ -14094,9 +14189,14 @@ async function exportChurchData() {
 }
 
 // =====================================================
+<<<<<<< HEAD
 // CHURCHHQ SETTINGS
 // IMPORT / RESTORE COMPLETE BACKUP
 // SUPPORTS OLD + NEW BACKUPS
+=======
+// SETTINGS & BACKUP ENGINE
+// SUPABASE IMPORT / RESTORE
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
 // =====================================================
 
 async function importChurchData(event) {
@@ -14106,6 +14206,7 @@ async function importChurchData(event) {
     }
 
 
+<<<<<<< HEAD
     const input =
         event.target;
 
@@ -14133,6 +14234,26 @@ async function importChurchData(event) {
                 // READ JSON
                 // =====================================
 
+=======
+    const file =
+        event.target.files[0];
+
+
+    if (!file) {
+        return;
+    }
+
+
+    const reader =
+        new FileReader();
+
+
+    reader.onload =
+        async function(e) {
+
+            try {
+
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
                 const importedJSON =
                     JSON.parse(
                         e.target.result
@@ -14147,33 +14268,50 @@ async function importChurchData(event) {
                     !importedJSON ||
                     importedJSON.app !==
                         "ChurchHQ" ||
+<<<<<<< HEAD
                     !importedJSON.data ||
                     typeof importedJSON.data !==
                         "object"
+=======
+                    !importedJSON.data
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
                 ) {
 
                     alert(
                         "❌ Invalid ChurchHQ backup file."
                     );
 
+<<<<<<< HEAD
                     input.value =
+=======
+                    event.target.value =
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
                         "";
 
                     return;
                 }
 
 
+<<<<<<< HEAD
                 const rawBackup =
+=======
+                const backup =
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
                     importedJSON.data;
 
 
                 // =====================================
+<<<<<<< HEAD
                 // REQUIRED CORE TABLES
+=======
+                // VALIDATE REQUIRED ARRAYS
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
                 // =====================================
 
                 const validBackup =
 
                     Array.isArray(
+<<<<<<< HEAD
                         rawBackup.members
                     ) &&
 
@@ -14191,22 +14329,65 @@ async function importChurchData(event) {
 
                     Array.isArray(
                         rawBackup.attendance_records
+=======
+                        backup.members
+                    ) &&
+
+                    Array.isArray(
+                        backup.planner_tasks
+                    ) &&
+
+                    Array.isArray(
+                        backup.songs
+                    ) &&
+
+                    Array.isArray(
+                        backup.service_records
+                    ) &&
+
+                    Array.isArray(
+                        backup.attendance_records
+                    ) &&
+
+                    Array.isArray(
+                        backup.annual_activities
+                    ) &&
+
+                    Array.isArray(
+                        backup.announcements
+                    ) &&
+
+                    Array.isArray(
+                        backup.church_leaders
+                    ) &&
+
+                    Array.isArray(
+                        backup.ministries
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
                     );
 
 
                 if (!validBackup) {
 
                     alert(
+<<<<<<< HEAD
                         "❌ This is not a valid ChurchHQ backup file."
                     );
 
                     input.value =
+=======
+                        "❌ This is not a valid ChurchHQ v5 backup."
+                    );
+
+                    event.target.value =
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
                         "";
 
                     return;
                 }
 
 
+<<<<<<< HEAD
                 // =====================================
                 // BACKWARD COMPATIBILITY
                 // =====================================
@@ -14277,6 +14458,8 @@ async function importChurchData(event) {
                 // CONFIRM RESTORE
                 // =====================================
 
+=======
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
                 const confirmed =
                     confirm(
 
@@ -14284,6 +14467,7 @@ async function importChurchData(event) {
 
                         "Existing records with the same IDs will be updated.\n" +
 
+<<<<<<< HEAD
                         "Missing records from this backup will be added.\n\n" +
 
                         "Backup Version: " +
@@ -14294,21 +14478,34 @@ async function importChurchData(event) {
                         "\n\n" +
 
                         "This restore can include:\n" +
+=======
+                        "Records not currently in the database will be added.\n\n" +
+
+                        "This backup includes:\n" +
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
 
                         "• Members\n" +
                         "• Planner Tasks\n" +
                         "• Songs\n" +
+<<<<<<< HEAD
                         "• Sunday & Midweek Services\n" +
                         "• Attendance\n" +
                         "• Dashboard Activities\n" +
+=======
+                        "• Services\n" +
+                        "• Attendance\n" +
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
                         "• Annual Activities\n" +
                         "• Announcements\n" +
                         "• File Folders\n" +
                         "• Church Leaders\n" +
                         "• Ministries\n\n" +
 
+<<<<<<< HEAD
                         "User accounts, roles and Audit Logs will NOT be replaced.\n\n" +
 
+=======
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
                         "Continue?"
 
                     );
@@ -14316,7 +14513,11 @@ async function importChurchData(event) {
 
                 if (!confirmed) {
 
+<<<<<<< HEAD
                     input.value =
+=======
+                    event.target.value =
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
                         "";
 
                     return;
@@ -14329,6 +14530,7 @@ async function importChurchData(event) {
 
 
                 // =====================================
+<<<<<<< HEAD
                 // RESTORE HELPER
                 // =====================================
 
@@ -14380,10 +14582,87 @@ async function importChurchData(event) {
                         records.length
                     );
 
+=======
+                // RESTORE MINISTRIES FIRST
+                // =====================================
+
+                if (
+                    backup.ministries.length > 0
+                ) {
+
+                    const {
+                        error:
+                            ministriesError
+                    } =
+                        await churchSupabase
+
+                            .from(
+                                "ministries"
+                            )
+
+                            .upsert(
+                                backup.ministries,
+                                {
+                                    onConflict:
+                                        "id"
+                                }
+                            );
+
+
+                    if (ministriesError) {
+
+                        throw new Error(
+                            "Ministries restore failed: " +
+                            ministriesError.message
+                        );
+
+                    }
+
                 }
 
 
                 // =====================================
+                // RESTORE MEMBERS
+                // =====================================
+
+                if (
+                    backup.members.length > 0
+                ) {
+
+                    const {
+                        error:
+                            membersError
+                    } =
+                        await churchSupabase
+
+                            .from(
+                                "members"
+                            )
+
+                            .upsert(
+                                backup.members,
+                                {
+                                    onConflict:
+                                        "id"
+                                }
+                            );
+
+
+                    if (membersError) {
+
+                        throw new Error(
+                            "Members restore failed: " +
+                            membersError.message
+                        );
+
+                    }
+
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
+                }
+
+
+                // =====================================
+<<<<<<< HEAD
                 // RESTORE ORDER
                 // =====================================
 
@@ -14446,12 +14725,354 @@ async function importChurchData(event) {
                 // =====================================
                 // AUDIT - IMPORT
                 // =====================================
+=======
+                // RESTORE PLANNER TASKS
+                // =====================================
+
+                if (
+                    backup.planner_tasks
+                        .length > 0
+                ) {
+
+                    const {
+                        error:
+                            tasksError
+                    } =
+                        await churchSupabase
+
+                            .from(
+                                "planner_tasks"
+                            )
+
+                            .upsert(
+                                backup.planner_tasks,
+                                {
+                                    onConflict:
+                                        "id"
+                                }
+                            );
+
+
+                    if (tasksError) {
+
+                        throw new Error(
+                            "Planner tasks restore failed: " +
+                            tasksError.message
+                        );
+
+                    }
+
+                }
+
+
+                // =====================================
+                // RESTORE SONGS
+                // =====================================
+
+                if (
+                    backup.songs.length > 0
+                ) {
+
+                    const {
+                        error:
+                            songsError
+                    } =
+                        await churchSupabase
+
+                            .from(
+                                "songs"
+                            )
+
+                            .upsert(
+                                backup.songs,
+                                {
+                                    onConflict:
+                                        "id"
+                                }
+                            );
+
+
+                    if (songsError) {
+
+                        throw new Error(
+                            "Songs restore failed: " +
+                            songsError.message
+                        );
+
+                    }
+
+                }
+
+
+                // =====================================
+                // RESTORE SERVICES
+                // =====================================
+
+                if (
+                    backup.service_records
+                        .length > 0
+                ) {
+
+                    const {
+                        error:
+                            servicesError
+                    } =
+                        await churchSupabase
+
+                            .from(
+                                "service_records"
+                            )
+
+                            .upsert(
+                                backup.service_records,
+                                {
+                                    onConflict:
+                                        "id"
+                                }
+                            );
+
+
+                    if (servicesError) {
+
+                        throw new Error(
+                            "Service records restore failed: " +
+                            servicesError.message
+                        );
+
+                    }
+
+                }
+
+
+                // =====================================
+                // RESTORE ATTENDANCE
+                // =====================================
+
+                if (
+                    backup.attendance_records
+                        .length > 0
+                ) {
+
+                    const {
+                        error:
+                            attendanceError
+                    } =
+                        await churchSupabase
+
+                            .from(
+                                "attendance_records"
+                            )
+
+                            .upsert(
+                                backup.attendance_records,
+                                {
+                                    onConflict:
+                                        "id"
+                                }
+                            );
+
+
+                    if (attendanceError) {
+
+                        throw new Error(
+                            "Attendance restore failed: " +
+                            attendanceError.message
+                        );
+
+                    }
+
+                }
+
+
+                // =====================================
+                // RESTORE ANNUAL ACTIVITIES
+                // =====================================
+
+                if (
+                    backup.annual_activities
+                        .length > 0
+                ) {
+
+                    const {
+                        error:
+                            annualActivitiesError
+                    } =
+                        await churchSupabase
+
+                            .from(
+                                "annual_activities"
+                            )
+
+                            .upsert(
+                                backup.annual_activities,
+                                {
+                                    onConflict:
+                                        "id"
+                                }
+                            );
+
+
+                    if (
+                        annualActivitiesError
+                    ) {
+
+                        throw new Error(
+                            "Annual Activities restore failed: " +
+                            annualActivitiesError.message
+                        );
+
+                    }
+
+                }
+
+
+                // =====================================
+                // RESTORE ANNOUNCEMENTS
+                // =====================================
+
+                if (
+                    backup.announcements
+                        .length > 0
+                ) {
+
+                    const {
+                        error:
+                            announcementsError
+                    } =
+                        await churchSupabase
+
+                            .from(
+                                "announcements"
+                            )
+
+                            .upsert(
+                                backup.announcements,
+                                {
+                                    onConflict:
+                                        "id"
+                                }
+                            );
+
+
+                    if (
+                        announcementsError
+                    ) {
+
+                        throw new Error(
+                            "Announcements restore failed: " +
+                            announcementsError.message
+                        );
+
+                    }
+
+                }
+
+
+                // =====================================
+                // RESTORE FILE FOLDERS
+                // =====================================
+
+                if (
+                    Array.isArray(
+                        backup.file_folders
+                    ) &&
+                    backup.file_folders
+                        .length > 0
+                ) {
+
+                    const {
+                        error:
+                            fileFoldersError
+                    } =
+                        await churchSupabase
+
+                            .from(
+                                "file_folders"
+                            )
+
+                            .upsert(
+                                backup.file_folders,
+                                {
+                                    onConflict:
+                                        "id"
+                                }
+                            );
+
+
+                    if (
+                        fileFoldersError
+                    ) {
+
+                        throw new Error(
+                            "File folders restore failed: " +
+                            fileFoldersError.message
+                        );
+
+                    }
+
+                }
+
+
+                // =====================================
+                // RESTORE CHURCH LEADERS LAST
+                // =====================================
+
+                if (
+                    backup.church_leaders
+                        .length > 0
+                ) {
+
+                    const {
+                        error:
+                            leadersError
+                    } =
+                        await churchSupabase
+
+                            .from(
+                                "church_leaders"
+                            )
+
+                            .upsert(
+                                backup.church_leaders,
+                                {
+                                    onConflict:
+                                        "id"
+                                }
+                            );
+
+
+                    if (leadersError) {
+
+                        throw new Error(
+                            "Church Leaders restore failed: " +
+                            leadersError.message
+                        );
+
+                    }
+
+                }
+
+
+                console.log(
+                    "✅ ChurchHQ Supabase restore completed."
+                );
+
+
+                alert(
+                    "✅ ChurchHQ backup restored successfully!"
+                );
+
+
+                event.target.value =
+                    "";
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
 
                 if (
                     typeof writeAuditLog ===
                     "function"
                 ) {
 
+<<<<<<< HEAD
                     await writeAuditLog(
                         "IMPORT",
                         "Settings",
@@ -14496,10 +15117,26 @@ async function importChurchData(event) {
                                 backup.ministries.length
                         }
                     );
+=======
+                // =====================================
+                // RELOAD DATA
+                // =====================================
+
+                await initializeChurchHQ();
+
+
+                if (
+                    typeof loadMinistriesFromSupabase ===
+                    "function"
+                ) {
+
+                    await loadMinistriesFromSupabase();
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
 
                 }
 
 
+<<<<<<< HEAD
                 // =====================================
                 // RELOAD DATA
                 // =====================================
@@ -14544,6 +15181,8 @@ async function importChurchData(event) {
                 }
 
 
+=======
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
                 if (
                     typeof loadLeadersFromSupabase ===
                     "function"
@@ -14564,6 +15203,7 @@ async function importChurchData(event) {
                 }
 
 
+<<<<<<< HEAD
                 if (
                     typeof loadFileFoldersFromSupabase ===
                     "function"
@@ -14596,6 +15236,9 @@ async function importChurchData(event) {
                 alert(
                     "✅ ChurchHQ backup restored successfully!"
                 );
+=======
+                refreshDashboardStatus();
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
 
 
             } catch (error) {
@@ -14612,7 +15255,11 @@ async function importChurchData(event) {
                 );
 
 
+<<<<<<< HEAD
                 input.value =
+=======
+                event.target.value =
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
                     "";
 
             }
@@ -14620,6 +15267,7 @@ async function importChurchData(event) {
         };
 
 
+<<<<<<< HEAD
     reader.onerror =
         function() {
 
@@ -14639,6 +15287,8 @@ async function importChurchData(event) {
         };
 
 
+=======
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
     reader.readAsText(
         file
     );
@@ -14683,6 +15333,7 @@ function updateLastBackupDisplay() {
 }
 
 // =====================================================
+<<<<<<< HEAD
 // CHURCHHQ SETTINGS
 // CLEAR ALL OPERATIONAL CHURCH DATA
 // FINAL VERSION 6.0
@@ -14691,6 +15342,10 @@ function updateLastBackupDisplay() {
 // - AUTH / LOGIN ACCOUNTS
 // - USER ROLES
 // - AUDIT LOGS
+=======
+// CLEAR ALL CHURCH DATA
+// SUPABASE DATABASE RESET
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
 // =====================================================
 
 async function clearAllChurchData() {
@@ -14707,24 +15362,37 @@ async function clearAllChurchData() {
     const firstConfirm =
         confirm(
 
+<<<<<<< HEAD
             "🚨 WARNING - CLEAR ALL CHURCH DATA\n\n" +
 
             "This will permanently delete all ChurchHQ operational records.\n\n" +
 
             "DATA TO BE DELETED:\n\n" +
+=======
+            "🚨 WARNING!\n\n" +
+
+            "This will permanently delete ALL ChurchHQ records from the Supabase database.\n\n" +
+
+            "This includes:\n" +
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
 
             "• Members\n" +
             "• Planner Tasks\n" +
             "• Songs\n" +
             "• Sunday & Midweek Services\n" +
+<<<<<<< HEAD
             "• Attendance Records\n" +
             "• Dashboard Activities\n" +
+=======
+            "• Attendance\n" +
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
             "• Annual Activities\n" +
             "• Announcements\n" +
             "• File Folders\n" +
             "• Church Leaders\n" +
             "• Ministries\n\n" +
 
+<<<<<<< HEAD
             "THE FOLLOWING WILL NOT BE DELETED:\n\n" +
 
             "• Login Accounts\n" +
@@ -14734,6 +15402,13 @@ async function clearAllChurchData() {
             "Make sure you downloaded a backup first.\n\n" +
 
             "Do you want to continue?"
+=======
+            "Your login account will NOT be deleted.\n\n" +
+
+            "Make sure you exported a backup first.\n\n" +
+
+            "Continue?"
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
 
         );
 
@@ -14749,7 +15424,11 @@ async function clearAllChurchData() {
 
 
     // =====================================
+<<<<<<< HEAD
     // SECOND / FINAL CONFIRMATION
+=======
+    // FINAL CONFIRMATION
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
     // =====================================
 
     const confirmationText =
@@ -14757,8 +15436,11 @@ async function clearAllChurchData() {
 
             "⚠️ FINAL CONFIRMATION\n\n" +
 
+<<<<<<< HEAD
             "This action cannot be undone without a backup.\n\n" +
 
+=======
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
             "Type exactly:\n\n" +
 
             "DELETE ALL DATA"
@@ -14794,10 +15476,17 @@ async function clearAllChurchData() {
 
 
         // =====================================
+<<<<<<< HEAD
         // TABLES TO CLEAR
         //
         // IMPORTANT:
         // Dependent records are deleted first.
+=======
+        // DELETE ORDER
+        //
+        // Child/dependent records first.
+        // Members before ministry master list.
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
         // =====================================
 
         const tables = [
@@ -14812,8 +15501,11 @@ async function clearAllChurchData() {
 
             "songs",
 
+<<<<<<< HEAD
             "activities",
 
+=======
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
             "annual_activities",
 
             "announcements",
@@ -14828,7 +15520,11 @@ async function clearAllChurchData() {
 
 
         // =====================================
+<<<<<<< HEAD
         // DELETE SUPABASE RECORDS
+=======
+        // DELETE EACH TABLE
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
         // =====================================
 
         for (
@@ -14843,10 +15539,20 @@ async function clearAllChurchData() {
 
             const { error } =
                 await churchSupabase
+<<<<<<< HEAD
                     .from(
                         tableName
                     )
                     .delete()
+=======
+
+                    .from(
+                        tableName
+                    )
+
+                    .delete()
+
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
                     .not(
                         "id",
                         "is",
@@ -14877,7 +15583,11 @@ async function clearAllChurchData() {
 
 
         // =====================================
+<<<<<<< HEAD
         // CLEAR LOCAL STORAGE CACHE
+=======
+        // CLEAR LOCAL CHURCHHQ CACHE
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
         // =====================================
 
         const localKeys = [
@@ -14902,17 +15612,91 @@ async function clearAllChurchData() {
 
             "churchhq_leaders",
 
+<<<<<<< HEAD
             "churchhq_ministries",
 
             "churchhq_annual_activities",
 
             "churchhq_file_folders"
+=======
+            "churchhq_ministries"
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
 
         ];
 
 
         localKeys.forEach(
             key => {
+<<<<<<< HEAD
+=======
+
+                localStorage.removeItem(
+                    key
+                );
+
+            }
+        );
+
+
+        // =====================================
+        // RESET IN-MEMORY ARRAYS
+        // =====================================
+
+        if (
+            typeof members !==
+            "undefined"
+        ) {
+            members = [];
+        }
+
+
+        if (
+            typeof churchLeaders !==
+            "undefined"
+        ) {
+            churchLeaders = [];
+        }
+
+
+        if (
+            typeof annualActivities !==
+            "undefined"
+        ) {
+            annualActivities = [];
+        }
+
+
+        if (
+            typeof ministries !==
+            "undefined"
+        ) {
+            ministries = [];
+        }
+
+
+        if (
+            typeof sundayServices !==
+            "undefined"
+        ) {
+            sundayServices = [];
+        }
+
+
+        if (
+            typeof midweekServices !==
+            "undefined"
+        ) {
+            midweekServices = [];
+        }
+
+
+        if (
+            typeof attendanceRecords !==
+            "undefined"
+        ) {
+            attendanceRecords = [];
+        }
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
 
                 localStorage.removeItem(
                     key
@@ -15093,12 +15877,17 @@ async function clearAllChurchData() {
         // =====================================
 
         console.log(
+<<<<<<< HEAD
             "✅ ChurchHQ System Reset completed."
+=======
+            "✅ ChurchHQ database and local cache cleared."
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
         );
 
 
         alert(
 
+<<<<<<< HEAD
             "✅ ChurchHQ data has been cleared successfully.\n\n" +
 
             "Login Accounts were preserved.\n" +
@@ -15106,6 +15895,11 @@ async function clearAllChurchData() {
             "User Roles were preserved.\n" +
 
             "Audit Logs were preserved."
+=======
+            "✅ ChurchHQ database has been completely cleared.\n\n" +
+
+            "Your login account was NOT deleted."
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
 
         );
 
@@ -15126,6 +15920,21 @@ async function clearAllChurchData() {
 
 
         alert(
+<<<<<<< HEAD
+=======
+
+            "❌ Database reset failed.\n\n" +
+
+            error.message +
+
+            "\n\nSome tables may not have been cleared."
+
+        );
+
+    }
+
+}
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
 
             "❌ System Reset failed.\n\n" +
 

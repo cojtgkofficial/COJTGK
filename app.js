@@ -13836,7 +13836,11 @@ async function exportChurchData() {
                 "ChurchHQ",
 
             version:
+<<<<<<< HEAD
                 "6.0",
+=======
+                "5.2",
+>>>>>>> 42fa7b845efff4e7aa876d6ba8bd81453f258eb2
 
             source:
                 "Supabase",
