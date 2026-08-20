@@ -1,3 +1,4 @@
+
 // =====================================
 // ChurchHQ - Supabase Configuration
 // =====================================
@@ -13,6 +14,16 @@ const churchSupabase = window.supabase.createClient(
 
 let currentUser = null;
 let currentUserRole = null;
+
+// =====================================
+// AUDIT LOG GLOBAL DATA
+// =====================================
+
+let auditLogs = [];
+
+let auditCurrentPage = 1;
+
+const auditPageSize = 10;
 
 console.log("✅ ChurchHQ Supabase client created.");
 console.log(
@@ -360,7 +371,1749 @@ async function saveSongToSupabase(song) {
     }
 }
 
+// =====================================================
+// LEADERS - MODAL OPEN / CLOSE
+// =====================================================
 
+function openLeaderModal() {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
+    const modal =
+        document.getElementById("leaderModal");
+
+    const memberSelect =
+        document.getElementById("leaderMemberSelect");
+
+    const positionInput =
+        document.getElementById("leaderPosition");
+
+    const contactInput =
+        document.getElementById("leaderContact");
+
+    const levelSelect =
+        document.getElementById("leaderLevel");
+
+    const slotInput =
+        document.getElementById("leaderSlotId");
+
+    const modalTitle =
+        document.getElementById("leaderModalTitle");
+
+
+    if (!modal || !memberSelect) {
+        return;
+    }
+
+
+    // Reset form
+    memberSelect.innerHTML = `
+        <option value="">
+            Select Member
+        </option>
+    `;
+
+    if (positionInput) {
+        positionInput.value = "";
+    }
+
+    if (contactInput) {
+        contactInput.value = "";
+    }
+
+    if (levelSelect) {
+        levelSelect.value = "3";
+    }
+
+    if (slotInput) {
+        slotInput.value = "";
+    }
+
+    if (modalTitle) {
+        modalTitle.textContent =
+            "Add Leader";
+    }
+
+
+    // Sort members alphabetically
+    const sortedMembers =
+        [...members].sort((a, b) =>
+            String(a.name || "")
+                .localeCompare(
+                    String(b.name || ""),
+                    undefined,
+                    {
+                        sensitivity: "base"
+                    }
+                )
+        );
+
+
+    // Populate members dropdown
+    sortedMembers.forEach(member => {
+
+        const option =
+            document.createElement("option");
+
+        option.value =
+            member.id;
+
+        option.textContent =
+            member.name || "Unnamed Member";
+
+        memberSelect.appendChild(
+            option
+        );
+
+    });
+
+    populateLeaderPhotoSelect();
+    modal.classList.remove("hidden");
+
+}
+
+
+// =====================================================
+// LEADERS - CLOSE MODAL
+// =====================================================
+
+function closeLeaderModal() {
+
+    const modal =
+        document.getElementById(
+            "leaderModal"
+        );
+
+
+    if (modal) {
+        modal.classList.add("hidden");
+    }
+
+}
+
+
+// =====================================================
+// LEADERS - AUTO CONTACT FROM MEMBER
+// =====================================================
+
+const leaderMemberSelect =
+    document.getElementById(
+        "leaderMemberSelect"
+    );
+
+
+if (leaderMemberSelect) {
+
+    leaderMemberSelect.addEventListener(
+        "change",
+        function () {
+
+            const selectedMember =
+                members.find(
+                    member =>
+                        String(member.id) ===
+                        String(this.value)
+                );
+
+
+            const contactInput =
+                document.getElementById(
+                    "leaderContact"
+                );
+
+
+            if (!contactInput) {
+                return;
+            }
+
+
+            if (!selectedMember) {
+
+                contactInput.value = "";
+
+                return;
+
+            }
+
+
+            contactInput.value =
+                selectedMember.contact ||
+                "No Contact";
+
+        }
+    );
+
+}
+
+// =====================================================
+// LEADERS DATA
+// =====================================================
+
+let churchLeaders = [];
+
+// =====================================================
+// LEADER PHOTO LIST
+// Manual image list from images/leaders/
+// =====================================================
+
+const leaderImages = [
+
+    "Head Pastor.jpg",
+    "Pastor 1.jpg",
+    "Pastor 2.jpg",
+    "Pastor 3.jpg",
+    "Adult Ministry Leader.jpg",
+    "Womens Fellowship Leader.jpg",
+    "Mens Fellowship Leader.jpg",
+    "Youth Leader 1.jpg",
+    "Youth Leader 2.jpg",
+    "Young Pro Leader 1.jpg",
+    "Young Pro Leader 2.jpg",
+    "Children Ministry Leader.jpg",
+    "Music Ministry Leader.jpg",
+    "Prayer and Fasting Ministry Leader.jpg",
+    "Ushering and Follow up Ministry Leader.jpg",
+    "Security Ministry Leader.jpg",
+    "Secretary.jpg",
+    "Treasurer.jpg"
+
+];
+
+// =====================================================
+// POPULATE LEADER PHOTO SELECT
+// =====================================================
+
+function populateLeaderPhotoSelect(
+    selectedPath = ""
+) {
+
+    const select =
+        document.getElementById(
+            "leaderPhotoSelect"
+        );
+
+
+    if (!select) {
+        return;
+    }
+
+
+    select.innerHTML = `
+        <option value="">
+            No Photo / Use Initials
+        </option>
+    `;
+
+
+    leaderImages.forEach(
+        fileName => {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+
+            const fullPath =
+                `images/leaders/${fileName}`;
+
+
+            option.value =
+                fullPath;
+
+
+            option.textContent =
+                fileName;
+
+
+            if (
+                fullPath ===
+                selectedPath
+            ) {
+
+                option.selected =
+                    true;
+
+            }
+
+
+            select.appendChild(
+                option
+            );
+
+        }
+    );
+
+
+    updateLeaderPhotoPreview(
+        select.value
+    );
+
+}
+
+// =====================================================
+// LEADER PHOTO PREVIEW
+// =====================================================
+
+function updateLeaderPhotoPreview(
+    imagePath
+) {
+
+    const preview =
+        document.getElementById(
+            "leaderPhotoPreview"
+        );
+
+    const text =
+        document.getElementById(
+            "leaderPhotoPreviewText"
+        );
+
+
+    if (!preview) {
+        return;
+    }
+
+
+    if (!imagePath) {
+
+        preview.src = "";
+
+        preview.style.display =
+            "none";
+
+
+        if (text) {
+
+            text.textContent =
+                "No photo selected.";
+
+        }
+
+
+        return;
+    }
+
+
+    preview.src =
+        imagePath;
+
+    preview.style.display =
+        "block";
+
+
+    if (text) {
+
+        text.textContent =
+            imagePath;
+
+    }
+
+}
+
+const leaderPhotoSelect =
+    document.getElementById(
+        "leaderPhotoSelect"
+    );
+
+
+if (leaderPhotoSelect) {
+
+    leaderPhotoSelect.addEventListener(
+        "change",
+        function () {
+
+            updateLeaderPhotoPreview(
+                this.value
+            );
+
+        }
+    );
+
+}
+
+// =====================================================
+// LEADERS - SUPABASE READ
+// =====================================================
+
+async function loadLeadersFromSupabase() {
+
+    try {
+
+        const { data, error } =
+            await churchSupabase
+                .from("church_leaders")
+                .select("*")
+                .order("level", {
+                    ascending: true
+                })
+                .order("id", {
+                    ascending: true
+                });
+
+
+        if (error) {
+
+            console.error(
+                "❌ Failed to load leaders from Supabase:",
+                error
+            );
+
+            return false;
+        }
+
+
+        // Convert Supabase format
+        // into the format used by renderLeaders()
+
+        churchLeaders =
+            (data || []).map(
+                leader => ({
+
+                    id:
+                        leader.id,
+
+                    memberId:
+                        leader.member_id,
+
+                    memberName:
+                        leader.member_name || "",
+
+                    position:
+                        leader.position || "",
+
+                    slotKey:
+                        leader.slot_key || "",
+
+                    level:
+                        Number(
+                            leader.level || 3
+                        ),
+                        imagePath:
+    leader.image_path || ""
+                })
+            );
+
+
+        // Optional local cache
+
+        localStorage.setItem(
+            "churchhq_leaders",
+            JSON.stringify(
+                churchLeaders
+            )
+        );
+
+
+        // Refresh chart
+
+        renderLeaders();
+
+
+        console.log(
+            "✅ Church leaders loaded from Supabase:",
+            churchLeaders
+        );
+
+
+        return true;
+
+    } catch (error) {
+
+        console.error(
+            "❌ Leaders Supabase read error:",
+            error
+        );
+
+        return false;
+    }
+
+}
+
+loadLeadersFromSupabase();
+
+// =====================================================
+// LEADERS - SUPABASE INSERT
+// =====================================================
+
+async function saveLeaderToSupabase(leader) {
+
+    try {
+
+        const { data, error } =
+            await churchSupabase
+                .from("church_leaders")
+                .insert([{
+                    member_id:
+                        leader.memberId,
+
+                    member_name:
+                        leader.memberName || "",
+
+                    position:
+                        leader.position || "",
+
+                    slot_key:
+                        leader.slotKey,
+
+                    level:
+                        leader.level || 3,
+
+                        image_path:
+    leader.imagePath || ""
+
+                }])
+                .select()
+                .single();
+
+
+        if (error) {
+
+            console.error(
+                "❌ Failed to save leader to Supabase:",
+                error
+            );
+
+            return null;
+        }
+
+
+        console.log(
+            "✅ Leader saved to Supabase:",
+            data
+        );
+
+
+        return data;
+
+    } catch (error) {
+
+        console.error(
+            "❌ Leader Supabase insert error:",
+            error
+        );
+
+        return null;
+    }
+
+}
+
+// =====================================================
+// SAVE LEADER ASSIGNMENT
+// =====================================================
+
+async function saveLeaderAssignment() {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
+    const memberSelect =
+        document.getElementById(
+            "leaderMemberSelect"
+        );
+
+    const positionInput =
+        document.getElementById(
+            "leaderPosition"
+        );
+
+    const levelSelect =
+        document.getElementById(
+            "leaderLevel"
+        );
+
+    const slotInput =
+        document.getElementById(
+            "leaderSlotId"
+        );
+
+
+    if (
+        !memberSelect ||
+        !positionInput ||
+        !levelSelect
+    ) {
+        return;
+    }
+
+
+    // =====================================
+    // VALUES
+    // =====================================
+
+    const memberId =
+        memberSelect.value;
+
+    const position =
+        positionInput.value.trim();
+
+    const level =
+        Number(levelSelect.value);
+
+    const editId =
+        slotInput
+            ? slotInput.value
+            : "";
+
+const photoSelect =
+    document.getElementById(
+        "leaderPhotoSelect"
+    );
+
+const imagePath =
+    photoSelect
+        ? photoSelect.value
+        : "";
+
+    // =====================================
+    // VALIDATION
+    // =====================================
+
+    if (!memberId) {
+
+        alert(
+            "Please select a member."
+        );
+
+        return;
+    }
+
+
+    if (!position) {
+
+        alert(
+            "Please enter a leadership position."
+        );
+
+        return;
+    }
+
+
+    const selectedMember =
+        members.find(member =>
+            String(member.id) ===
+            String(memberId)
+        );
+
+
+    if (!selectedMember) {
+
+        alert(
+            "Selected member was not found."
+        );
+
+        return;
+    }
+
+
+    // =====================================
+    // EDIT EXISTING LEADER
+    // =====================================
+
+    if (editId) {
+
+        const index =
+            churchLeaders.findIndex(
+                leader =>
+                    String(leader.id) ===
+                    String(editId)
+            );
+
+
+        if (index === -1) {
+
+            alert(
+                "❌ Leader record was not found."
+            );
+
+            return;
+        }
+
+
+        const updatedLeaderData = {
+
+            id:
+                churchLeaders[index].id,
+
+            memberId:
+                selectedMember.id,
+
+            memberName:
+                selectedMember.name || "",
+
+            position,
+
+            slotKey:
+                churchLeaders[index].slotKey ||
+                `leader-${churchLeaders[index].id}`,
+
+            level,
+
+            imagePath:
+    imagePath || ""
+
+        };
+
+
+        const updatedLeader =
+            await updateLeaderInSupabase(
+                updatedLeaderData
+            );
+
+
+        if (!updatedLeader) {
+
+            alert(
+                "❌ Failed to update leader in Supabase."
+            );
+
+            return;
+        }
+
+
+        churchLeaders[index] = {
+
+            id:
+                updatedLeader.id,
+
+            memberId:
+                updatedLeader.member_id,
+
+            memberName:
+                updatedLeader.member_name || "",
+
+            position:
+                updatedLeader.position || "",
+
+            slotKey:
+                updatedLeader.slot_key || "",
+
+            level:
+                Number(
+                    updatedLeader.level || 3
+                ),
+                imagePath:
+    updatedLeader.image_path || ""
+
+        };
+
+// =====================================
+// AUDIT - EDIT LEADER
+// =====================================
+
+await writeAuditLog(
+    "EDIT",
+    "Leaders",
+    `Updated leader: ${updatedLeader.member_name || selectedMember.name}`,
+    updatedLeader.id,
+    {
+        memberName:
+            updatedLeader.member_name ||
+            selectedMember.name ||
+            "",
+
+        position:
+            updatedLeader.position ||
+            position,
+
+        level:
+            Number(
+                updatedLeader.level ||
+                level
+            ),
+
+        imagePath:
+            updatedLeader.image_path ||
+            ""
+    }
+);
+
+    }
+
+
+    // =====================================
+    // ADD NEW LEADER
+    // =====================================
+
+    else {
+
+        const newLeader = {
+
+            memberId:
+                selectedMember.id,
+
+            memberName:
+                selectedMember.name || "",
+
+            position,
+
+            level,
+
+            slotKey:
+                `leader-${Date.now()}`,
+
+                imagePath:
+        imagePath || ""
+
+        };
+
+
+        const savedLeader =
+            await saveLeaderToSupabase(
+                newLeader
+            );
+
+
+        if (!savedLeader) {
+
+            alert(
+                "❌ Failed to save leader to Supabase."
+            );
+
+            return;
+        }
+
+
+        churchLeaders.push({
+
+            id:
+                savedLeader.id,
+
+            memberId:
+                savedLeader.member_id,
+
+            memberName:
+                savedLeader.member_name || "",
+
+            position:
+                savedLeader.position || "",
+
+            slotKey:
+                savedLeader.slot_key || "",
+
+            level:
+                Number(
+                    savedLeader.level || 3
+                ),
+                imagePath:
+    savedLeader.image_path || ""
+
+        });
+
+        // =====================================
+// AUDIT - ADD LEADER
+// =====================================
+
+await writeAuditLog(
+    "ADD",
+    "Leaders",
+    `Added leader: ${savedLeader.member_name || selectedMember.name}`,
+    savedLeader.id,
+    {
+        memberName:
+            savedLeader.member_name ||
+            selectedMember.name ||
+            "",
+
+        position:
+            savedLeader.position ||
+            position,
+
+        level:
+            Number(
+                savedLeader.level ||
+                level
+            ),
+
+        imagePath:
+            savedLeader.image_path ||
+            ""
+    }
+);
+
+    }
+
+
+    // =====================================
+    // LOCAL CACHE
+    // =====================================
+
+    localStorage.setItem(
+        "churchhq_leaders",
+        JSON.stringify(
+            churchLeaders
+        )
+    );
+
+
+    // =====================================
+    // REFRESH UI
+    // =====================================
+
+    renderLeaders();
+
+    closeLeaderModal();
+
+}
+
+
+
+// =====================================================
+// RENDER LEADERS - DYNAMIC ORGANIZATIONAL CHART
+// =====================================================
+
+function renderLeaders() {
+
+    const chart =
+        document.querySelector(
+            ".leaders-org-chart"
+        );
+
+    if (!chart) {
+        return;
+    }
+
+
+    // =====================================
+    // CLEAR CURRENT CHART
+    // =====================================
+
+    chart.innerHTML = "";
+
+
+    // =====================================
+    // NO LEADERS
+    // =====================================
+
+    if (
+        !Array.isArray(churchLeaders) ||
+        churchLeaders.length === 0
+    ) {
+
+        chart.innerHTML = `
+
+            <div class="leaders-level-group">
+
+                <div class="leaders-level-label">
+                    Level 1
+                </div>
+
+                <div class="leaders-level leaders-level-dynamic">
+
+                    <div class="leader-slot">
+
+                        <div class="leader-slot-empty">
+
+                            <div class="leader-slot-icon">
+                                +
+                            </div>
+
+                            <strong>
+                                Main Leader
+                            </strong>
+
+                            <span>
+                                No leader assigned
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        `;
+
+        return;
+    }
+
+
+    // =====================================
+    // SORT LEADERS
+    // Level first, then position/name
+    // =====================================
+
+    const sortedLeaders =
+        [...churchLeaders]
+            .sort((a, b) => {
+
+                const levelA =
+                    Number(a.level || 3);
+
+                const levelB =
+                    Number(b.level || 3);
+
+
+                if (levelA !== levelB) {
+
+                    return levelA - levelB;
+
+                }
+
+
+                const positionCompare =
+                    String(a.position || "")
+                        .localeCompare(
+                            String(b.position || ""),
+                            undefined,
+                            {
+                                sensitivity: "base"
+                            }
+                        );
+
+
+                if (positionCompare !== 0) {
+
+                    return positionCompare;
+
+                }
+
+
+                return String(
+                    a.memberName || ""
+                ).localeCompare(
+                    String(
+                        b.memberName || ""
+                    ),
+                    undefined,
+                    {
+                        sensitivity: "base"
+                    }
+                );
+
+            });
+
+
+    // =====================================
+    // GET USED LEVELS
+    // =====================================
+
+    const levels =
+        [
+            ...new Set(
+                sortedLeaders.map(
+                    leader =>
+                        Number(
+                            leader.level || 3
+                        )
+                )
+            )
+        ]
+        .sort(
+            (a, b) => a - b
+        );
+
+
+    // =====================================
+    // CREATE EACH LEVEL
+    // =====================================
+
+    levels.forEach(
+        (levelNumber, levelIndex) => {
+
+
+            const levelLeaders =
+                sortedLeaders.filter(
+                    leader =>
+                        Number(
+                            leader.level || 3
+                        ) ===
+                        levelNumber
+                );
+
+
+            // =====================================
+            // LEVEL CONTAINER
+            // =====================================
+
+            const levelGroup =
+                document.createElement(
+                    "div"
+                );
+
+
+            levelGroup.className =
+                "leaders-level-group";
+
+
+            levelGroup.dataset.level =
+                levelNumber;
+
+
+            // =====================================
+            // LEVEL LABEL
+            // =====================================
+
+            const levelLabel =
+                document.createElement(
+                    "div"
+                );
+
+
+            levelLabel.className =
+                "leaders-level-label";
+
+
+            let levelName = "";
+
+
+            if (levelNumber === 1) {
+
+                levelName =
+                    "Main Leadership";
+
+            } else if (
+                levelNumber === 2
+            ) {
+
+                levelName =
+                    "Supporting Leadership";
+
+            } else if (
+                levelNumber === 3
+            ) {
+
+                levelName =
+                    "Ministry Leadership";
+
+            } else if (
+                levelNumber === 4
+            ) {
+
+                levelName =
+                    "Department / Team Leadership";
+
+            } else {
+
+                levelName =
+                    "Additional Leadership";
+
+            }
+
+
+            levelLabel.innerHTML = `
+
+                <span>
+                    Level ${levelNumber}
+                </span>
+
+                <strong>
+                    ${levelName}
+                </strong>
+
+            `;
+
+
+            levelGroup.appendChild(
+                levelLabel
+            );
+
+
+            // =====================================
+            // LEADER ROW
+            // =====================================
+
+            const levelRow =
+                document.createElement(
+                    "div"
+                );
+
+
+            levelRow.className =
+                "leaders-level leaders-level-dynamic";
+
+
+            // Automatic columns based on
+            // number of leaders
+            levelRow.style.setProperty(
+                "--leader-count",
+                Math.min(
+                    levelLeaders.length,
+                    4
+                )
+            );
+
+
+            // =====================================
+            // CREATE LEADER CARDS
+            // =====================================
+
+            levelLeaders.forEach(
+                leader => {
+
+
+                    const member =
+                        members.find(
+                            member =>
+                                String(
+                                    member.id
+                                ) ===
+                                String(
+                                    leader.memberId
+                                )
+                        );
+
+
+                    // Use member database first.
+                    // Fall back to saved leader name.
+                    const memberName =
+                        member
+                            ? (
+                                member.name ||
+                                leader.memberName ||
+                                "Unnamed Member"
+                            )
+                            : (
+                                leader.memberName ||
+                                "Unnamed Member"
+                            );
+
+
+                    const contact =
+                        member
+                            ? (
+                                member.contact ||
+                                "No Contact"
+                            )
+                            : "No Contact";
+
+
+                    // =====================================
+                    // INITIALS
+                    // =====================================
+
+                    const initials =
+                        String(
+                            memberName
+                        )
+                            .trim()
+                            .split(/\s+/)
+                            .filter(Boolean)
+                            .slice(0, 2)
+                            .map(
+                                word =>
+                                    word
+                                        .charAt(0)
+                                        .toUpperCase()
+                            )
+                            .join("") ||
+                        "?";
+
+
+                    // =====================================
+                    // CARD
+                    // =====================================
+
+                    const card =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    card.className =
+                        "leader-slot";
+
+
+                    card.dataset.leaderId =
+                        leader.id;
+
+
+                    card.innerHTML = `
+
+    <div class="leader-card">
+
+        <div class="leader-card-avatar">
+
+            ${
+                leader.imagePath
+                    ? `
+                        <img
+                            src="${leader.imagePath}"
+                            alt="Leader Photo"
+                            class="leader-photo"
+                        >
+                    `
+                    : `
+                        <span>
+                            ${initials}
+                        </span>
+                    `
+            }
+
+        </div>
+
+
+        <h3>
+            ${memberName}
+        </h3>
+
+
+        <div class="leader-position">
+
+            ${
+                leader.position ||
+                "Leader"
+            }
+
+        </div>
+
+
+        <div class="leader-contact">
+
+            ${contact}
+
+        </div>
+
+
+        <div class="leader-card-actions">
+
+            <button
+                type="button"
+                class="secondary-btn"
+                data-admin-only="true"
+                onclick="editLeader(${leader.id})"
+            >
+                ✏️ Edit
+            </button>
+
+
+            <button
+                type="button"
+                class="secondary-btn leader-delete-btn"
+                data-admin-only="true"
+                onclick="deleteLeader(${leader.id})"
+            >
+                ✖ Delete
+            </button>
+
+        </div>
+
+    </div>
+
+`;
+
+
+                    levelRow.appendChild(
+                        card
+                    );
+
+                }
+            );
+
+
+            levelGroup.appendChild(
+                levelRow
+            );
+
+
+            chart.appendChild(
+                levelGroup
+            );
+
+
+            // =====================================
+            // CONNECTOR TO NEXT LEVEL
+            // =====================================
+
+            if (
+                levelIndex <
+                levels.length - 1
+            ) {
+
+                const connector =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                connector.className =
+                    "leader-dynamic-connector";
+
+
+                connector.innerHTML = `
+
+                    <div class="leader-connector-line"></div>
+
+                    <div class="leader-connector-horizontal"></div>
+
+                `;
+
+
+                chart.appendChild(
+                    connector
+                );
+
+            }
+
+        }
+    );
+
+
+    // =====================================
+    // APPLY ADMIN / VIEWER UI AGAIN
+    // Important because buttons were
+    // dynamically generated
+    // =====================================
+
+    if (
+        typeof applyRoleBasedUI ===
+        "function"
+    ) {
+
+        applyRoleBasedUI();
+
+    }
+
+}
+// =====================================================
+// EDIT LEADER
+// =====================================================
+
+function editLeader(id) {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
+    const leader =
+        churchLeaders.find(
+            item =>
+                String(item.id) ===
+                String(id)
+        );
+
+    if (!leader) {
+        return;
+    }
+
+
+    // Open modal first
+    openLeaderModal();
+
+
+    const memberSelect =
+        document.getElementById(
+            "leaderMemberSelect"
+        );
+
+    const positionInput =
+        document.getElementById(
+            "leaderPosition"
+        );
+
+    const contactInput =
+        document.getElementById(
+            "leaderContact"
+        );
+
+    const levelSelect =
+        document.getElementById(
+            "leaderLevel"
+        );
+
+    const slotInput =
+        document.getElementById(
+            "leaderSlotId"
+        );
+
+    const modalTitle =
+        document.getElementById(
+            "leaderModalTitle"
+        );
+
+    populateLeaderPhotoSelect(
+    leader.imagePath || ""
+);
+
+    const member =
+        members.find(
+            item =>
+                String(item.id) ===
+                String(
+                    leader.memberId
+                )
+        );
+
+
+    if (memberSelect) {
+        memberSelect.value =
+            leader.memberId;
+    }
+
+
+    if (positionInput) {
+        positionInput.value =
+            leader.position || "";
+    }
+
+
+    if (contactInput) {
+
+        contactInput.value =
+            member
+                ? (
+                    member.contact ||
+                    "No Contact"
+                )
+                : "";
+
+    }
+
+
+    if (levelSelect) {
+        levelSelect.value =
+            String(
+                leader.level || 3
+            );
+    }
+
+
+    if (slotInput) {
+        slotInput.value =
+            leader.id;
+    }
+
+
+    if (modalTitle) {
+        modalTitle.textContent =
+            "Edit Leader";
+    }
+
+}
+
+
+
+// =====================================================
+// DELETE LEADER
+// =====================================================
+
+async function deleteLeader(id) {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
+    const leader =
+        churchLeaders.find(
+            item =>
+                String(item.id) ===
+                String(id)
+        );
+
+    if (!leader) {
+
+        alert(
+            "Leader record was not found."
+        );
+
+        return;
+    }
+
+    const confirmed =
+        confirm(
+            `Are you sure you want to remove ${leader.memberName || "this leader"} from ${leader.position || "this position"}?`
+        );
+
+    if (!confirmed) {
+        return;
+    }
+
+    const deleted =
+        await deleteLeaderFromSupabase(id);
+
+    if (!deleted) {
+
+        alert(
+            "❌ Failed to delete leader from Supabase."
+        );
+
+        return;
+    }
+
+    // =====================================
+// AUDIT - DELETE LEADER
+// =====================================
+
+await writeAuditLog(
+    "DELETE",
+    "Leaders",
+    `Deleted leader: ${leader.memberName || "Unknown Leader"}`,
+    leader.id,
+    {
+        memberName:
+            leader.memberName || "",
+
+        position:
+            leader.position || "",
+
+        level:
+            Number(
+                leader.level || 3
+            ),
+
+        imagePath:
+            leader.imagePath || ""
+    }
+);
+
+    churchLeaders =
+        churchLeaders.filter(
+            item =>
+                String(item.id) !==
+                String(id)
+        );
+
+    localStorage.setItem(
+        "churchhq_leaders",
+        JSON.stringify(
+            churchLeaders
+        )
+    );
+
+    renderLeaders();
+
+    alert(
+        "✅ Leader removed successfully."
+    );
+
+    // =====================================
+// RE-APPLY ROLE PERMISSIONS
+// =====================================
+
+if (
+    typeof applyRoleBasedUI === "function"
+) {
+    applyRoleBasedUI();
+}
+}
+
+// =====================================================
+// LEADERS - SUPABASE DELETE
+// =====================================================
+
+async function deleteLeaderFromSupabase(id) {
+
+    try {
+
+        const { data, error } =
+            await churchSupabase
+                .from("church_leaders")
+                .delete()
+                .eq("id", id)
+                .select();
+
+        if (error) {
+
+            console.error(
+                "❌ Failed to delete leader from Supabase:",
+                error
+            );
+
+            return false;
+        }
+
+        console.log(
+            "✅ Leader deleted from Supabase:",
+            data
+        );
+
+        return true;
+
+    } catch (error) {
+
+        console.error(
+            "❌ Leader Supabase delete error:",
+            error
+        );
+
+        return false;
+    }
+}
+
+// =====================================================
+// LEADERS - SUPABASE UPDATE
+// =====================================================
+
+async function updateLeaderInSupabase(leader) {
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await churchSupabase
+
+                .from("church_leaders")
+
+                .update({
+
+                    member_id:
+                        leader.memberId,
+
+                    member_name:
+                        leader.memberName || "",
+
+                    position:
+                        leader.position || "",
+
+                    slot_key:
+                        leader.slotKey || "",
+
+                    level:
+                        leader.level || 3,
+
+                    image_path:
+                        leader.imagePath || ""
+
+                })
+
+                .eq(
+                    "id",
+                    leader.id
+                )
+
+                .select()
+
+                .single();
+
+
+        if (error) {
+
+            console.error(
+                "❌ Failed to update leader in Supabase:",
+                error
+            );
+
+            return null;
+        }
+
+
+        console.log(
+            "✅ Leader updated in Supabase:",
+            data
+        );
+
+
+        return data;
+
+
+    } catch (error) {
+
+        console.error(
+            "❌ Leader Supabase update error:",
+            error
+        );
+
+        return null;
+    }
+
+}
 
 // =====================================
 // SONGS - SUPABASE UPDATE
@@ -754,26 +2507,193 @@ async function deleteAnnouncementFromSupabase(id) {
     }
 }
 
-// ---------- Navigation ----------
+// =====================================
+// PAGE NAVIGATION WITH ROLE ACCESS
+// =====================================
+
 function showPage(pageId) {
-    document.querySelectorAll('.page').forEach(page => {
-        page.classList.add('hidden');
-    });
 
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.classList.remove('active');
-    });
+    // =====================================
+    // VIEWER RESTRICTED PAGES
+    // =====================================
 
-    const targetPage = document.getElementById(pageId);
+    const viewerRestrictedPages = [
+
+        "members",
+        "leaders",
+        "attendance",
+        "reports",
+        "settings"
+
+    ];
+
+
+    if (
+        isViewerUser() &&
+        viewerRestrictedPages.includes(
+            pageId
+        )
+    ) {
+
+        console.warn(
+            "🚫 Viewer attempted to open restricted page:",
+            pageId
+        );
+
+
+        alert(
+            "You do not have permission to access this page."
+        );
+
+
+        pageId =
+            "dashboard";
+
+    }
+
+
+    // =====================================
+    // HIDE ALL PAGES
+    // =====================================
+
+    document
+        .querySelectorAll(
+            ".page"
+        )
+        .forEach(page => {
+
+            page.classList.add(
+                "hidden"
+            );
+
+        });
+
+
+    // =====================================
+    // REMOVE ACTIVE NAV
+    // =====================================
+
+    document
+        .querySelectorAll(
+            ".nav-item"
+        )
+        .forEach(item => {
+
+            item.classList.remove(
+                "active"
+            );
+
+        });
+
+
+    // =====================================
+    // SHOW TARGET PAGE
+    // =====================================
+
+    const targetPage =
+        document.getElementById(
+            pageId
+        );
+
+
     if (targetPage) {
-        targetPage.classList.remove('hidden');
+
+        targetPage.classList.remove(
+            "hidden"
+        );
+
     }
 
-    const activeNav = document.querySelector(`.nav-item[onclick*="${pageId}"]`);
-    if (activeNav) {
-        activeNav.classList.add('active');
-    }
+if (
+    pageId === "settings" &&
+    isAdminUser()
+) {
+
+    loadAuditLogsFromSupabase();
+
 }
+
+// =====================================
+// AUDIT - PAGE VIEW
+// =====================================
+
+if (
+    currentUser &&
+    currentUserRole
+) {
+
+    const pageNames = {
+
+        dashboard:
+            "Dashboard",
+
+        planner:
+            "Planner",
+
+        "sunday-service":
+            "Sunday Service",
+
+        "midweek-service":
+            "Midweek Service",
+
+        songs:
+            "Song Library",
+
+        members:
+            "Members",
+
+        leaders:
+            "Leaders",
+
+        attendance:
+            "Attendance",
+
+        files:
+            "Files",
+
+        reports:
+            "Reports",
+
+        settings:
+            "Settings"
+
+    };
+
+
+    const readablePageName =
+        pageNames[pageId] ||
+        pageId;
+
+
+    writeAuditLog(
+        "VIEW",
+        readablePageName,
+        `${currentUserRole} viewed ${readablePageName}.`
+    );
+
+}
+
+    // =====================================
+    // ACTIVE SIDEBAR ITEM
+    // =====================================
+
+    const activeNav =
+        document.querySelector(
+            `.nav-item[onclick*="${pageId}"]`
+        );
+
+
+    if (activeNav) {
+
+        activeNav.classList.add(
+            "active"
+        );
+
+    }
+
+}
+
+
 
 // ---------- Dark Mode ----------
 const themeBtn = document.getElementById("themeBtn");
@@ -861,7 +2781,36 @@ const updatedInSupabase =
 
     targetArray[existingIndex] = serviceRecord;
 
-} else {
+// =====================================
+// AUDIT - EDIT SERVICE RECORD
+// =====================================
+
+await writeAuditLog(
+    "EDIT",
+    type === "sunday"
+        ? "Sunday Service"
+        : "Midweek Service",
+    `Updated ${
+        type === "sunday"
+            ? "Sunday"
+            : "Midweek"
+    } Service record for ${dateValue}`,
+    dateValue,
+    {
+        date: dateValue,
+        preacher:
+            serviceRecord.preacher || "",
+        messageTitle:
+            serviceRecord.messageTitle || "",
+        worshipLeader:
+            serviceRecord.worshipLeader || ""
+    }
+);
+
+} 
+
+
+else {
 
     const savedToSupabase =
         await saveServiceToSupabase(
@@ -879,6 +2828,32 @@ const updatedInSupabase =
     }
 
     targetArray.push(serviceRecord);
+
+    // =====================================
+// AUDIT - ADD SERVICE RECORD
+// =====================================
+
+await writeAuditLog(
+    "ADD",
+    type === "sunday"
+        ? "Sunday Service"
+        : "Midweek Service",
+    `Added ${
+        type === "sunday"
+            ? "Sunday"
+            : "Midweek"
+    } Service record for ${dateValue}`,
+    dateValue,
+    {
+        date: dateValue,
+        preacher:
+            serviceRecord.preacher || "",
+        messageTitle:
+            serviceRecord.messageTitle || "",
+        worshipLeader:
+            serviceRecord.worshipLeader || ""
+    }
+);
 }
 
     targetArray.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -938,51 +2913,284 @@ function loadServiceRecord(type, date) {
 }
 
 function renderServiceHistory(type) {
-    const listBody = document.getElementById(`${type}HistoryBody`);
-    if (!listBody) return;
 
-    const targetArray = type === "sunday" ? sundayServices : midweekServices;
-    listBody.innerHTML = "";
+    const listBody =
+        document.getElementById(
+            `${type}HistoryBody`
+        );
 
-    if (targetArray.length === 0) {
-        listBody.innerHTML = `<tr><td colspan="4" style="padding:15px; text-align:center; color:#9ca3af;">No saved records found.</td></tr>`;
+    if (!listBody) {
         return;
     }
 
-    targetArray.forEach(record => {
-        const tr = document.createElement("tr");
-        tr.style.borderBottom = "1px solid #f1f5f9";
 
-        tr.innerHTML = `
-            <td style="padding: 10px;"><b>${record.date}</b></td>
-            <td style="padding: 10px;">${record.worshipLeader || '-'}</td>
-            <td style="padding: 10px;">${record.preacher || '-'}</td>
-            <td style="padding: 10px; display:flex; gap:8px;">
-                <button
-    type="button"
-    class="secondary-btn"
-    data-admin-only="true"
-    style="padding: 3px 8px; font-size: 12px;"
-    onclick="loadServiceRecord('${type}', '${record.date}')"
->
-    ✏️ Load/Edit
-</button>
+    const targetArray =
+        type === "sunday"
+            ? sundayServices
+            : midweekServices;
 
-<button
-    type="button"
-    class="secondary-btn"
-    data-admin-only="true"
-    style="padding: 3px 8px; font-size: 12px; color:#ef4444; border-color:#fca5a5;"
-    onclick="deleteServiceRecord('${type}', '${record.date}')"
->
-    ❌ Delete
-</button>
-            </td>
+
+    listBody.innerHTML = "";
+
+
+    // =====================================
+    // NO RECORDS
+    // =====================================
+
+    if (targetArray.length === 0) {
+
+        const colspan =
+            type === "midweek"
+                ? 5
+                : 4;
+
+        listBody.innerHTML = `
+            <tr>
+                <td
+                    colspan="${colspan}"
+                    style="
+                        padding:15px;
+                        text-align:center;
+                        color:#9ca3af;
+                    "
+                >
+                    No saved records found.
+                </td>
+            </tr>
         `;
-        listBody.appendChild(tr);
-    });
-}
 
+        return;
+    }
+
+
+    // =====================================
+    // RENDER RECORDS
+    // =====================================
+
+    targetArray.forEach(
+        record => {
+
+            const tr =
+                document.createElement(
+                    "tr"
+                );
+
+
+            tr.style.borderBottom =
+                "1px solid #f1f5f9";
+
+
+            // =====================================
+            // MIDWEEK HISTORY
+            // =====================================
+
+            if (type === "midweek") {
+
+                const multimediaText = [
+
+                    record.pptOperator
+                        ? `PPT: ${record.pptOperator}`
+                        : "",
+
+                    record.soundEngineer
+                        ? `Sound: ${record.soundEngineer}`
+                        : "",
+
+                    record.liveStream
+                        ? `Live: ${record.liveStream}`
+                        : ""
+
+                ]
+                    .filter(Boolean)
+                    .join("<br>");
+
+
+                tr.innerHTML = `
+
+                    <td style="padding:10px;">
+                        <b>
+                            ${record.date || "-"}
+                        </b>
+                    </td>
+
+
+                    <td style="padding:10px; font-size:12px; line-height:1.6;">
+                        ${
+                            multimediaText ||
+                            "-"
+                        }
+                    </td>
+
+
+                    <td style="padding:10px;">
+                        ${
+                            record.preacher ||
+                            "-"
+                        }
+                    </td>
+
+
+                    <td style="padding:10px;">
+                        ${
+                            record.messageTitle ||
+                            "-"
+                        }
+                    </td>
+
+
+                    <td
+                        style="
+                            padding:10px;
+                            display:flex;
+                            gap:8px;
+                        "
+                    >
+
+                        <button
+                            type="button"
+                            class="secondary-btn"
+                            data-admin-only="true"
+                            style="
+                                padding:3px 8px;
+                                font-size:12px;
+                            "
+                            onclick="loadServiceRecord(
+                                'midweek',
+                                '${record.date}'
+                            )"
+                        >
+                            ✏️ Load/Edit
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="secondary-btn"
+                            data-admin-only="true"
+                            style="
+                                padding:3px 8px;
+                                font-size:12px;
+                                color:#ef4444;
+                                border-color:#fca5a5;
+                            "
+                            onclick="deleteServiceRecord(
+                                'midweek',
+                                '${record.date}'
+                            )"
+                        >
+                            ❌ Delete
+                        </button>
+
+                    </td>
+
+                `;
+
+            }
+
+
+            // =====================================
+            // SUNDAY HISTORY
+            // =====================================
+
+            else {
+
+                tr.innerHTML = `
+
+                    <td style="padding:10px;">
+                        <b>
+                            ${record.date || "-"}
+                        </b>
+                    </td>
+
+
+                    <td style="padding:10px;">
+                        ${
+                            record.worshipLeader ||
+                            "-"
+                        }
+                    </td>
+
+
+                    <td style="padding:10px;">
+                        ${
+                            record.preacher ||
+                            "-"
+                        }
+                    </td>
+
+
+                    <td
+                        style="
+                            padding:10px;
+                            display:flex;
+                            gap:8px;
+                        "
+                    >
+
+                        <button
+                            type="button"
+                            class="secondary-btn"
+                            data-admin-only="true"
+                            style="
+                                padding:3px 8px;
+                                font-size:12px;
+                            "
+                            onclick="loadServiceRecord(
+                                'sunday',
+                                '${record.date}'
+                            )"
+                        >
+                            ✏️ Load/Edit
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="secondary-btn"
+                            data-admin-only="true"
+                            style="
+                                padding:3px 8px;
+                                font-size:12px;
+                                color:#ef4444;
+                                border-color:#fca5a5;
+                            "
+                            onclick="deleteServiceRecord(
+                                'sunday',
+                                '${record.date}'
+                            )"
+                        >
+                            ❌ Delete
+                        </button>
+
+                    </td>
+
+                `;
+
+            }
+
+
+            listBody.appendChild(
+                tr
+            );
+
+        }
+    );
+
+
+    // =====================================
+    // RE-APPLY ROLE PERMISSIONS
+    // =====================================
+
+    if (
+        typeof applyRoleBasedUI ===
+        "function"
+    ) {
+
+        applyRoleBasedUI();
+
+    }
+
+}
 // =====================================
 // SUNDAY & MIDWEEK SERVICE - SUPABASE READ
 // =====================================
@@ -1268,6 +3476,27 @@ async function deleteServiceRecord(type, date) {
         return;
     }
 
+// =====================================
+// AUDIT - DELETE SERVICE RECORD
+// =====================================
+
+await writeAuditLog(
+    "DELETE",
+    type === "sunday"
+        ? "Sunday Service"
+        : "Midweek Service",
+    `Deleted ${
+        type === "sunday"
+            ? "Sunday"
+            : "Midweek"
+    } Service record for ${date}`,
+    date,
+    {
+        date: date,
+        serviceType: type
+    }
+);
+
     if (type === "sunday") {
 
         sundayServices =
@@ -1362,63 +3591,62 @@ function populateSundayGeneratorFields() {
 
 
 // =====================================
-// DASHBOARD - EVENTS COUNT FROM SUPABASE
+// DASHBOARD - EVENTS THIS MONTH
 // =====================================
 
-async function loadEventCountFromSupabase() {
-    try {
-        const { data, error } = await churchSupabase
-            .from("activities")
-            .select("id, date");
+function loadEventCountFromSupabase() {
 
-        if (error) {
-            console.error(
-                "❌ Failed to load event count from Supabase:",
-                error
-            );
-            return;
-        }
+    const eventCountEl =
+        document.getElementById(
+            "eventCount"
+        );
 
-        const now = new Date();
-        const currentMonth = now.getMonth();
-        const currentYear = now.getFullYear();
+    if (!eventCountEl) {
+        return;
+    }
 
-        const eventsThisMonth = (data || []).filter(activity => {
-            if (!activity.date) return false;
 
-            const activityDate = new Date(activity.date);
+    const today =
+        new Date();
 
-            if (isNaN(activityDate.getTime())) {
+    const currentYear =
+        today.getFullYear();
+
+    const currentMonth =
+        today.getMonth();
+
+
+    const count =
+        (Array.isArray(annualActivities)
+            ? annualActivities
+            : []
+        )
+        .filter(activity => {
+
+            if (!activity.date) {
                 return false;
             }
 
+
+            const activityDate =
+                new Date(
+                    activity.date +
+                    "T00:00:00"
+                );
+
+
             return (
-                activityDate.getMonth() === currentMonth &&
-                activityDate.getFullYear() === currentYear
+                activityDate.getFullYear() === currentYear &&
+                activityDate.getMonth() === currentMonth
             );
-        });
 
-        const eventCountEl =
-            document.getElementById("eventCount");
+        })
+        .length;
 
-        if (eventCountEl) {
-            eventCountEl.textContent =
-                eventsThisMonth.length;
-        }
 
-        console.log(
-            "✅ Events count loaded from Supabase:",
-            eventsThisMonth.length
-        );
-
-    } catch (error) {
-        console.error(
-            "❌ Event count Supabase error:",
-            error
-        );
-    }
+    eventCountEl.textContent =
+        count;
 }
-
 
 /* =========================================
    PLANNER MODAL & ENGINE
@@ -1430,15 +3658,27 @@ const cancelTask = document.getElementById("cancelTask");
 
 function openTaskModal() { if (taskModal) taskModal.classList.remove("hidden"); }
 function closeTaskModal() { 
+
+
     if (taskModal) taskModal.classList.add("hidden"); 
     editingTaskId = null;
 }
 
 if (addTaskBtn) {
-    addTaskBtn.addEventListener("click", () => {
-        clearForm();
-        openTaskModal();
-    });
+
+    addTaskBtn.addEventListener(
+        "click",
+        () => {
+
+            clearForm();
+
+            populateTaskAssigneeSelect();
+
+            openTaskModal();
+
+        }
+    );
+
 }
 if (closeModal) closeModal.addEventListener("click", closeTaskModal);
 if (cancelTask) cancelTask.addEventListener("click", closeTaskModal);
@@ -1492,42 +3732,137 @@ async function saveTask() {
         return;
     }
 
-    const title = document.getElementById("taskTitle").value.trim();
-    const description = document.getElementById("taskDescription").value.trim();
-    const category = document.getElementById("taskCategory").value;
-    const priority = document.getElementById("taskPriority").value;
-    const dueDate = document.getElementById("taskDate").value;
-    const status = document.getElementById("taskStatus").value;
+
+    const title =
+        document
+            .getElementById(
+                "taskTitle"
+            )
+            .value
+            .trim();
+
+
+    const description =
+        document
+            .getElementById(
+                "taskDescription"
+            )
+            .value
+            .trim();
+
+
+    const category =
+        document.getElementById(
+            "taskCategory"
+        ).value;
+
+
+    const priority =
+        document.getElementById(
+            "taskPriority"
+        ).value;
+
+
+    const dueDate =
+        document.getElementById(
+            "taskDate"
+        ).value;
+
+
+    const status =
+        document.getElementById(
+            "taskStatus"
+        ).value;
+
+
+    const assignedSelect =
+        document.getElementById(
+            "taskAssignedTo"
+        );
+
+
+    const assignedMemberId =
+        assignedSelect
+            ? assignedSelect.value
+            : "";
+
+
+    const selectedMember =
+        members.find(
+            member =>
+                String(member.id) ===
+                String(assignedMemberId)
+        );
+
+
+    const assignedTo =
+        selectedMember
+            ? selectedMember.name || ""
+            : "";
+
 
     if (title === "") {
-        alert("Please enter task title.");
+
+        alert(
+            "Please enter task title."
+        );
+
         return;
     }
 
-    // =====================================
-    // EDIT EXISTING TASK
-    // =====================================
 
-    if (editingTaskId !== null) {
+ // =====================================
+// EDIT EXISTING TASK
+// =====================================
 
-    const index = tasks.findIndex(
-        task => task.id === editingTaskId
-    );
+if (
+    editingTaskId !== null
+) {
+
+    const index =
+        tasks.findIndex(
+            task =>
+                task.id ===
+                editingTaskId
+        );
+
 
     if (index !== -1) {
 
         const updatedTask = {
-            id: editingTaskId,
+
+            id:
+                editingTaskId,
+
             title,
+
             description,
+
             category,
+
             priority,
+
             dueDate,
-            status
+
+            status,
+
+            assignedMemberId:
+                assignedMemberId
+                    ? Number(
+                        assignedMemberId
+                    )
+                    : null,
+
+            assignedTo
+
         };
 
+
         const updatedInSupabase =
-            await updateTaskToSupabase(updatedTask);
+            await updateTaskToSupabase(
+                updatedTask
+            );
+
 
         if (!updatedInSupabase) {
 
@@ -1538,58 +3873,153 @@ async function saveTask() {
             return;
         }
 
-        tasks[index] = updatedTask;
 
-        console.log(
-            "✅ Planner task updated successfully:",
-            updatedTask
+        tasks[index] =
+            updatedTask;
+
+
+        // =====================================
+        // AUDIT - EDIT PLANNER TASK
+        // =====================================
+
+        await writeAuditLog(
+            "EDIT",
+            "Planner",
+            `Updated task: ${updatedTask.title}`,
+            updatedTask.id,
+            {
+                title:
+                    updatedTask.title,
+
+                category:
+                    updatedTask.category,
+
+                priority:
+                    updatedTask.priority,
+
+                dueDate:
+                    updatedTask.dueDate,
+
+                status:
+                    updatedTask.status,
+
+                assignedTo:
+                    updatedTask.assignedTo || ""
+            }
         );
+
     }
 
-    editingTaskId = null;
 
-    // =====================================
-    // ADD NEW TASK
-    // =====================================
+    editingTaskId =
+        null;
 
-    } else {
+}
 
-        const task = {
-            id: Date.now(),
-            title,
-            description,
-            category,
-            priority,
-            dueDate,
-            status
-        };
 
-        const savedToSupabase =
-            await saveTaskToSupabase(task);
+// =====================================
+// ADD NEW TASK
+// =====================================
 
-        if (!savedToSupabase) {
-            alert("❌ Task was not saved to Supabase.");
-            return;
-        }
+else {
 
-        tasks.push(task);
+    const task = {
 
-        console.log(
-            "✅ New Planner task added successfully:",
+        id:
+            Date.now(),
+
+        title,
+
+        description,
+
+        category,
+
+        priority,
+
+        dueDate,
+
+        status,
+
+        assignedMemberId:
+            assignedMemberId
+                ? Number(
+                    assignedMemberId
+                )
+                : null,
+
+        assignedTo
+
+    };
+
+
+    const savedToSupabase =
+        await saveTaskToSupabase(
             task
         );
+
+
+    if (!savedToSupabase) {
+
+        alert(
+            "❌ Task was not saved to Supabase."
+        );
+
+        return;
     }
 
+
+    tasks.push(
+        task
+    );
+
+
     // =====================================
-    // EXISTING UI / LOCAL STORAGE
+    // AUDIT - ADD PLANNER TASK
     // =====================================
 
-    saveToLocalStorage();
-    loadSavedTasks();
-    clearForm();
-    closeTaskModal();
+    await writeAuditLog(
+        "ADD",
+        "Planner",
+        `Added task: ${task.title}`,
+        task.id,
+        {
+            title:
+                task.title,
 
-    refreshDashboardStatus();
+            category:
+                task.category,
+
+            priority:
+                task.priority,
+
+            dueDate:
+                task.dueDate,
+
+            status:
+                task.status,
+
+            assignedTo:
+                task.assignedTo || ""
+        }
+    );
+
+}
+
+
+// =====================================
+// REFRESH
+// =====================================
+
+saveToLocalStorage();
+
+loadSavedTasks();
+
+clearForm();
+
+closeTaskModal();
+
+refreshDashboardStatus();
+
 }
 
 function openEditTaskModal(id) {
@@ -1598,19 +4028,86 @@ function openEditTaskModal(id) {
         return;
     }
 
-    const task = tasks.find(t => t.id === id);
-    if (!task) return;
 
-    editingTaskId = id;
+    const task =
+        tasks.find(
+            t => t.id === id
+        );
 
-    document.getElementById("taskTitle").value = task.title;
-    document.getElementById("taskDescription").value = task.description || "";
-    document.getElementById("taskCategory").value = task.category;
-    document.getElementById("taskPriority").value = task.priority;
-    document.getElementById("taskDate").value = task.dueDate || "";
-    document.getElementById("taskStatus").value = task.status;
+
+    if (!task) {
+        return;
+    }
+
+
+    editingTaskId =
+        id;
+
+
+    document.getElementById(
+        "taskTitle"
+    ).value =
+        task.title || "";
+
+
+    document.getElementById(
+        "taskDescription"
+    ).value =
+        task.description || "";
+
+
+    document.getElementById(
+        "taskCategory"
+    ).value =
+        task.category || "";
+
+
+    document.getElementById(
+        "taskPriority"
+    ).value =
+        task.priority || "";
+
+
+    document.getElementById(
+        "taskDate"
+    ).value =
+        task.dueDate || "";
+
+
+    document.getElementById(
+        "taskStatus"
+    ).value =
+        task.status || "todo";
+
+
+    // =====================================
+    // RESTORE ASSIGNED MEMBER
+    // =====================================
+
+    populateTaskAssigneeSelect(
+        task.assignedMemberId || ""
+    );
+
+
+    const searchInput =
+        document.getElementById(
+            "taskAssigneeSearch"
+        );
+
+
+    if (
+        searchInput &&
+        task.assignedTo
+    ) {
+
+        searchInput.value =
+            task.assignedTo;
+
+    }
+
 
     openTaskModal();
+
 }
 
 function saveToLocalStorage() {
@@ -1641,15 +4138,41 @@ async function loadTasksFromSupabase() {
             return false;
         }
 
-        tasks = (data || []).map(task => ({
-            id: task.id,
-            title: task.title || "",
-            description: task.description || "",
-            category: task.category || "",
-            priority: task.priority || "",
-            dueDate: task.due_date || "",
-            status: task.status || "todo"
-        }));
+       tasks = (data || []).map(task => ({
+
+    id:
+        task.id,
+
+    title:
+        task.title || "",
+
+    description:
+        task.description || "",
+
+    category:
+        task.category || "",
+
+    priority:
+        task.priority || "",
+
+    dueDate:
+        task.due_date || "",
+
+    status:
+        task.status || "todo",
+
+    assignedMemberId:
+        task.assigned_member_id || null,
+
+    assignedTo:
+        task.assigned_to || ""
+
+}));
+
+       localStorage.setItem(
+    "churchhq_tasks",
+    JSON.stringify(tasks)
+);
 
         // =====================================
         // RENDER PLANNER UI
@@ -1699,36 +4222,76 @@ async function loadTasksFromSupabase() {
 // PLANNER - SUPABASE INSERT
 // =====================================
 
-async function saveTaskToSupabase(task) {
+async function saveTaskToSupabase(
+    task
+) {
+
     try {
 
-        const { data, error } = await churchSupabase
-            .from("planner_tasks")
-            .insert([{
-                id: task.id,
-                title: task.title,
-                description: task.description || "",
-                category: task.category || "",
-                priority: task.priority || "",
-                due_date: task.dueDate || null,
-                status: task.status || "todo"
-            }])
-            .select();
+        const {
+            data,
+            error
+        } =
+            await churchSupabase
+
+                .from(
+                    "planner_tasks"
+                )
+
+                .insert([{
+
+                    id:
+                        task.id,
+
+                    title:
+                        task.title,
+
+                    description:
+                        task.description || "",
+
+                    category:
+                        task.category || "",
+
+                    priority:
+                        task.priority || "",
+
+                    due_date:
+                        task.dueDate || null,
+
+                    status:
+                        task.status || "todo",
+
+                    assigned_member_id:
+                        task.assignedMemberId ||
+                        null,
+
+                    assigned_to:
+                        task.assignedTo || ""
+
+                }])
+
+                .select();
+
 
         if (error) {
+
             console.error(
                 "❌ Failed to save task to Supabase:",
                 error
             );
+
             return false;
         }
+
 
         console.log(
             "✅ Planner task saved to Supabase:",
             data
         );
 
+
         return true;
+
 
     } catch (error) {
 
@@ -1738,7 +4301,96 @@ async function saveTaskToSupabase(task) {
         );
 
         return false;
+
     }
+
+}
+// =====================================
+// PLANNER - SUPABASE UPDATE
+// =====================================
+
+async function saveTaskToSupabase(
+    task
+) {
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await churchSupabase
+
+                .from(
+                    "planner_tasks"
+                )
+
+                .insert([{
+
+                    id:
+                        task.id,
+
+                    title:
+                        task.title,
+
+                    description:
+                        task.description || "",
+
+                    category:
+                        task.category || "",
+
+                    priority:
+                        task.priority || "",
+
+                    due_date:
+                        task.dueDate || null,
+
+                    status:
+                        task.status || "todo",
+
+                    assigned_member_id:
+                        task.assignedMemberId ||
+                        null,
+
+                    assigned_to:
+                        task.assignedTo || ""
+
+                }])
+
+                .select();
+
+
+        if (error) {
+
+            console.error(
+                "❌ Failed to save task to Supabase:",
+                error
+            );
+
+            return false;
+        }
+
+
+        console.log(
+            "✅ Planner task saved to Supabase:",
+            data
+        );
+
+
+        return true;
+
+
+    } catch (error) {
+
+        console.error(
+            "❌ Planner Supabase insert error:",
+            error
+        );
+
+        return false;
+
+    }
+
 }
 
 // =====================================
@@ -1749,18 +4401,49 @@ async function updateTaskToSupabase(task) {
 
     try {
 
-        const { data, error } = await churchSupabase
-            .from("planner_tasks")
-            .update({
-                title: task.title,
-                description: task.description || "",
-                category: task.category || "",
-                priority: task.priority || "",
-                due_date: task.dueDate || null,
-                status: task.status || "todo"
-            })
-            .eq("id", task.id)
-            .select();
+        const {
+            data,
+            error
+        } =
+            await churchSupabase
+
+                .from("planner_tasks")
+
+                .update({
+
+                    title:
+                        task.title,
+
+                    description:
+                        task.description || "",
+
+                    category:
+                        task.category || "",
+
+                    priority:
+                        task.priority || "",
+
+                    due_date:
+                        task.dueDate || null,
+
+                    status:
+                        task.status || "todo",
+
+                    assigned_member_id:
+                        task.assignedMemberId || null,
+
+                    assigned_to:
+                        task.assignedTo || ""
+
+                })
+
+                .eq(
+                    "id",
+                    task.id
+                )
+
+                .select();
+
 
         if (error) {
 
@@ -1770,14 +4453,18 @@ async function updateTaskToSupabase(task) {
             );
 
             return false;
+
         }
+
 
         console.log(
             "✅ Planner task updated in Supabase:",
             data
         );
 
+
         return true;
+
 
     } catch (error) {
 
@@ -1786,8 +4473,11 @@ async function updateTaskToSupabase(task) {
             error
         );
 
+
         return false;
+
     }
+
 }
 
 // =====================================
@@ -1830,6 +4520,1512 @@ async function deleteTaskFromSupabase(taskId) {
 
         return false;
     }
+}
+
+// =====================================================
+// PLANNER - SEARCHABLE MEMBER ASSIGNEE
+// =====================================================
+
+function populateTaskAssigneeSelect(
+    selectedMemberId = ""
+) {
+
+    const select =
+        document.getElementById(
+            "taskAssignedTo"
+        );
+
+    const searchInput =
+        document.getElementById(
+            "taskAssigneeSearch"
+        );
+
+
+    if (
+        !select ||
+        !searchInput
+    ) {
+        return;
+    }
+
+
+    select.innerHTML = "";
+    select.style.display = "none";
+    searchInput.value = "";
+
+
+    // =====================================
+    // EXISTING ASSIGNEE DURING EDIT
+    // =====================================
+
+    if (selectedMemberId) {
+
+        const selectedMember =
+            members.find(
+                member =>
+                    String(member.id) ===
+                    String(selectedMemberId)
+            );
+
+
+        if (selectedMember) {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+            option.value =
+                selectedMember.id;
+
+            option.textContent =
+                selectedMember.name || "";
+
+            option.selected = true;
+
+            select.appendChild(
+                option
+            );
+
+
+            searchInput.value =
+                selectedMember.name || "";
+
+        }
+
+    }
+
+
+    // =====================================
+    // SEARCH RESULTS
+    // =====================================
+
+    function renderOptions(
+        searchText
+    ) {
+
+        const search =
+            String(searchText || "")
+                .trim()
+                .toLowerCase();
+
+
+        select.innerHTML = "";
+
+
+        if (!search) {
+
+            select.style.display =
+                "none";
+
+            return;
+
+        }
+
+
+        const sortedMembers =
+            Array.isArray(members)
+                ? [...members]
+                : [];
+
+
+        sortedMembers.sort(
+            (a, b) =>
+                String(a.name || "")
+                    .localeCompare(
+                        String(b.name || ""),
+                        undefined,
+                        {
+                            sensitivity:
+                                "base"
+                        }
+                    )
+        );
+
+
+        const filteredMembers =
+            sortedMembers.filter(
+                member =>
+                    String(
+                        member.name || ""
+                    )
+                        .toLowerCase()
+                        .includes(search)
+            );
+
+
+        select.style.display =
+            "block";
+
+
+        if (
+            filteredMembers.length === 0
+        ) {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+            option.value = "";
+
+            option.textContent =
+                "No member found";
+
+            option.disabled = true;
+
+            select.appendChild(
+                option
+            );
+
+            return;
+
+        }
+
+
+        filteredMembers.forEach(
+            member => {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+                option.value =
+                    member.id;
+
+                option.textContent =
+                    member.name ||
+                    "Unnamed Member";
+
+                select.appendChild(
+                    option
+                );
+
+            }
+        );
+
+    }
+
+
+    searchInput.oninput =
+        function () {
+
+            renderOptions(
+                this.value
+            );
+
+        };
+
+
+    select.onchange =
+        function () {
+
+            const member =
+                members.find(
+                    member =>
+                        String(member.id) ===
+                        String(this.value)
+                );
+
+
+            if (!member) {
+                return;
+            }
+
+
+            searchInput.value =
+                member.name || "";
+
+            select.style.display =
+                "none";
+
+        };
+
+}
+
+// =====================================================
+// CHURCH ANNUAL ACTIVITIES
+// BASIC UI
+// =====================================================
+
+let annualActivities = [];
+
+let selectedAnnualActivityYear =
+    new Date().getFullYear();
+
+
+const annualActivityMonths = [
+
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
+
+];
+
+
+// =====================================================
+// LOAD YEAR SELECTOR
+// =====================================================
+
+function loadAnnualActivityYearSelector() {
+
+    const select =
+        document.getElementById(
+            "annualActivityYear"
+        );
+
+    if (!select) {
+        return;
+    }
+
+
+    const currentYear =
+        new Date().getFullYear();
+
+
+    select.innerHTML = "";
+
+
+    // Current year +/- 5 years
+    for (
+        let year = currentYear - 5;
+        year <= currentYear + 5;
+        year++
+    ) {
+
+        const option =
+            document.createElement(
+                "option"
+            );
+
+
+        option.value =
+            year;
+
+        option.textContent =
+            year;
+
+
+        if (
+            year ===
+            selectedAnnualActivityYear
+        ) {
+
+            option.selected =
+                true;
+
+        }
+
+
+        select.appendChild(
+            option
+        );
+
+    }
+
+
+    select.onchange =
+        function () {
+
+            selectedAnnualActivityYear =
+                Number(
+                    this.value
+                );
+
+
+            renderAnnualActivities();
+
+        };
+
+}
+
+
+// =====================================================
+// RENDER JANUARY - DECEMBER
+// =====================================================
+
+function renderAnnualActivities() {
+
+    const grid =
+        document.getElementById(
+            "annualActivitiesGrid"
+        );
+
+
+    if (!grid) {
+        return;
+    }
+
+
+    grid.innerHTML = "";
+
+
+    annualActivityMonths.forEach(
+        (monthName, monthIndex) => {
+
+
+            // Activities for this month/year
+            const monthActivities =
+                annualActivities
+                    .filter(activity => {
+
+                        if (!activity.date) {
+                            return false;
+                        }
+
+
+                        const activityDate =
+                            new Date(
+                                activity.date +
+                                "T00:00:00"
+                            );
+
+
+                        return (
+                            activityDate.getFullYear() ===
+                                selectedAnnualActivityYear &&
+
+                            activityDate.getMonth() ===
+                                monthIndex
+                        );
+
+                    })
+                    .sort(
+                        (a, b) =>
+                            String(a.date)
+                                .localeCompare(
+                                    String(b.date)
+                                )
+                    );
+
+
+            // =====================================
+            // MONTH CARD
+            // =====================================
+
+            const monthCard =
+                document.createElement(
+                    "div"
+                );
+
+
+            monthCard.className =
+                "annual-month-card";
+
+
+            // =====================================
+            // MONTH HEADER
+            // =====================================
+
+            const monthTitle =
+                document.createElement(
+                    "div"
+                );
+
+
+            monthTitle.className =
+                "annual-month-title";
+
+
+            monthTitle.innerHTML = `
+
+                <strong>
+                    ${monthName}
+                </strong>
+
+                <span class="annual-month-count">
+                    ${monthActivities.length}
+                </span>
+
+            `;
+
+
+            monthCard.appendChild(
+                monthTitle
+            );
+
+
+            // =====================================
+            // MONTH LIST
+            // =====================================
+
+            const list =
+                document.createElement(
+                    "div"
+                );
+
+
+            list.className =
+                "annual-month-list";
+
+
+            // =====================================
+            // EMPTY MONTH
+            // =====================================
+
+            if (
+                monthActivities.length === 0
+            ) {
+
+                list.innerHTML = `
+
+                    <div class="annual-month-empty">
+
+                        No activities scheduled
+
+                    </div>
+
+                `;
+
+            }
+
+
+            // =====================================
+            // ACTIVITIES
+            // =====================================
+
+            else {
+
+                monthActivities.forEach(
+                    activity => {
+
+
+                        const activityDate =
+                            new Date(
+                                activity.date +
+                                "T00:00:00"
+                            );
+
+
+                        const formattedDate =
+                            activityDate
+                                .toLocaleDateString(
+                                    "en-US",
+                                    {
+                                        month:
+                                            "short",
+
+                                        day:
+                                            "numeric"
+                                    }
+                                );
+
+
+                        const item =
+                            document.createElement(
+                                "div"
+                            );
+
+
+                        item.className =
+                            "annual-activity-item";
+
+
+                        item.innerHTML = `
+
+                            <div class="annual-activity-date">
+
+                                ${formattedDate}
+
+                            </div>
+
+
+                            <div class="annual-activity-title">
+
+                                ${
+                                    activity.title ||
+                                    "Untitled Activity"
+                                }
+
+                            </div>
+
+                                    <div
+    class="annual-activity-actions"
+    data-admin-only="true"
+>
+
+    <button
+        type="button"
+        class="secondary-btn"
+        onclick="editAnnualActivity(${activity.id})"
+    >
+        ✏️ Edit
+    </button>
+
+    <button
+        type="button"
+        class="secondary-btn"
+        onclick="deleteAnnualActivity(${activity.id})"
+    >
+        ✖ Delete
+    </button>
+
+</div>
+                        `;
+
+
+                        list.appendChild(
+                            item
+                        );
+
+                    }
+                );
+
+            }
+
+
+            monthCard.appendChild(
+                list
+            );
+
+
+            grid.appendChild(
+                monthCard
+            );
+
+        }
+    );
+
+}
+
+// =====================================================
+// ANNUAL ACTIVITY MODAL
+// =====================================================
+
+function openAnnualActivityModal() {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
+    const modal =
+        document.getElementById(
+            "annualActivityModal"
+        );
+
+    if (!modal) {
+        return;
+    }
+
+
+    document.getElementById(
+        "annualActivityModalTitle"
+    ).textContent =
+        "Add Annual Activity";
+
+
+    document.getElementById(
+        "annualActivityTitle"
+    ).value = "";
+
+
+    document.getElementById(
+        "annualActivityDate"
+    ).value = "";
+
+
+    document.getElementById(
+        "annualActivityDescription"
+    ).value = "";
+
+
+    document.getElementById(
+        "annualActivityEditId"
+    ).value = "";
+
+
+    modal.classList.remove(
+        "hidden"
+    );
+}
+
+
+// =====================================================
+// CLOSE ANNUAL ACTIVITY MODAL
+// =====================================================
+
+function closeAnnualActivityModal() {
+
+    const modal =
+        document.getElementById(
+            "annualActivityModal"
+        );
+
+    if (modal) {
+        modal.classList.add(
+            "hidden"
+        );
+    }
+}
+
+// =====================================================
+// SAVE ANNUAL ACTIVITY
+// =====================================================
+
+function saveAnnualActivity() {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
+
+    const titleInput =
+        document.getElementById(
+            "annualActivityTitle"
+        );
+
+    const dateInput =
+        document.getElementById(
+            "annualActivityDate"
+        );
+
+    const descriptionInput =
+        document.getElementById(
+            "annualActivityDescription"
+        );
+
+    const editIdInput =
+        document.getElementById(
+            "annualActivityEditId"
+        );
+
+
+    if (
+        !titleInput ||
+        !dateInput
+    ) {
+        return;
+    }
+
+
+    const title =
+        titleInput.value.trim();
+
+    const date =
+        dateInput.value;
+
+    const description =
+        descriptionInput
+            ? descriptionInput.value.trim()
+            : "";
+
+    const editId =
+        editIdInput
+            ? editIdInput.value
+            : "";
+
+
+    // =====================================
+    // VALIDATION
+    // =====================================
+
+    if (!title) {
+
+        alert(
+            "Please enter an activity name."
+        );
+
+        return;
+    }
+
+
+    if (!date) {
+
+        alert(
+            "Please select an activity date."
+        );
+
+        return;
+    }
+
+
+    // =====================================
+    // EDIT EXISTING
+    // =====================================
+
+    if (editId) {
+
+        const index =
+            annualActivities.findIndex(
+                activity =>
+                    String(activity.id) ===
+                    String(editId)
+            );
+
+
+        if (index !== -1) {
+
+            annualActivities[index] = {
+
+                ...annualActivities[index],
+
+                title,
+                date,
+                description
+
+            };
+
+        }
+
+    }
+
+
+    // =====================================
+    // ADD NEW
+    // =====================================
+
+    else {
+
+        const newActivity = {
+
+            id: Date.now(),
+
+            title,
+
+            date,
+
+            description
+
+        };
+
+
+        annualActivities.push(
+            newActivity
+        );
+
+    }
+
+
+    // =====================================
+    // SWITCH YEAR AUTOMATICALLY
+    // =====================================
+
+    const activityYear =
+        Number(
+            date.substring(0, 4)
+        );
+
+
+    selectedAnnualActivityYear =
+        activityYear;
+
+
+    loadAnnualActivityYearSelector();
+
+    renderAnnualActivities();
+
+
+    // =====================================
+    // CLOSE MODAL
+    // =====================================
+
+    closeAnnualActivityModal();
+
+}
+
+// =====================================================
+// ANNUAL ACTIVITIES - SUPABASE READ
+// =====================================================
+
+async function loadAnnualActivitiesFromSupabase() {
+
+    try {
+
+        const { data, error } =
+            await churchSupabase
+                .from("annual_activities")
+                .select("*")
+                .order("activity_date", {
+                    ascending: true
+                });
+
+        if (error) {
+
+            console.error(
+                "❌ Failed to load annual activities:",
+                error
+            );
+
+            return false;
+        }
+
+
+        annualActivities =
+            (data || []).map(activity => ({
+
+                id:
+                    activity.id,
+
+                title:
+                    activity.title || "",
+
+                date:
+                    activity.activity_date || "",
+
+                description:
+                    activity.description || ""
+
+            }));
+
+
+        console.log(
+            "✅ Annual activities loaded from Supabase:",
+            annualActivities
+        );
+
+
+        loadAnnualActivityYearSelector();
+
+        renderAnnualActivities();
+
+
+        return true;
+
+    } catch (error) {
+
+        console.error(
+            "❌ Annual activities read error:",
+            error
+        );
+
+        return false;
+    }
+}
+
+// =====================================================
+// ANNUAL ACTIVITIES - SUPABASE INSERT
+// =====================================================
+
+async function saveAnnualActivityToSupabase(activity) {
+
+    try {
+
+        const { data, error } =
+            await churchSupabase
+                .from("annual_activities")
+                .insert([{
+
+                    id:
+                        activity.id,
+
+                    title:
+                        activity.title,
+
+                    activity_date:
+                        activity.date,
+
+                    description:
+                        activity.description || ""
+
+                }])
+                .select()
+                .single();
+
+
+        if (error) {
+
+            console.error(
+                "❌ Failed to save annual activity:",
+                error
+            );
+
+            return null;
+        }
+
+
+        console.log(
+            "✅ Annual activity saved to Supabase:",
+            data
+        );
+
+
+        return data;
+
+    } catch (error) {
+
+        console.error(
+            "❌ Annual activity insert error:",
+            error
+        );
+
+        return null;
+    }
+}
+
+// =====================================================
+// SAVE ANNUAL ACTIVITY
+// =====================================================
+
+async function saveAnnualActivity() {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
+
+    const titleInput =
+        document.getElementById(
+            "annualActivityTitle"
+        );
+
+    const dateInput =
+        document.getElementById(
+            "annualActivityDate"
+        );
+
+    const descriptionInput =
+        document.getElementById(
+            "annualActivityDescription"
+        );
+
+    const editIdInput =
+        document.getElementById(
+            "annualActivityEditId"
+        );
+
+
+    if (
+        !titleInput ||
+        !dateInput
+    ) {
+        return;
+    }
+
+
+    const title =
+        titleInput.value.trim();
+
+    const date =
+        dateInput.value;
+
+    const description =
+        descriptionInput
+            ? descriptionInput.value.trim()
+            : "";
+
+    const editId =
+        editIdInput
+            ? editIdInput.value
+            : "";
+
+
+    // =====================================
+    // VALIDATION
+    // =====================================
+
+    if (!title) {
+
+        alert(
+            "Please enter an activity name."
+        );
+
+        return;
+    }
+
+
+    if (!date) {
+
+        alert(
+            "Please select an activity date."
+        );
+
+        return;
+    }
+
+
+    // =====================================
+    // EDIT
+    // Gagawin natin sa next step
+    // =====================================
+
+   if (editId) {
+
+    const index =
+        annualActivities.findIndex(
+            activity =>
+                String(activity.id) ===
+                String(editId)
+        );
+
+
+    if (index === -1) {
+
+        alert(
+            "Activity was not found."
+        );
+
+        return;
+    }
+
+
+    const activityData = {
+
+        id:
+            annualActivities[index].id,
+
+        title,
+
+        date,
+
+        description
+
+    };
+
+
+    const updatedActivity =
+        await updateAnnualActivityToSupabase(
+            activityData
+        );
+
+
+    if (!updatedActivity) {
+
+        alert(
+            "❌ Failed to update activity."
+        );
+
+        return;
+    }
+
+
+    annualActivities[index] = {
+
+        id:
+            updatedActivity.id,
+
+        title:
+            updatedActivity.title || "",
+
+        date:
+            updatedActivity.activity_date || "",
+
+        description:
+            updatedActivity.description || ""
+
+    };
+
+    // =====================================
+// AUDIT - EDIT ANNUAL ACTIVITY
+// =====================================
+
+await writeAuditLog(
+    "EDIT",
+    "Annual Activities",
+    `Updated annual activity: ${updatedActivity.title || title}`,
+    updatedActivity.id,
+    {
+        title:
+            updatedActivity.title || title,
+
+        date:
+            updatedActivity.activity_date || date,
+
+        description:
+            updatedActivity.description || description || ""
+    }
+);
+
+
+    selectedAnnualActivityYear =
+        Number(
+            date.substring(0, 4)
+        );
+
+
+    loadAnnualActivityYearSelector();
+
+    renderAnnualActivities();
+
+    refreshDashboardStatus();
+
+    closeAnnualActivityModal();
+
+
+    alert(
+        "✅ Activity updated successfully."
+    );
+
+
+    return;
+}
+
+
+    // =====================================
+    // NEW ACTIVITY
+    // =====================================
+
+    const newActivity = {
+
+        id:
+            Date.now(),
+
+        title,
+
+        date,
+
+        description
+
+    };
+
+
+    const savedActivity =
+        await saveAnnualActivityToSupabase(
+            newActivity
+        );
+
+
+    if (!savedActivity) {
+
+        alert(
+            "❌ Failed to save activity to Supabase."
+        );
+
+        return;
+    }
+
+
+    // =====================================
+    // ADD TO LOCAL ARRAY
+    // =====================================
+
+    annualActivities.push({
+
+        id:
+            savedActivity.id,
+
+        title:
+            savedActivity.title || "",
+
+        date:
+            savedActivity.activity_date || "",
+
+        description:
+            savedActivity.description || ""
+
+    });
+
+
+    // =====================================
+// AUDIT - ADD ANNUAL ACTIVITY
+// =====================================
+
+await writeAuditLog(
+    "ADD",
+    "Annual Activities",
+    `Added annual activity: ${savedActivity.title || title}`,
+    savedActivity.id,
+    {
+        title:
+            savedActivity.title || title,
+
+        date:
+            savedActivity.activity_date || date,
+
+        description:
+            savedActivity.description || description || ""
+    }
+);
+
+    // =====================================
+    // SWITCH TO ACTIVITY YEAR
+    // =====================================
+
+    selectedAnnualActivityYear =
+        Number(
+            date.substring(0, 4)
+        );
+
+
+    loadAnnualActivityYearSelector();
+
+    renderAnnualActivities();
+
+    refreshDashboardStatus();
+
+    closeAnnualActivityModal();
+
+
+    alert(
+        "✅ Annual activity saved successfully."
+    );
+
+}
+
+// =====================================================
+// ANNUAL ACTIVITIES - SUPABASE UPDATE
+// =====================================================
+
+async function updateAnnualActivityToSupabase(activity) {
+
+    try {
+
+        const { data, error } =
+            await churchSupabase
+                .from("annual_activities")
+                .update({
+
+                    title:
+                        activity.title,
+
+                    activity_date:
+                        activity.date,
+
+                    description:
+                        activity.description || ""
+
+                })
+                .eq("id", activity.id)
+                .select()
+                .single();
+
+
+        if (error) {
+
+            console.error(
+                "❌ Failed to update annual activity:",
+                error
+            );
+
+            return null;
+        }
+
+
+        console.log(
+            "✅ Annual activity updated in Supabase:",
+            data
+        );
+
+
+        return data;
+
+    } catch (error) {
+
+        console.error(
+            "❌ Annual activity update error:",
+            error
+        );
+
+        return null;
+    }
+}
+
+// =====================================================
+// ANNUAL ACTIVITIES - SUPABASE DELETE
+// =====================================================
+
+async function deleteAnnualActivityFromSupabase(id) {
+
+    try {
+
+        const { error } =
+            await churchSupabase
+                .from("annual_activities")
+                .delete()
+                .eq("id", id);
+
+
+        if (error) {
+
+            console.error(
+                "❌ Failed to delete annual activity:",
+                error
+            );
+
+            return false;
+        }
+
+
+        console.log(
+            "✅ Annual activity deleted from Supabase:",
+            id
+        );
+
+
+        return true;
+
+    } catch (error) {
+
+        console.error(
+            "❌ Annual activity delete error:",
+            error
+        );
+
+        return false;
+    }
+}
+
+// =====================================================
+// EDIT ANNUAL ACTIVITY
+// =====================================================
+
+function editAnnualActivity(id) {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
+
+    const activity =
+        annualActivities.find(
+            item =>
+                String(item.id) ===
+                String(id)
+        );
+
+
+    if (!activity) {
+
+        alert(
+            "Activity was not found."
+        );
+
+        return;
+    }
+
+
+    document.getElementById(
+        "annualActivityModalTitle"
+    ).textContent =
+        "Edit Annual Activity";
+
+
+    document.getElementById(
+        "annualActivityTitle"
+    ).value =
+        activity.title || "";
+
+
+    document.getElementById(
+        "annualActivityDate"
+    ).value =
+        activity.date || "";
+
+
+    document.getElementById(
+        "annualActivityDescription"
+    ).value =
+        activity.description || "";
+
+
+    document.getElementById(
+        "annualActivityEditId"
+    ).value =
+        activity.id;
+
+
+    document.getElementById(
+        "annualActivityModal"
+    ).classList.remove(
+        "hidden"
+    );
+}
+
+// =====================================================
+// DELETE ANNUAL ACTIVITY
+// =====================================================
+
+async function deleteAnnualActivity(id) {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
+
+    const activity =
+        annualActivities.find(
+            item =>
+                String(item.id) ===
+                String(id)
+        );
+
+
+    if (!activity) {
+        return;
+    }
+
+
+    const confirmed =
+        confirm(
+            `Delete "${activity.title}"?`
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    const deleted =
+        await deleteAnnualActivityFromSupabase(
+            id
+        );
+
+
+    if (!deleted) {
+
+
+        alert(
+            "❌ Failed to delete activity."
+        );
+
+        return;
+    }
+
+
+    // =====================================
+// AUDIT - DELETE ANNUAL ACTIVITY
+// =====================================
+
+await writeAuditLog(
+    "DELETE",
+    "Annual Activities",
+    `Deleted annual activity: ${activity.title || "Unknown Activity"}`,
+    activity.id,
+    {
+        title:
+            activity.title || "",
+
+        date:
+            activity.date || "",
+
+        description:
+            activity.description || ""
+    }
+);
+
+    annualActivities =
+        annualActivities.filter(
+            item =>
+                String(item.id) !==
+                String(id)
+        );
+
+
+    renderAnnualActivities();
+
+    refreshDashboardStatus();
+
+
+    alert(
+        "✅ Activity deleted successfully."
+    );
+
+    if (
+    typeof applyRoleBasedUI === "function"
+) {
+    applyRoleBasedUI();
+}
+
 }
 
 // =====================================
@@ -1878,23 +6074,70 @@ async function loadSongsFromSupabase() {
 }
 
 function loadSavedTasks() {
+
     try {
-        const saved = localStorage.getItem("churchhq_tasks");
-        if (saved) tasks = JSON.parse(saved);
+
+        const saved =
+            localStorage.getItem(
+                "churchhq_tasks"
+            );
+
+        if (saved) {
+            tasks =
+                JSON.parse(saved);
+        }
+
     } catch (e) {
+
         tasks = [];
+
     }
-    
-    const todoCol = document.getElementById("todoColumn");
-    const progCol = document.getElementById("progressColumn");
-    const compCol = document.getElementById("completedColumn");
 
-    if (todoCol) todoCol.innerHTML = "";
-    if (progCol) progCol.innerHTML = "";
-    if (compCol) compCol.innerHTML = "";
 
-    tasks.forEach(task => renderTask(task));
+    const todoCol =
+        document.getElementById(
+            "todoColumn"
+        );
+
+    const progCol =
+        document.getElementById(
+            "progressColumn"
+        );
+
+    const compCol =
+        document.getElementById(
+            "completedColumn"
+        );
+
+
+    if (todoCol) {
+        todoCol.innerHTML = "";
+    }
+
+    if (progCol) {
+        progCol.innerHTML = "";
+    }
+
+    if (compCol) {
+        compCol.innerHTML = "";
+    }
+
+
+    tasks.forEach(
+        task =>
+            renderTask(task)
+    );
+
+
     updateCounters();
+
+
+    // =====================================
+    // RE-APPLY ROLE UI TO NEW TASK CARDS
+    // =====================================
+
+    applyRoleBasedUI();
+
 }
 
 function renderTask(task) {
@@ -1991,25 +6234,35 @@ function renderTask(task) {
     card.innerHTML = `
 
         <div
-            style="
-                display:flex;
-                justify-content:space-between;
-                align-items:flex-start;
-            "
-        >
+    style="
+        display:flex;
+        align-items:flex-start;
+        gap:10px;
+        width:100%;
+    "
+>
 
-            <h4>
-                ${task.title}
-            </h4>
+    <h4
+        style="
+            margin:0;
+            flex:1;
+            min-width:0;
+            overflow-wrap:anywhere;
+            word-break:break-word;
+        "
+    >
+        ${task.title}
+    </h4>
 
 
-            <div
-                style="
-                    display:flex;
-                    gap:6px;
-                    align-items:center;
-                "
-            >
+           <div
+    style="
+        display:flex;
+        gap:6px;
+        align-items:center;
+        flex-shrink:0;
+    "
+>
 
                 <button
                     type="button"
@@ -2020,7 +6273,13 @@ function renderTask(task) {
                         border:none;
                         color:#2563eb;
                         cursor:pointer;
-                        font-size:14px;
+                        font-size:18px;
+width:36px;
+height:36px;
+display:flex;
+align-items:center;
+justify-content:center;
+border-radius:50%;
                     "
                     title="Edit"
                 >
@@ -2038,7 +6297,13 @@ function renderTask(task) {
                         color:#ef4444;
                         cursor:pointer;
                         font-weight:bold;
-                        font-size:18px;
+                        font-size:20px;
+width:36px;
+height:36px;
+display:flex;
+align-items:center;
+justify-content:center;
+border-radius:50%;
                     "
                     title="Delete"
                 >
@@ -2059,6 +6324,12 @@ function renderTask(task) {
             📂 ${task.category || "-"}
         </p>
 
+        <p>
+            👤 Assigned to:
+            <strong>
+                ${task.assignedTo || "Unassigned"}
+            </strong>
+        </p>
 
         <p>
             📅 ${task.dueDate || "-"}
@@ -2148,12 +6419,43 @@ async function deleteTask(id) {
         return;
     }
 
-    if (!confirm("Are you sure you want to delete this task?")) {
+
+    // =====================================
+    // GET TASK BEFORE DELETE
+    // =====================================
+
+    const taskToDelete =
+        tasks.find(
+            task =>
+                String(task.id) ===
+                String(id)
+        );
+
+
+    const deletedTaskTitle =
+        taskToDelete
+            ? taskToDelete.title
+            : "Unknown Task";
+
+
+    if (
+        !confirm(
+            "Are you sure you want to delete this task?"
+        )
+    ) {
         return;
     }
 
+
+    // =====================================
+    // DELETE FROM SUPABASE
+    // =====================================
+
     const deletedFromSupabase =
-        await deleteTaskFromSupabase(id);
+        await deleteTaskFromSupabase(
+            id
+        );
+
 
     if (!deletedFromSupabase) {
 
@@ -2164,17 +6466,59 @@ async function deleteTask(id) {
         return;
     }
 
-    tasks = tasks.filter(
-        task => task.id !== id
+
+    // =====================================
+    // AUDIT - DELETE PLANNER TASK
+    // =====================================
+
+    await writeAuditLog(
+        "DELETE",
+        "Planner",
+        `Deleted task: ${deletedTaskTitle}`,
+        id,
+        {
+            title:
+                deletedTaskTitle,
+
+            category:
+                taskToDelete?.category || "",
+
+            priority:
+                taskToDelete?.priority || "",
+
+            dueDate:
+                taskToDelete?.dueDate || "",
+
+            assignedTo:
+                taskToDelete?.assignedTo || ""
+        }
     );
 
+
+    // =====================================
+    // REMOVE FROM LOCAL DATA
+    // =====================================
+
+    tasks =
+        tasks.filter(
+            task =>
+                String(task.id) !==
+                String(id)
+        );
+
+
     saveToLocalStorage();
+
     loadSavedTasks();
+
+    refreshDashboardStatus();
+
 
     console.log(
         "✅ Planner task deleted successfully:",
         id
     );
+
 }
 
 function updateCounters() {
@@ -2210,6 +6554,31 @@ function clearForm() {
     if (tPrio) tPrio.selectedIndex = 0;
     if (tDate) tDate.value = "";
     if (tStat) tStat.selectedIndex = 0;
+
+    const assigneeSearch =
+    document.getElementById(
+        "taskAssigneeSearch"
+    );
+
+const assigneeSelect =
+    document.getElementById(
+        "taskAssignedTo"
+    );
+
+
+if (assigneeSearch) {
+    assigneeSearch.value = "";
+}
+
+
+if (assigneeSelect) {
+
+    assigneeSelect.innerHTML = "";
+
+    assigneeSelect.style.display =
+        "none";
+
+}
 }
 
 /* =========================================
@@ -2252,66 +6621,258 @@ if (closeViewSongBtn) closeViewSongBtn.addEventListener("click", () => { if (vie
 
 if (saveSongBtn) saveSongBtn.addEventListener("click", saveSong);
 
-function saveSong() {
-    const title = document.getElementById("songTitle").value.trim();
-    const artist = document.getElementById("songArtist").value.trim();
-    const key = document.getElementById("songKey").value;
-    const category = document.getElementById("songCategory").value;
-    const lyrics = document.getElementById("songLyrics").value.trim();
+async function saveSong() {
 
-    if (title === "") {
-        alert("Please enter a song title.");
+    if (!requireAdmin()) {
         return;
     }
 
-if (editingSongId !== null) {
-    songs = songs.map(song => {
-        if (song.id === editingSongId) {
-            return {
-                ...song,
-                title,
-                artist: artist || "Unknown Artist",
-                key,
-                category,
-                lyrics
-            };
-        }
-        return song;
-    });
 
-    // Supabase UPDATE - existing songs only
-    const updatedSong = songs.find(
-        song => song.id === editingSongId
-    );
+    const title =
+        document
+            .getElementById("songTitle")
+            .value
+            .trim();
 
-    if (updatedSong) {
-        updateSongToSupabase(updatedSong);
+
+    const artist =
+        document
+            .getElementById("songArtist")
+            .value
+            .trim();
+
+
+    const key =
+        document
+            .getElementById("songKey")
+            .value;
+
+
+    const category =
+        document
+            .getElementById("songCategory")
+            .value;
+
+
+    const lyrics =
+        document
+            .getElementById("songLyrics")
+            .value
+            .trim();
+
+
+    if (title === "") {
+
+        alert(
+            "Please enter a song title."
+        );
+
+        return;
     }
 
-    editingSongId = null;
-}
+
+    // =====================================
+    // EDIT EXISTING SONG
+    // =====================================
+
+    if (
+        editingSongId !== null
+    ) {
+
+        const existingSong =
+            songs.find(
+                song =>
+                    song.id ===
+                    editingSongId
+            );
+
+
+        if (!existingSong) {
+
+            alert(
+                "❌ Song record not found."
+            );
+
+            return;
+        }
+
+
+        const updatedSong = {
+
+            ...existingSong,
+
+            title,
+
+            artist:
+                artist ||
+                "Unknown Artist",
+
+            key,
+
+            category,
+
+            lyrics
+
+        };
+
+
+        const updatedInSupabase =
+            await updateSongToSupabase(
+                updatedSong
+            );
+
+
+        if (!updatedInSupabase) {
+
+            alert(
+                "❌ Song was not updated in Supabase."
+            );
+
+            return;
+        }
+
+
+        const index =
+            songs.findIndex(
+                song =>
+                    song.id ===
+                    editingSongId
+            );
+
+
+        if (index !== -1) {
+
+            songs[index] =
+                updatedSong;
+
+        }
+
+
+        // =====================================
+        // AUDIT - EDIT SONG
+        // =====================================
+
+        await writeAuditLog(
+            "EDIT",
+            "Song Library",
+            `Updated song: ${updatedSong.title}`,
+            updatedSong.id,
+            {
+                title:
+                    updatedSong.title,
+
+                artist:
+                    updatedSong.artist,
+
+                key:
+                    updatedSong.key,
+
+                category:
+                    updatedSong.category
+            }
+        );
+
+
+        editingSongId =
+            null;
+
+    }
+
+
+    // =====================================
+    // ADD NEW SONG
+    // =====================================
+
     else {
-    const song = {
-        id: Date.now(),
-        title,
-        artist: artist || "Unknown Artist",
-        key,
-        category,
-        lyrics
-    };
 
-    songs.push(song);
+        const song = {
 
-    // Supabase INSERT - new songs only
-    saveSongToSupabase(song);
-}
+            id:
+                Date.now(),
+
+            title,
+
+            artist:
+                artist ||
+                "Unknown Artist",
+
+            key,
+
+            category,
+
+            lyrics
+
+        };
+
+
+        const savedToSupabase =
+            await saveSongToSupabase(
+                song
+            );
+
+
+        if (!savedToSupabase) {
+
+            alert(
+                "❌ Song was not saved to Supabase."
+            );
+
+            return;
+        }
+
+
+        songs.push(
+            song
+        );
+
+
+        // =====================================
+        // AUDIT - ADD SONG
+        // =====================================
+
+        await writeAuditLog(
+            "ADD",
+            "Song Library",
+            `Added song: ${song.title}`,
+            song.id,
+            {
+                title:
+                    song.title,
+
+                artist:
+                    song.artist,
+
+                key:
+                    song.key,
+
+                category:
+                    song.category
+            }
+        );
+
+    }
+
+
+    // =====================================
+    // REFRESH SONG LIBRARY
+    // =====================================
 
     saveSongsToLocalStorage();
-    loadSavedSongs();
-    clearSongForm();
-    if (songModal) songModal.classList.add("hidden");
-}
 
+    loadSavedSongs();
+
+    clearSongForm();
+
+
+    if (songModal) {
+
+        songModal.classList.add(
+            "hidden"
+        );
+
+    }
+
+}
 function openEditSongModal(id) {
 
     if (!requireAdmin()) {
@@ -2611,22 +7172,83 @@ async function deleteSong(id) {
         return;
     }
 
-    if (confirm("Are you sure you want to delete this song?")) {
 
-        const deletedFromSupabase =
-            await deleteSongFromSupabase(id);
+    const songToDelete =
+        songs.find(
+            song =>
+                String(song.id) ===
+                String(id)
+        );
 
-        if (!deletedFromSupabase) {
-            alert(
-                "❌ Failed to delete song from Supabase."
-            );
-            return;
-        }
 
-        songs = songs.filter(s => s.id !== id);
-        saveSongsToLocalStorage();
-        loadSavedSongs();
+    const deletedSongTitle =
+        songToDelete
+            ? songToDelete.title
+            : "Unknown Song";
+
+
+    if (
+        !confirm(
+            "Are you sure you want to delete this song?"
+        )
+    ) {
+        return;
     }
+
+
+    const deletedFromSupabase =
+        await deleteSongFromSupabase(
+            id
+        );
+
+
+    if (!deletedFromSupabase) {
+
+        alert(
+            "❌ Failed to delete song from Supabase."
+        );
+
+        return;
+    }
+
+
+    // =====================================
+    // AUDIT - DELETE SONG
+    // =====================================
+
+    await writeAuditLog(
+        "DELETE",
+        "Song Library",
+        `Deleted song: ${deletedSongTitle}`,
+        id,
+        {
+            title:
+                deletedSongTitle,
+
+            artist:
+                songToDelete?.artist || "",
+
+            key:
+                songToDelete?.key || "",
+
+            category:
+                songToDelete?.category || ""
+        }
+    );
+
+
+    songs =
+        songs.filter(
+            song =>
+                String(song.id) !==
+                String(id)
+        );
+
+
+    saveSongsToLocalStorage();
+
+    loadSavedSongs();
+
 }
 
 function clearSongForm() {
@@ -2671,6 +7293,113 @@ if (cancelMember) cancelMember.addEventListener("click", () => { if (memberModal
 if (saveMemberBtn) saveMemberBtn.addEventListener("click", saveMember);
 
 
+// =====================================================
+// MINISTRIES DATABASE
+// =====================================================
+
+let ministries = [];
+
+
+// =====================================================
+// LOAD MINISTRIES FROM SUPABASE
+// =====================================================
+
+async function loadMinistriesFromSupabase() {
+
+    const { data, error } =
+        await churchSupabase
+            .from("ministries")
+            .select("*")
+            .order("name", {
+                ascending: true
+            });
+
+
+    if (error) {
+
+        console.error(
+            "❌ Failed to load ministries:",
+            error
+        );
+
+        return;
+    }
+
+
+    ministries = data || [];
+
+
+    console.log(
+        "✅ Ministries loaded:",
+        ministries
+    );
+
+
+    renderMemberMinistries();
+}
+
+
+// =====================================================
+// RENDER MINISTRY CHECKBOXES
+// =====================================================
+
+function renderMemberMinistries(
+    selectedMinistries = []
+) {
+
+    const container =
+        document.getElementById(
+            "memberMinistry"
+        );
+
+
+    if (!container) {
+        return;
+    }
+
+
+    container.innerHTML = "";
+
+
+    ministries.forEach(
+        ministry => {
+
+            const label =
+                document.createElement(
+                    "label"
+                );
+
+
+            const checked =
+                selectedMinistries.includes(
+                    ministry.name
+                );
+
+
+            label.innerHTML = `
+
+                <input
+                    type="checkbox"
+                    value="${ministry.name}"
+                    ${checked ? "checked" : ""}
+                >
+
+                <span>
+                    ${ministry.name}
+                </span>
+
+            `;
+
+
+            container.appendChild(
+                label
+            );
+
+        }
+    );
+
+}
+
 function getSelectedMemberMinistries() {
     const container = document.getElementById("memberMinistry");
 
@@ -2687,9 +7416,9 @@ function getSelectedMemberMinistries() {
 
 async function saveMember() {
 
-    if (!requireAdmin()) {
-        return;
-    }
+    if (!requireMemberManager()) {
+    return;
+}
 
     const editId = document.getElementById("editMemberId").value;
     const name = document.getElementById("memberName").value.trim();
@@ -2744,6 +7473,17 @@ async function saveMember() {
                 "✅ Member updated successfully:",
                 updatedMember
             );
+            await writeAuditLog(
+    "EDIT",
+    "Members",
+    `Updated member: ${updatedMember.name}`,
+    updatedMember.id,
+    {
+        name: updatedMember.name,
+        ministries: updatedMember.ministries,
+        role: updatedMember.role
+    }
+);
         }
 
     // =====================================
@@ -2765,6 +7505,18 @@ async function saveMember() {
         const savedToSupabase =
             await saveMemberToSupabase(member);
 
+            const saveBtn =
+    document.getElementById(
+        "saveMember"
+    );
+
+if (saveBtn) {
+
+    saveBtn.textContent =
+        "Save Changes";
+
+}
+
         if (!savedToSupabase) {
             alert("❌ Member was not saved to Supabase.");
             return;
@@ -2776,6 +7528,18 @@ async function saveMember() {
             "✅ New member added successfully:",
             member
         );
+
+        await writeAuditLog(
+    "ADD",
+    "Members",
+    `Added new member: ${member.name}`,
+    member.id,
+    {
+        name: member.name,
+        ministries: member.ministries,
+        role: member.role
+    }
+);
     }
 
     // =====================================
@@ -2785,6 +7549,7 @@ async function saveMember() {
     saveMembersToLocalStorage();
     loadSavedMembers();
     loadDashboardBirthdays();
+    renderAttendanceList();
     clearMemberForm();
     refreshDashboardStatus();
     filterMembers();
@@ -3445,81 +8210,107 @@ function initializeBackingVocalsAutocomplete() {
 function populateMemberMinistryFilter() {
 
     const filter =
-        document.getElementById("memberMinistryFilter");
+        document.getElementById(
+            "memberMinistryFilter"
+        );
 
-    if (!filter) return;
+    if (!filter) {
+        return;
+    }
 
-    // Clear existing options
+
+    // Keep current selected value
+    const currentValue =
+        filter.value;
+
+
     filter.innerHTML = "";
 
-    // Default option
-    const allOption = document.createElement("option");
+
+    // ALL MINISTRIES
+    const allOption =
+        document.createElement(
+            "option"
+        );
 
     allOption.value = "";
-    allOption.textContent = "All Ministries";
+    allOption.textContent =
+        "All Ministries";
 
-    filter.appendChild(allOption);
+    filter.appendChild(
+        allOption
+    );
 
-    // Store unique ministries
-    const ministries = new Set();
 
-    members.forEach(member => {
+    // =====================================
+    // SOURCE: SUPABASE MINISTRIES MASTER LIST
+    // =====================================
 
-        // New multiple-ministry format
-        if (
-            Array.isArray(member.ministries)
-        ) {
+    const sortedMinistries =
+        (Array.isArray(ministries)
+            ? [...ministries]
+            : []
+        )
+        .sort(
+            (a, b) =>
+                String(a.name || "")
+                    .localeCompare(
+                        String(b.name || ""),
+                        undefined,
+                        {
+                            sensitivity:
+                                "base"
+                        }
+                    )
+        );
 
-            member.ministries.forEach(ministry => {
 
-                if (
-                    typeof ministry === "string" &&
-                    ministry.trim() !== ""
-                ) {
-                    ministries.add(
-                        ministry.trim()
-                    );
-                }
+    sortedMinistries.forEach(
+        ministry => {
 
-            });
+            if (!ministry.name) {
+                return;
+            }
 
-        }
 
-        // Support old single-ministry data
-        else if (
-            typeof member.ministry === "string" &&
-            member.ministry.trim() !== ""
-        ) {
+            const option =
+                document.createElement(
+                    "option"
+                );
 
-            ministries.add(
-                member.ministry.trim()
+
+            option.value =
+                ministry.name;
+
+
+            option.textContent =
+                ministry.name;
+
+
+            filter.appendChild(
+                option
             );
 
         }
+    );
 
-    });
 
-    // Sort ministries alphabetically
-    const sortedMinistries =
-        Array.from(ministries).sort((a, b) =>
-            a.localeCompare(
-                b,
-                undefined,
-                { sensitivity: "base" }
-            )
+    // Restore selection if it still exists
+    const valueStillExists =
+        Array.from(
+            filter.options
+        ).some(
+            option =>
+                option.value ===
+                currentValue
         );
 
-    // Add ministries to dropdown
-    sortedMinistries.forEach(ministry => {
 
-        const option =
-            document.createElement("option");
+    if (valueStillExists) {
+        filter.value =
+            currentValue;
+    }
 
-        option.value = ministry;
-        option.textContent = ministry;
-
-        filter.appendChild(option);
-    });
 }
 
 function filterMembers() {
@@ -3730,32 +8521,52 @@ function renderMemberCard(member) {
 
         <div style="display:flex; justify-content:space-between; margin-top:15px;">
             <button
-                type="button"
-                class="secondary-btn"
-                style="padding: 4px 10px; font-size: 12px;"
-                onclick="editMember(${member.id})"
-            >
-                ✏️ Edit
-            </button>
+    type="button"
+    class="secondary-btn"
+    data-member-manage="true"
+    style="
+        padding:4px 10px;
+        font-size:12px;
+    "
+    onclick="editMember(${member.id})"
+>
+    ✏️ Edit
+</button>
 
-            <button
-                type="button"
-                onclick="deleteMember(${member.id})"
-                style="background:none; border:none; color:#ef4444; cursor:pointer; font-size: 16px; font-weight:bold;"
-            >
-                &times;
-            </button>
+
+<button
+    type="button"
+    data-member-manage="true"
+    onclick="deleteMember(${member.id})"
+    style="
+        background:none;
+        border:none;
+        color:#ef4444;
+        cursor:pointer;
+        font-size:16px;
+        font-weight:bold;
+    "
+>
+    &times;
+</button>
         </div>
     `;
 
     membersGrid.appendChild(card);
+
+    if (
+    typeof applyRoleBasedUI === "function"
+) {
+    applyRoleBasedUI();
+}
+
 }
 
 function editMember(id) {
 
-    if (!requireAdmin()) {
-        return;
-    }
+if (!requireMemberManager()) {
+    return;
+}
 
     const member = members.find(m => m.id === id);
     if (!member) return;
@@ -3774,6 +8585,18 @@ function editMember(id) {
     if (mName) mName.value = member.name;
     if (mContact) mContact.value = member.contact;
     if (mStatus) mStatus.value = member.status;
+
+const saveBtn =
+    document.getElementById(
+        "saveMember"
+    );
+
+if (saveBtn) {
+
+    saveBtn.textContent =
+        "Save Changes";
+
+}
 
     // =====================================
     // LOAD MEMBER MINISTRIES
@@ -3809,85 +8632,917 @@ function editMember(id) {
     }
 }
 
-function addCustomMinistry() {
+// =====================================================
+// ADD NEW MINISTRY
+// =====================================================
+
+async function addCustomMinistry() {
 
     if (!requireAdmin()) {
         return;
     }
 
-    const newMinistry = prompt("Enter new Ministry Group name:");
 
-    if (newMinistry && newMinistry.trim() !== "") {
+    const ministryName =
+        prompt(
+            "Enter new ministry name:"
+        );
 
-        const container = document.getElementById("memberMinistry");
 
-        if (container) {
+    if (ministryName === null) {
+        return;
+    }
 
-            const ministryName = newMinistry.trim();
 
-            // Prevent duplicate ministry
-            const existingCheckboxes =
-                container.querySelectorAll('input[type="checkbox"]');
+    const cleanName =
+        ministryName.trim();
 
-            const alreadyExists = Array.from(existingCheckboxes)
-                .some(checkbox => checkbox.value === ministryName);
 
-            if (alreadyExists) {
-                alert(`"${ministryName}" already exists.`);
+    if (!cleanName) {
+
+        alert(
+            "Please enter a ministry name."
+        );
+
+        return;
+    }
+
+
+    // =====================================
+    // CHECK EXISTING MINISTRY
+    // =====================================
+
+    const alreadyExists =
+        ministries.some(
+            ministry =>
+                String(ministry.name)
+                    .trim()
+                    .toLowerCase() ===
+                cleanName.toLowerCase()
+        );
+
+
+    if (alreadyExists) {
+
+        alert(
+            "This ministry already exists."
+        );
+
+        return;
+    }
+
+
+    // =====================================
+    // SAVE TO SUPABASE
+    // =====================================
+
+    const {
+        data,
+        error
+    } =
+        await churchSupabase
+
+            .from("ministries")
+
+            .insert({
+
+                name:
+                    cleanName
+
+            })
+
+            .select()
+
+            .single();
+
+
+    if (error) {
+
+        console.error(
+            "❌ Failed to add ministry:",
+            error
+        );
+
+
+        alert(
+            "❌ Failed to save ministry."
+        );
+
+        return;
+    }
+
+
+    // =====================================
+    // UPDATE LOCAL ARRAY
+    // =====================================
+
+    ministries.push(
+        data
+    );
+
+
+    ministries.sort(
+        (a, b) =>
+            String(a.name)
+                .localeCompare(
+                    String(b.name)
+                )
+    );
+
+
+    // =====================================
+    // KEEP CURRENT CHECKBOX SELECTION
+    // =====================================
+
+    const currentlySelected =
+        getSelectedMemberMinistries();
+
+
+    currentlySelected.push(
+        data.name
+    );
+
+
+    // =====================================
+    // RENDER AGAIN
+    // =====================================
+
+    renderMemberMinistries(
+        currentlySelected
+    );
+
+    populateMemberMinistryFilter();
+    populateMinistryDashboardSelect();
+
+
+    console.log(
+        "✅ Ministry saved:",
+        data
+    );
+
+
+    alert(
+        "✅ Ministry added successfully."
+    );
+
+}
+
+// =====================================================
+// OPEN MANAGE MINISTRIES
+// =====================================================
+
+function openManageMinistries() {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
+    const modal =
+        document.getElementById(
+            "manageMinistriesModal"
+        );
+
+    if (!modal) {
+        return;
+    }
+
+    renderManageMinistries();
+
+    modal.classList.remove(
+        "hidden"
+    );
+}
+
+
+// =====================================================
+// CLOSE MANAGE MINISTRIES
+// =====================================================
+
+function closeManageMinistries() {
+
+    const modal =
+        document.getElementById(
+            "manageMinistriesModal"
+        );
+
+    if (modal) {
+
+        modal.classList.add(
+            "hidden"
+        );
+
+    }
+}
+
+
+// =====================================================
+// RENDER MANAGE MINISTRIES
+// =====================================================
+
+function renderManageMinistries() {
+
+    const container =
+        document.getElementById(
+            "manageMinistriesList"
+        );
+
+    if (!container) {
+        return;
+    }
+
+
+    container.innerHTML = "";
+
+
+    if (
+        !Array.isArray(ministries) ||
+        ministries.length === 0
+    ) {
+
+        container.innerHTML = `
+            <div
+                style="
+                    padding:15px;
+                    color:#94a3b8;
+                    text-align:center;
+                "
+            >
+                No ministries found.
+            </div>
+        `;
+
+        return;
+    }
+
+
+    ministries.forEach(
+        ministry => {
+
+            const row =
+                document.createElement(
+                    "div"
+                );
+
+
+            row.style.cssText = `
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                gap:10px;
+                padding:10px 12px;
+                border:1px solid #e2e8f0;
+                border-radius:8px;
+            `;
+
+
+            row.innerHTML = `
+
+                <span
+                    style="
+                        font-size:13px;
+                        font-weight:600;
+                    "
+                >
+                    ${ministry.name}
+                </span>
+
+
+                <div
+                    style="
+                        display:flex;
+                        gap:6px;
+                    "
+                >
+
+                    <button
+                        type="button"
+                        class="secondary-btn"
+                        style="
+                            padding:4px 8px;
+                            font-size:10px;
+                        "
+                        onclick="editMinistry(${ministry.id})"
+                    >
+                        ✏ Edit
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="secondary-btn"
+                        style="
+                            padding:4px 8px;
+                            font-size:10px;
+                            color:#dc2626;
+                        "
+                        onclick="deleteMinistry(${ministry.id})"
+                    >
+                        ✖ Delete
+                    </button>
+
+                </div>
+
+            `;
+
+
+            container.appendChild(
+                row
+            );
+
+        }
+    );
+
+}
+
+// =====================================================
+// EDIT MINISTRY
+// =====================================================
+
+async function editMinistry(id) {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
+
+    const ministry =
+        ministries.find(
+            item =>
+                String(item.id) ===
+                String(id)
+        );
+
+
+    if (!ministry) {
+
+        alert(
+            "Ministry was not found."
+        );
+
+        return;
+    }
+
+
+    const oldName =
+        ministry.name;
+
+
+    const newNameInput =
+        prompt(
+            "Edit ministry name:",
+            oldName
+        );
+
+
+    if (newNameInput === null) {
+        return;
+    }
+
+
+    const newName =
+        newNameInput.trim();
+
+
+    if (!newName) {
+
+        alert(
+            "Ministry name cannot be empty."
+        );
+
+        return;
+    }
+
+
+    if (
+        newName.toLowerCase() ===
+        oldName.toLowerCase()
+    ) {
+        return;
+    }
+
+
+    // =====================================
+    // DUPLICATE CHECK
+    // =====================================
+
+    const duplicate =
+        ministries.some(
+            item =>
+                String(item.id) !==
+                    String(id) &&
+
+                String(item.name)
+                    .trim()
+                    .toLowerCase() ===
+                newName.toLowerCase()
+        );
+
+
+    if (duplicate) {
+
+        alert(
+            "This ministry already exists."
+        );
+
+        return;
+    }
+
+
+    try {
+
+        // =====================================
+        // 1. UPDATE MINISTRIES TABLE
+        // =====================================
+
+        const {
+            data: updatedMinistry,
+            error: ministryError
+        } =
+            await churchSupabase
+                .from("ministries")
+                .update({
+                    name:
+                        newName
+                })
+                .eq(
+                    "id",
+                    id
+                )
+                .select()
+                .single();
+
+
+        if (ministryError) {
+
+            console.error(
+                "❌ Failed to update ministry:",
+                ministryError
+            );
+
+            alert(
+                "❌ Failed to update ministry."
+            );
+
+            return;
+        }
+
+
+        // =====================================
+        // 2. FIND AFFECTED MEMBERS
+        // =====================================
+
+        const affectedMembers =
+            members.filter(member => {
+
+                const memberMinistries =
+                    Array.isArray(
+                        member.ministries
+                    )
+                        ? member.ministries
+                        : (
+                            member.ministry
+                                ? [member.ministry]
+                                : []
+                        );
+
+
+                return memberMinistries
+                    .some(
+                        name =>
+                            String(name)
+                                .trim()
+                                .toLowerCase() ===
+                            oldName.toLowerCase()
+                    );
+
+            });
+
+
+        // =====================================
+        // 3. UPDATE AFFECTED MEMBERS
+        // =====================================
+
+        for (
+            const member
+            of affectedMembers
+        ) {
+
+            let updatedMinistries =
+                Array.isArray(
+                    member.ministries
+                )
+                    ? [...member.ministries]
+                    : (
+                        member.ministry
+                            ? [member.ministry]
+                            : []
+                    );
+
+
+            updatedMinistries =
+                updatedMinistries.map(
+                    name =>
+                        String(name)
+                            .trim()
+                            .toLowerCase() ===
+                        oldName.toLowerCase()
+
+                            ? newName
+
+                            : name
+                );
+
+
+            const updatedMember = {
+
+                ...member,
+
+                ministry:
+                    String(
+                        member.ministry || ""
+                    )
+                    .trim()
+                    .toLowerCase() ===
+                    oldName.toLowerCase()
+
+                        ? newName
+
+                        : (
+                            member.ministry ||
+                            updatedMinistries[0] ||
+                            ""
+                        ),
+
+                ministries:
+                    updatedMinistries
+
+            };
+
+
+            const updated =
+                await updateMemberToSupabase(
+                    updatedMember
+                );
+
+
+            if (!updated) {
+
+                alert(
+                    `❌ Ministry was renamed, but failed to update member: ${member.name}`
+                );
+
+                await loadMinistriesFromSupabase();
+                await loadMembersFromSupabase();
+                populateMemberMinistryFilter();
+                populateMinistryDashboardSelect();
+
                 return;
             }
 
-            // Create checkbox
-            const label = document.createElement("label");
-
-            const checkbox = document.createElement("input");
-            checkbox.type = "checkbox";
-            checkbox.value = ministryName;
-
-            const span = document.createElement("span");
-            span.textContent = ministryName;
-
-            label.appendChild(checkbox);
-            label.appendChild(span);
-
-            container.appendChild(label);
-
-            // Automatically select newly added ministry
-            checkbox.checked = true;
-
-            alert(`Added "${ministryName}" to Ministry list!`);
         }
+
+
+        // =====================================
+        // 4. RELOAD EVERYTHING
+        // =====================================
+
+        await loadMinistriesFromSupabase();
+
+        await loadMembersFromSupabase();
+
+
+        renderManageMinistries();
+
+
+        console.log(
+            "✅ Ministry renamed:",
+            oldName,
+            "→",
+            newName
+        );
+
+
+        alert(
+            `✅ Ministry renamed successfully.\n\n${oldName} → ${newName}`
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "❌ Edit ministry error:",
+            error
+        );
+
+
+        alert(
+            "❌ Failed to edit ministry."
+        );
+
     }
+
+}
+
+// =====================================================
+// DELETE MINISTRY
+// =====================================================
+
+async function deleteMinistry(id) {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
+
+    const ministry =
+        ministries.find(
+            item =>
+                String(item.id) ===
+                String(id)
+        );
+
+
+    if (!ministry) {
+
+        alert(
+            "Ministry was not found."
+        );
+
+        return;
+    }
+
+
+    const ministryName =
+        ministry.name;
+
+
+    // =====================================
+    // CHECK IF MINISTRY IS IN USE
+    // =====================================
+
+    const affectedMembers =
+        members.filter(member => {
+
+            const memberMinistries =
+                Array.isArray(
+                    member.ministries
+                )
+                    ? member.ministries
+                    : (
+                        member.ministry
+                            ? [member.ministry]
+                            : []
+                    );
+
+
+            return memberMinistries.some(
+                name =>
+                    String(name)
+                        .trim()
+                        .toLowerCase() ===
+                    String(ministryName)
+                        .trim()
+                        .toLowerCase()
+            );
+
+        });
+
+
+    // =====================================
+    // BLOCK DELETE IF USED BY MEMBERS
+    // =====================================
+
+    if (
+        affectedMembers.length > 0
+    ) {
+
+        const names =
+            affectedMembers
+                .slice(0, 5)
+                .map(
+                    member =>
+                        member.name
+                )
+                .join("\n• ");
+
+
+        let message =
+
+            `"${ministryName}" cannot be deleted yet.\n\n` +
+
+            `${affectedMembers.length} member(s) are still assigned to this ministry.\n\n` +
+
+            "Examples:\n• " +
+            names;
+
+
+        if (
+            affectedMembers.length > 5
+        ) {
+
+            message +=
+                `\n• +${affectedMembers.length - 5} more`;
+
+        }
+
+
+        message +=
+            "\n\nPlease edit those members first and remove this ministry from their Ministry Group.";
+
+
+        alert(
+            message
+        );
+
+
+        return;
+    }
+
+
+    // =====================================
+    // CONFIRM DELETE
+    // =====================================
+
+    const confirmed =
+        confirm(
+            `Delete ministry "${ministryName}"?\n\n` +
+            "This action cannot be undone."
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    try {
+
+        // =====================================
+        // DELETE FROM SUPABASE
+        // =====================================
+
+        const {
+            error
+        } =
+            await churchSupabase
+
+                .from(
+                    "ministries"
+                )
+
+                .delete()
+
+                .eq(
+                    "id",
+                    id
+                );
+
+
+        if (error) {
+
+            console.error(
+                "❌ Failed to delete ministry:",
+                error
+            );
+
+
+            alert(
+                "❌ Failed to delete ministry."
+            );
+
+            return;
+        }
+
+
+        // =====================================
+        // REMOVE FROM LOCAL ARRAY
+        // =====================================
+
+        ministries =
+            ministries.filter(
+                item =>
+                    String(item.id) !==
+                    String(id)
+            );
+
+
+        // Keep current member checkbox selections
+        const selected =
+            getSelectedMemberMinistries();
+
+
+        renderMemberMinistries(
+            selected
+        );
+
+renderManageMinistries();
+
+populateMemberMinistryFilter();
+
+populateMinistryDashboardSelect();
+
+alert(
+    "✅ Ministry deleted successfully."
+);
+
+} catch (error) {
+
+    console.error(
+        "❌ Delete ministry error:",
+        error
+    );
+
+    alert(
+        "❌ Failed to delete ministry."
+    );
+
+}
+
 }
 
 async function deleteMember(id) {
 
-    if (!requireAdmin()) {
+    if (!requireMemberManager()) {
         return;
     }
 
-    if (!confirm("Are you sure you want to delete this member?")) {
+
+    const memberToDelete =
+        members.find(
+            member =>
+                String(member.id) ===
+                String(id)
+        );
+
+
+    const deletedMemberName =
+        memberToDelete
+            ? memberToDelete.name
+            : "Unknown Member";
+
+
+    if (
+        !confirm(
+            "Are you sure you want to delete this member?"
+        )
+    ) {
         return;
     }
+
 
     const deletedFromSupabase =
-        await deleteMemberFromSupabase(id);
+        await deleteMemberFromSupabase(
+            id
+        );
+
 
     if (!deletedFromSupabase) {
-        alert("❌ Member was not deleted from Supabase.");
+
+        alert(
+            "❌ Member was not deleted from Supabase."
+        );
+
         return;
     }
 
-    members = members.filter(m => m.id !== id);
+
+    // =====================================
+    // AUDIT - DELETE MEMBER
+    // =====================================
+
+    await writeAuditLog(
+        "DELETE",
+        "Members",
+        `Deleted member: ${deletedMemberName}`,
+        id,
+        {
+            name: deletedMemberName
+        }
+    );
+
+
+    members =
+        members.filter(
+            m =>
+                String(m.id) !==
+                String(id)
+        );
+
 
     saveMembersToLocalStorage();
+
     loadSavedMembers();
+
     loadDashboardBirthdays();
+
     refreshDashboardStatus();
+
+
     console.log(
         "✅ Member deleted successfully:",
         id
     );
+
 }
 
 function clearMemberForm() {
@@ -3918,84 +9573,84 @@ function clearMemberForm() {
     if (mBirthday) mBirthday.value = "";
 }
 
-/* =========================================
-   DASHBOARD BIRTHDAY
-========================================= */
+// =====================================================
+// ATTENDANCE - OPEN ADD MEMBER MODAL
+// =====================================================
 
-function loadDashboardBirthdays() {
+function openAttendanceAddMember() {
 
-    const birthdayList =
-        document.getElementById("birthdayList");
-
-    if (!birthdayList) return;
-
-
-    const currentMonth =
-        new Date().getMonth();
-
-
-    const birthdayMembers =
-        members.filter(member => {
-
-            if (!member.birthday) return false;
-
-
-            const birthday =
-                new Date(member.birthday);
-
-
-            return birthday.getMonth() === currentMonth;
-
-        });
-
-
-    birthdayList.innerHTML = "";
-
-
-    if (birthdayMembers.length === 0) {
-
-        birthdayList.innerHTML = `
-            <p style="color:#6b7280;">
-                No birthdays this month.
-            </p>
-        `;
-
+    if (!requireMemberManager()) {
         return;
+    }
+
+
+    clearMemberForm();
+
+    const saveBtn =
+    document.getElementById(
+        "saveMember"
+    );
+
+if (saveBtn) {
+
+    saveBtn.textContent =
+        "Add Member";
+
+}
+
+    const modal =
+        document.getElementById(
+            "memberModal"
+        );
+
+    const modalTitle =
+        document.getElementById(
+            "memberModalTitle"
+        );
+
+    const editId =
+        document.getElementById(
+            "editMemberId"
+        );
+
+
+    if (modalTitle) {
+
+        modalTitle.textContent =
+            "Add New Member";
 
     }
 
 
-    birthdayMembers.forEach(member => {
+
+    if (editId) {
+
+        editId.value = "";
+
+    }
 
 
-        const date =
-            new Date(member.birthday);
+    // Reload current ministries
+    if (
+        typeof renderMemberMinistries ===
+        "function"
+    ) {
+
+        renderMemberMinistries([]);
+
+    }
 
 
-        const formattedDate =
-            date.toLocaleDateString(
-                "en-US",
-                {
-                    month:"long",
-                    day:"numeric"
-                }
-            );
+    if (modal) {
 
+        modal.classList.remove(
+            "hidden"
+        );
 
-        birthdayList.innerHTML += `
-
-    <div style="
-        padding:8px 0;
-        border-bottom:1px solid #e5e7eb;
-    ">
-        🎂 <b>${member.name}</b> - ${formattedDate}
-    </div>
-
-`;
-
-    });
+    }
 
 }
+
 
 /* =========================================
    DASHBOARD BIRTHDAY THIS MONTH
@@ -4013,19 +9668,59 @@ function loadDashboardBirthdays() {
         new Date().getMonth();
 
 
-    const birthdayMembers =
-        members.filter(member => {
+   const birthdayMembers =
+    members
+        .filter(member => {
 
-            if (!member.birthday) return false;
-
+            if (!member.birthday) {
+                return false;
+            }
 
             const birthdayDate =
-                new Date(member.birthday);
+                new Date(
+                    member.birthday + "T00:00:00"
+                );
 
+            return (
+                birthdayDate.getMonth() ===
+                currentMonth
+            );
 
-            return birthdayDate.getMonth() === currentMonth;
+        })
+        .sort((a, b) => {
 
-        });
+    const dayA =
+        Number(
+            a.birthday.split("-")[2]
+        );
+
+    const dayB =
+        Number(
+            b.birthday.split("-")[2]
+        );
+
+    // =====================================
+    // FIRST: SORT BY BIRTHDAY DAY
+    // =====================================
+
+    if (dayA !== dayB) {
+        return dayA - dayB;
+    }
+
+    // =====================================
+    // SAME BIRTHDAY: SORT BY NAME
+    // =====================================
+
+    return String(a.name || "")
+        .localeCompare(
+            String(b.name || ""),
+            undefined,
+            {
+                sensitivity: "base"
+            }
+        );
+
+});
 
 
     birthdayList.innerHTML = "";
@@ -4430,10 +10125,13 @@ async function saveAttendance() {
     // EXISTING RECORD
     // =====================================
 
-    if (index !== -1) {
+if (index !== -1) {
 
     const updatedInSupabase =
-        await updateAttendanceToSupabase(recordData);
+        await updateAttendanceToSupabase(
+            recordData
+        );
+
 
     if (!updatedInSupabase) {
 
@@ -4444,27 +10142,86 @@ async function saveAttendance() {
         return;
     }
 
+
     attendanceRecords[index] = {
         ...recordData,
         id: attendanceRecords[index].id
     };
 
+
+    // =====================================
+    // AUDIT - UPDATE ATTENDANCE
+    // =====================================
+
+    await writeAuditLog(
+        "EDIT",
+        "Attendance",
+        `Updated ${
+            serviceType === "midweek"
+                ? "Midweek"
+                : "Sunday"
+        } attendance: ${eventName} (${date})`,
+        attendanceRecords[index].id,
+        {
+            date: date,
+            eventName: eventName,
+            serviceType: serviceType,
+            presentCount:
+                recordData.presentCount,
+            totalMembers:
+                recordData.totalMembers
+        }
+    );
+
+
 } else {
 
-        const savedToSupabase =
-            await saveAttendanceToSupabase(recordData);
+    const savedToSupabase =
+        await saveAttendanceToSupabase(
+            recordData
+        );
 
-        if (!savedToSupabase) {
 
-            alert(
-                "❌ Attendance was not saved to Supabase."
-            );
+    if (!savedToSupabase) {
 
-            return;
-        }
+        alert(
+            "❌ Attendance was not saved to Supabase."
+        );
 
-        attendanceRecords.push(recordData);
+        return;
     }
+
+
+    attendanceRecords.push(
+        recordData
+    );
+
+
+    // =====================================
+    // AUDIT - NEW ATTENDANCE
+    // =====================================
+
+    await writeAuditLog(
+        "ADD",
+        "Attendance",
+        `Saved ${
+            serviceType === "midweek"
+                ? "Midweek"
+                : "Sunday"
+        } attendance: ${eventName} (${date})`,
+        date,
+        {
+            date: date,
+            eventName: eventName,
+            serviceType: serviceType,
+            presentCount:
+                recordData.presentCount,
+            totalMembers:
+                recordData.totalMembers
+        }
+    );
+
+}
 
     localStorage.setItem(
     "churchhq_attendance",
@@ -5984,13 +11741,15 @@ function calculateMemberStatusAlerts() {
 
 // =========================================
 // PLANNER STATUS ALERTS
+// Due Soon + Due Today + Overdue
 // =========================================
 
 function calculatePlannerStatusAlerts() {
 
     const alerts = [];
 
-    const today = new Date();
+    const today =
+        new Date();
 
     today.setHours(
         0,
@@ -6003,11 +11762,15 @@ function calculatePlannerStatusAlerts() {
     tasks.forEach(task => {
 
         const status =
-            String(task.status || "")
+            String(
+                task.status || ""
+            )
                 .trim()
                 .toLowerCase();
 
 
+        // Ignore tasks without due date
+        // and completed tasks
         if (
             !task.dueDate ||
             status === "completed"
@@ -6023,39 +11786,139 @@ function calculatePlannerStatusAlerts() {
 
 
         if (
-            isNaN(dueDate.getTime()) ||
-            dueDate >= today
+            isNaN(
+                dueDate.getTime()
+            )
         ) {
             return;
         }
 
 
-        const overdueDays =
-            Math.floor(
+        // =====================================
+        // DAYS DIFFERENCE
+        // Positive = future
+        // 0 = today
+        // Negative = overdue
+        // =====================================
+
+        const daysDifference =
+            Math.round(
                 (
-                    today.getTime() -
-                    dueDate.getTime()
+                    dueDate.getTime() -
+                    today.getTime()
                 ) /
                 86400000
             );
 
 
-        alerts.push({
+        const assignedText =
+            task.assignedTo
+                ? ` Assigned to: ${task.assignedTo}.`
+                : "";
 
-            module: "Planner",
 
-            name:
-                task.title ||
-                "Untitled Task",
+        // =====================================
+        // OVERDUE
+        // =====================================
 
-            type: "overdue-task",
+        if (
+            daysDifference < 0
+        ) {
 
-            level: "warning",
+            const overdueDays =
+                Math.abs(
+                    daysDifference
+                );
 
-            message:
-                `Task is overdue by ${overdueDays} day${overdueDays === 1 ? "" : "s"}.`
 
-        });
+            alerts.push({
+
+                module:
+                    "Planner",
+
+                name:
+                    task.title ||
+                    "Untitled Task",
+
+                type:
+                    "overdue-task",
+
+                level:
+                    "warning",
+
+                message:
+                    `Task is overdue by ${overdueDays} day${overdueDays === 1 ? "" : "s"}.${assignedText}`
+
+            });
+
+
+            return;
+        }
+
+
+        // =====================================
+        // DUE TODAY
+        // =====================================
+
+        if (
+            daysDifference === 0
+        ) {
+
+            alerts.push({
+
+                module:
+                    "Planner",
+
+                name:
+                    task.title ||
+                    "Untitled Task",
+
+                type:
+                    "task-due-today",
+
+                level:
+                    "warning",
+
+                message:
+                    `Task is due today.${assignedText}`
+
+            });
+
+
+            return;
+        }
+
+
+        // =====================================
+        // DUE SOON
+        // Show starting 3 days before due date
+        // =====================================
+
+        if (
+            daysDifference <= 3
+        ) {
+
+            alerts.push({
+
+                module:
+                    "Planner",
+
+                name:
+                    task.title ||
+                    "Untitled Task",
+
+                type:
+                    "task-due-soon",
+
+                level:
+                    "info",
+
+                message:
+                    `Task is due in ${daysDifference} day${daysDifference === 1 ? "" : "s"}.${assignedText}`
+
+            });
+
+        }
 
     });
 
@@ -6084,37 +11947,38 @@ function calculateServiceStatusAlerts() {
                 record.date ||
                 "Unknown Date";
 
+// =====================================
+// MISSING WORSHIP LEADER
+// SUNDAY ONLY
+// =====================================
 
-            // =====================================
-            // MISSING WORSHIP LEADER
-            // =====================================
+if (
+    serviceLabel === "Sunday Service" &&
+    !String(
+        record.worshipLeader || ""
+    ).trim()
+) {
 
-            if (
-                !String(
-                    record.worshipLeader || ""
-                ).trim()
-            ) {
+    alerts.push({
 
-                alerts.push({
+        module:
+            serviceLabel,
 
-                    module:
-                        serviceLabel,
+        name:
+            date,
 
-                    name:
-                        date,
+        type:
+            "missing-worship-leader",
 
-                    type:
-                        "missing-worship-leader",
+        level:
+            "warning",
 
-                    level:
-                        "warning",
+        message:
+            "No Worship Leader assigned."
 
-                    message:
-                        "No Worship Leader assigned."
+    });
 
-                });
-
-            }
+}
 
 
             // =====================================
@@ -6290,6 +12154,156 @@ function calculateFileStatusAlerts() {
 
 }
 
+
+// =========================================
+// ANNUAL ACTIVITY STATUS ALERTS
+// =========================================
+
+function calculateAnnualActivityStatusAlerts() {
+
+    const alerts = [];
+
+    if (!Array.isArray(annualActivities)) {
+        return alerts;
+    }
+
+
+    const today = new Date();
+
+    today.setHours(
+        0, 0, 0, 0
+    );
+
+
+    annualActivities.forEach(activity => {
+
+        if (!activity.date) {
+            return;
+        }
+
+
+        const activityDate =
+            new Date(
+                activity.date +
+                "T00:00:00"
+            );
+
+
+        activityDate.setHours(
+            0, 0, 0, 0
+        );
+
+
+        const difference =
+            activityDate.getTime() -
+            today.getTime();
+
+
+        const daysUntil =
+            Math.round(
+                difference /
+                (1000 * 60 * 60 * 24)
+            );
+
+
+        // Already finished
+        if (daysUntil < 0) {
+            return;
+        }
+
+
+        // Only alert within 30 days
+        if (daysUntil > 30) {
+            return;
+        }
+
+
+        let message = "";
+        let level = "info";
+
+
+        // TODAY
+        if (daysUntil === 0) {
+
+            message =
+                "This activity is happening today.";
+
+            level =
+                "warning";
+
+        }
+
+        // TOMORROW
+        else if (daysUntil === 1) {
+
+            message =
+                "This activity is happening tomorrow.";
+
+            level =
+                "warning";
+
+        }
+
+        // 2 - 7 DAYS
+        else if (daysUntil <= 7) {
+
+            message =
+                `This activity is in ${daysUntil} days.`;
+
+            level =
+                "warning";
+
+        }
+
+        // 8 - 30 DAYS
+        else {
+
+            message =
+                `Upcoming in ${daysUntil} days.`;
+
+            level =
+                "info";
+
+        }
+
+
+        alerts.push({
+
+            module:
+                "Activities",
+
+            name:
+                activity.title ||
+                "Church Activity",
+
+            type:
+                "annual-activity",
+
+            level,
+
+            message,
+
+            date:
+                activity.date
+
+        });
+
+    });
+
+
+    // Closest activity first
+    alerts.sort(
+        (a, b) =>
+            String(a.date)
+                .localeCompare(
+                    String(b.date)
+                )
+    );
+
+
+    return alerts;
+}
+
 // =========================================
 // SYSTEM STATUS ALERTS ENGINE
 // =========================================
@@ -6364,6 +12378,18 @@ const fileAlerts =
 
 systemAlerts.push(
     ...fileAlerts
+);
+
+// =====================================
+// ANNUAL ACTIVITY ALERTS
+// =====================================
+
+const annualActivityAlerts =
+    calculateAnnualActivityStatusAlerts();
+
+
+systemAlerts.push(
+    ...annualActivityAlerts
 );
 
     return systemAlerts;
@@ -6566,51 +12592,34 @@ function renderSystemStatusAlerts() {
 
 function getAvailableMinistries() {
 
-    const ministrySet = new Set();
+    if (
+        !Array.isArray(ministries)
+    ) {
+        return [];
+    }
 
 
-    members.forEach(member => {
+    return ministries
 
-        // Multiple ministries
-        if (Array.isArray(member.ministries)) {
+        .map(
+            ministry =>
+                String(
+                    ministry.name || ""
+                ).trim()
+        )
 
-            member.ministries.forEach(ministry => {
+        .filter(Boolean)
 
-                const name =
-                    String(ministry || "").trim();
-
-                if (name) {
-                    ministrySet.add(name);
-                }
-
-            });
-
-        }
-
-
-        // Legacy / primary ministry
-        const primaryMinistry =
-            String(
-                member.ministry || ""
-            ).trim();
-
-
-        if (primaryMinistry) {
-            ministrySet.add(primaryMinistry);
-        }
-
-    });
-
-
-    return Array.from(ministrySet)
-        .sort((a, b) =>
-            a.localeCompare(
-                b,
-                undefined,
-                {
-                    sensitivity: "base"
-                }
-            )
+        .sort(
+            (a, b) =>
+                a.localeCompare(
+                    b,
+                    undefined,
+                    {
+                        sensitivity:
+                            "base"
+                    }
+                )
         );
 
 }
@@ -7261,19 +13270,102 @@ refreshDashboardStatus();
     );
 }
 
-async function deleteAttendanceFromSupabase(date, serviceType) {
+async function deleteAttendance(
+    date,
+    serviceType
+) {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
+
+    if (
+        !confirm(
+            `Are you sure you want to delete the attendance record for ${date}?`
+        )
+    ) {
+        return;
+    }
+
+
+    const actualServiceType =
+        serviceType || "sunday";
+
+
+    // =====================================
+    // GET RECORD BEFORE DELETE
+    // =====================================
+
+    const attendanceToDelete =
+        attendanceRecords.find(
+            record =>
+                record.date === date &&
+                (
+                    record.serviceType ||
+                    "sunday"
+                ) === actualServiceType
+        );
+
+
+    const deletedEventName =
+        attendanceToDelete
+            ? attendanceToDelete.eventName
+            : "Attendance";
+
+
+    // =====================================
+    // DELETE FROM SUPABASE
+    // =====================================
+
+    const deletedFromSupabase =
+        await deleteAttendanceFromSupabase(
+            date,
+            actualServiceType
+        );
+
+
+    if (!deletedFromSupabase) {
+
+        alert(
+            "❌ Failed to delete the attendance record in Supabase."
+        );
+
+        return;
+    }
+
+// =====================================
+// ATTENDANCE - SUPABASE DELETE
+// =====================================
+
+async function deleteAttendanceFromSupabase(
+    date,
+    serviceType
+) {
+
     try {
 
-        const actualServiceType = serviceType || "sunday";
+        const actualServiceType =
+            serviceType || "sunday";
 
-        const { data, error } = await churchSupabase
-            .from("attendance_records")
-            .delete()
-            .eq("date", date)
-            .eq("service_type", actualServiceType)
-            .select();
+
+        const { data, error } =
+            await churchSupabase
+                .from("attendance_records")
+                .delete()
+                .eq(
+                    "date",
+                    date
+                )
+                .eq(
+                    "service_type",
+                    actualServiceType
+                )
+                .select();
+
 
         if (error) {
+
             console.error(
                 "❌ Failed to delete attendance from Supabase:",
                 error
@@ -7282,25 +13374,33 @@ async function deleteAttendanceFromSupabase(date, serviceType) {
             return false;
         }
 
-        // Walang record na aktuwal na nabura
-        if (!data || data.length === 0) {
+
+        if (
+            !data ||
+            data.length === 0
+        ) {
+
             console.error(
                 "❌ No attendance record was deleted.",
                 {
                     date,
-                    serviceType: actualServiceType
+                    serviceType:
+                        actualServiceType
                 }
             );
 
             return false;
         }
 
+
         console.log(
             "✅ Attendance deleted from Supabase:",
             data
         );
 
+
         return true;
+
 
     } catch (error) {
 
@@ -7311,6 +13411,86 @@ async function deleteAttendanceFromSupabase(date, serviceType) {
 
         return false;
     }
+
+}
+
+    // =====================================
+    // AUDIT - DELETE ATTENDANCE
+    // =====================================
+
+    await writeAuditLog(
+        "DELETE",
+        "Attendance",
+        `Deleted ${
+            actualServiceType === "midweek"
+                ? "Midweek"
+                : "Sunday"
+        } attendance: ${deletedEventName} (${date})`,
+        attendanceToDelete
+            ? attendanceToDelete.id
+            : date,
+        {
+            date: date,
+            eventName:
+                deletedEventName,
+            serviceType:
+                actualServiceType
+        }
+    );
+
+
+    // =====================================
+    // REMOVE LOCAL RECORD
+    // =====================================
+
+    attendanceRecords =
+        attendanceRecords.filter(
+            record =>
+                !(
+                    record.date === date &&
+                    (
+                        record.serviceType ||
+                        "sunday"
+                    ) === actualServiceType
+                )
+        );
+
+
+    localStorage.setItem(
+        "churchhq_attendance",
+        JSON.stringify(
+            attendanceRecords
+        )
+    );
+
+
+    // =====================================
+    // REFRESH ATTENDANCE UI
+    // =====================================
+
+    renderAttendanceHistory();
+
+    loadAttendanceForDate();
+
+    renderAttendanceSummary(
+        document.getElementById(
+            "attendanceSummarySearch"
+        )?.value || ""
+    );
+
+    renderTopAttendance();
+
+    refreshDashboardStatus();
+
+
+    alert(
+        `✅ ${
+            actualServiceType === "midweek"
+                ? "Midweek"
+                : "Sunday"
+        } attendance from ${date} is successfully deleted.`
+    );
+
 }
 // =====================================
 // ATTENDANCE HISTORY RENDER
@@ -7471,10 +13651,10 @@ if (!canManageAttendance()) {
     });
 }
 
-/* =========================================
-   SETTINGS & BACKUP ENGINE
-   SUPABASE EXPORT BACKUP
-========================================= */
+// =====================================================
+// SETTINGS & BACKUP ENGINE
+// SUPABASE EXPORT BACKUP
+// =====================================================
 
 async function exportChurchData() {
 
@@ -7484,18 +13664,28 @@ async function exportChurchData() {
 
     try {
 
-        console.log("📦 Creating Supabase backup...");
+        console.log(
+            "📦 Creating ChurchHQ Supabase backup..."
+        );
 
+
+        // =====================================
+        // LOAD ALL DATABASE TABLES
+        // =====================================
 
         const [
+
             membersResult,
             tasksResult,
             songsResult,
             servicesResult,
             attendanceResult,
-            activitiesResult,
+            annualActivitiesResult,
             announcementsResult,
-            fileFoldersResult
+            fileFoldersResult,
+            leadersResult,
+            ministriesResult
+
         ] = await Promise.all([
 
             churchSupabase
@@ -7519,7 +13709,7 @@ async function exportChurchData() {
                 .select("*"),
 
             churchSupabase
-                .from("activities")
+                .from("annual_activities")
                 .select("*"),
 
             churchSupabase
@@ -7528,26 +13718,79 @@ async function exportChurchData() {
 
             churchSupabase
                 .from("file_folders")
+                .select("*"),
+
+            churchSupabase
+                .from("church_leaders")
+                .select("*"),
+
+            churchSupabase
+                .from("ministries")
                 .select("*")
 
         ]);
 
 
+        // =====================================
+        // CHECK FOR SUPABASE ERRORS
+        // =====================================
+
         const results = [
 
             ["members", membersResult],
-            ["planner_tasks", tasksResult],
-            ["songs", songsResult],
-            ["service_records", servicesResult],
-            ["attendance_records", attendanceResult],
-            ["activities", activitiesResult],
-            ["announcements", announcementsResult],
-            ["file_folders", fileFoldersResult]
+
+            [
+                "planner_tasks",
+                tasksResult
+            ],
+
+            [
+                "songs",
+                songsResult
+            ],
+
+            [
+                "service_records",
+                servicesResult
+            ],
+
+            [
+                "attendance_records",
+                attendanceResult
+            ],
+
+            [
+                "annual_activities",
+                annualActivitiesResult
+            ],
+
+            [
+                "announcements",
+                announcementsResult
+            ],
+
+            [
+                "file_folders",
+                fileFoldersResult
+            ],
+
+            [
+                "church_leaders",
+                leadersResult
+            ],
+
+            [
+                "ministries",
+                ministriesResult
+            ]
 
         ];
 
-        // Check Supabase errors
-        for (const [tableName, result] of results) {
+
+        for (
+            const [tableName, result]
+            of results
+        ) {
 
             if (result.error) {
 
@@ -7566,16 +13809,24 @@ async function exportChurchData() {
         }
 
 
+        // =====================================
+        // CREATE BACKUP OBJECT
+        // =====================================
+
         const backupData = {
 
-            app: "ChurchHQ",
+            app:
+                "ChurchHQ",
 
-            version: "3.0",
+            version:
+                "5.2",
 
-            source: "Supabase",
+            source:
+                "Supabase",
 
             exportDate:
-                new Date().toISOString(),
+                new Date()
+                    .toISOString(),
 
             data: {
 
@@ -7594,21 +13845,30 @@ async function exportChurchData() {
                 attendance_records:
                     attendanceResult.data || [],
 
-                activities:
-                    activitiesResult.data || [],
+                annual_activities:
+                    annualActivitiesResult.data || [],
 
                 announcements:
                     announcementsResult.data || [],
 
                 file_folders:
-                    fileFoldersResult.data || []
+                    fileFoldersResult.data || [],
+
+                church_leaders:
+                    leadersResult.data || [],
+
+                ministries:
+                    ministriesResult.data || []
 
             }
 
         };
 
 
-        // Convert backup to JSON
+        // =====================================
+        // CREATE JSON FILE
+        // =====================================
+
         const jsonData =
             JSON.stringify(
                 backupData,
@@ -7621,30 +13881,39 @@ async function exportChurchData() {
             new Blob(
                 [jsonData],
                 {
-                    type: "application/json"
+                    type:
+                        "application/json"
                 }
             );
 
 
         const url =
-            URL.createObjectURL(blob);
+            URL.createObjectURL(
+                blob
+            );
 
 
         const downloadAnchor =
-            document.createElement("a");
+            document.createElement(
+                "a"
+            );
 
 
         const today =
             new Date()
                 .toISOString()
-                .slice(0, 10);
+                .slice(
+                    0,
+                    10
+                );
 
 
         downloadAnchor.href =
             url;
 
+
         downloadAnchor.download =
-            `churchhq_supabase_backup_${today}.json`;
+            `churchhq_backup_v5_${today}.json`;
 
 
         document.body.appendChild(
@@ -7657,72 +13926,107 @@ async function exportChurchData() {
 
         downloadAnchor.remove();
 
-        URL.revokeObjectURL(url);
 
+        URL.revokeObjectURL(
+            url
+        );
+
+
+        // =====================================
+        // CONSOLE BACKUP SUMMARY
+        // =====================================
 
         console.log(
-            "✅ Supabase backup created:",
+            "✅ ChurchHQ backup created:",
             {
+
                 members:
-                    backupData.data.members.length,
+                    backupData.data
+                        .members.length,
 
                 planner_tasks:
-                    backupData.data.planner_tasks.length,
+                    backupData.data
+                        .planner_tasks.length,
 
                 songs:
-                    backupData.data.songs.length,
+                    backupData.data
+                        .songs.length,
 
                 service_records:
-                    backupData.data.service_records.length,
+                    backupData.data
+                        .service_records.length,
 
                 attendance_records:
-                    backupData.data.attendance_records.length,
+                    backupData.data
+                        .attendance_records.length,
 
-                activities:
-                    backupData.data.activities.length,
+                annual_activities:
+                    backupData.data
+                        .annual_activities.length,
 
                 announcements:
-                    backupData.data.announcements.length,
+                    backupData.data
+                        .announcements.length,
 
                 file_folders:
-                    backupData.data.file_folders.length
+                    backupData.data
+                        .file_folders.length,
+
+                church_leaders:
+                    backupData.data
+                        .church_leaders.length,
+
+                ministries:
+                    backupData.data
+                        .ministries.length
+
             }
         );
 
+
+        // =====================================
+        // SAVE LAST BACKUP TIME
+        // =====================================
+
         const backupTime =
-    new Date().toISOString();
+            new Date()
+                .toISOString();
 
-localStorage.setItem(
-    "churchhq_last_backup",
-    backupTime
-);
 
-updateLastBackupDisplay();
+        localStorage.setItem(
+            "churchhq_last_backup",
+            backupTime
+        );
+
+
+        updateLastBackupDisplay();
+
 
         alert(
-            "✅ Supabase backup downloaded successfully!"
+            "✅ ChurchHQ backup downloaded successfully!"
         );
 
 
     } catch (error) {
 
         console.error(
-            "❌ Supabase backup error:",
+            "❌ ChurchHQ backup error:",
             error
         );
 
+
         alert(
-            "❌ Failed to create Supabase backup."
+            "❌ Failed to create ChurchHQ backup."
         );
 
     }
 
 }
 
-/* =========================================
-   SETTINGS & BACKUP ENGINE
-   SUPABASE IMPORT / RESTORE
-========================================= */
+// =====================================================
+// SETTINGS & BACKUP ENGINE
+// SUPABASE IMPORT / RESTORE
+// =====================================================
 
 async function importChurchData(event) {
 
@@ -7730,347 +14034,639 @@ async function importChurchData(event) {
         return;
     }
 
-    const file = event.target.files[0];
 
-    if (!file) return;
-
-
-    const reader = new FileReader();
+    const file =
+        event.target.files[0];
 
 
-    reader.onload = async function(e) {
-
-        try {
-
-            const importedJSON =
-                JSON.parse(e.target.result);
+    if (!file) {
+        return;
+    }
 
 
-            // =====================================
-            // VALIDATE BACKUP FORMAT
-            // =====================================
+    const reader =
+        new FileReader();
 
-            if (
-                !importedJSON ||
-                importedJSON.app !== "ChurchHQ" ||
-                !importedJSON.data
-            ) {
 
-                alert(
-                    "❌ Invalid ChurchHQ backup file."
+    reader.onload =
+        async function(e) {
+
+            try {
+
+                const importedJSON =
+                    JSON.parse(
+                        e.target.result
+                    );
+
+
+                // =====================================
+                // BASIC VALIDATION
+                // =====================================
+
+                if (
+                    !importedJSON ||
+                    importedJSON.app !==
+                        "ChurchHQ" ||
+                    !importedJSON.data
+                ) {
+
+                    alert(
+                        "❌ Invalid ChurchHQ backup file."
+                    );
+
+                    event.target.value =
+                        "";
+
+                    return;
+                }
+
+
+                const backup =
+                    importedJSON.data;
+
+
+                // =====================================
+                // VALIDATE REQUIRED ARRAYS
+                // =====================================
+
+                const validBackup =
+
+                    Array.isArray(
+                        backup.members
+                    ) &&
+
+                    Array.isArray(
+                        backup.planner_tasks
+                    ) &&
+
+                    Array.isArray(
+                        backup.songs
+                    ) &&
+
+                    Array.isArray(
+                        backup.service_records
+                    ) &&
+
+                    Array.isArray(
+                        backup.attendance_records
+                    ) &&
+
+                    Array.isArray(
+                        backup.annual_activities
+                    ) &&
+
+                    Array.isArray(
+                        backup.announcements
+                    ) &&
+
+                    Array.isArray(
+                        backup.church_leaders
+                    ) &&
+
+                    Array.isArray(
+                        backup.ministries
+                    );
+
+
+                if (!validBackup) {
+
+                    alert(
+                        "❌ This is not a valid ChurchHQ v5 backup."
+                    );
+
+                    event.target.value =
+                        "";
+
+                    return;
+                }
+
+
+                const confirmed =
+                    confirm(
+
+                        "⚠️ RESTORE CHURCHHQ BACKUP?\n\n" +
+
+                        "Existing records with the same IDs will be updated.\n" +
+
+                        "Records not currently in the database will be added.\n\n" +
+
+                        "This backup includes:\n" +
+
+                        "• Members\n" +
+                        "• Planner Tasks\n" +
+                        "• Songs\n" +
+                        "• Services\n" +
+                        "• Attendance\n" +
+                        "• Annual Activities\n" +
+                        "• Announcements\n" +
+                        "• File Folders\n" +
+                        "• Church Leaders\n" +
+                        "• Ministries\n\n" +
+
+                        "Continue?"
+
+                    );
+
+
+                if (!confirmed) {
+
+                    event.target.value =
+                        "";
+
+                    return;
+                }
+
+
+                console.log(
+                    "📤 Starting ChurchHQ restore..."
                 );
 
-                event.target.value = "";
 
-                return;
-            }
+                // =====================================
+                // RESTORE MINISTRIES FIRST
+                // =====================================
+
+                if (
+                    backup.ministries.length > 0
+                ) {
+
+                    const {
+                        error:
+                            ministriesError
+                    } =
+                        await churchSupabase
+
+                            .from(
+                                "ministries"
+                            )
+
+                            .upsert(
+                                backup.ministries,
+                                {
+                                    onConflict:
+                                        "id"
+                                }
+                            );
 
 
-            const backup =
-                importedJSON.data;
+                    if (ministriesError) {
+
+                        throw new Error(
+                            "Ministries restore failed: " +
+                            ministriesError.message
+                        );
+
+                    }
+
+                }
 
 
-            const validSupabaseBackup =
-                Array.isArray(backup.members) &&
-                Array.isArray(backup.planner_tasks) &&
-                Array.isArray(backup.songs) &&
-                Array.isArray(backup.service_records) &&
-                Array.isArray(backup.attendance_records) &&
-                Array.isArray(backup.activities) &&
-                Array.isArray(backup.announcements);
+                // =====================================
+                // RESTORE MEMBERS
+                // =====================================
+
+                if (
+                    backup.members.length > 0
+                ) {
+
+                    const {
+                        error:
+                            membersError
+                    } =
+                        await churchSupabase
+
+                            .from(
+                                "members"
+                            )
+
+                            .upsert(
+                                backup.members,
+                                {
+                                    onConflict:
+                                        "id"
+                                }
+                            );
 
 
-            if (!validSupabaseBackup) {
+                    if (membersError) {
 
-                alert(
-                    "❌ This is not a valid Supabase ChurchHQ backup."
+                        throw new Error(
+                            "Members restore failed: " +
+                            membersError.message
+                        );
+
+                    }
+
+                }
+
+
+                // =====================================
+                // RESTORE PLANNER TASKS
+                // =====================================
+
+                if (
+                    backup.planner_tasks
+                        .length > 0
+                ) {
+
+                    const {
+                        error:
+                            tasksError
+                    } =
+                        await churchSupabase
+
+                            .from(
+                                "planner_tasks"
+                            )
+
+                            .upsert(
+                                backup.planner_tasks,
+                                {
+                                    onConflict:
+                                        "id"
+                                }
+                            );
+
+
+                    if (tasksError) {
+
+                        throw new Error(
+                            "Planner tasks restore failed: " +
+                            tasksError.message
+                        );
+
+                    }
+
+                }
+
+
+                // =====================================
+                // RESTORE SONGS
+                // =====================================
+
+                if (
+                    backup.songs.length > 0
+                ) {
+
+                    const {
+                        error:
+                            songsError
+                    } =
+                        await churchSupabase
+
+                            .from(
+                                "songs"
+                            )
+
+                            .upsert(
+                                backup.songs,
+                                {
+                                    onConflict:
+                                        "id"
+                                }
+                            );
+
+
+                    if (songsError) {
+
+                        throw new Error(
+                            "Songs restore failed: " +
+                            songsError.message
+                        );
+
+                    }
+
+                }
+
+
+                // =====================================
+                // RESTORE SERVICES
+                // =====================================
+
+                if (
+                    backup.service_records
+                        .length > 0
+                ) {
+
+                    const {
+                        error:
+                            servicesError
+                    } =
+                        await churchSupabase
+
+                            .from(
+                                "service_records"
+                            )
+
+                            .upsert(
+                                backup.service_records,
+                                {
+                                    onConflict:
+                                        "id"
+                                }
+                            );
+
+
+                    if (servicesError) {
+
+                        throw new Error(
+                            "Service records restore failed: " +
+                            servicesError.message
+                        );
+
+                    }
+
+                }
+
+
+                // =====================================
+                // RESTORE ATTENDANCE
+                // =====================================
+
+                if (
+                    backup.attendance_records
+                        .length > 0
+                ) {
+
+                    const {
+                        error:
+                            attendanceError
+                    } =
+                        await churchSupabase
+
+                            .from(
+                                "attendance_records"
+                            )
+
+                            .upsert(
+                                backup.attendance_records,
+                                {
+                                    onConflict:
+                                        "id"
+                                }
+                            );
+
+
+                    if (attendanceError) {
+
+                        throw new Error(
+                            "Attendance restore failed: " +
+                            attendanceError.message
+                        );
+
+                    }
+
+                }
+
+
+                // =====================================
+                // RESTORE ANNUAL ACTIVITIES
+                // =====================================
+
+                if (
+                    backup.annual_activities
+                        .length > 0
+                ) {
+
+                    const {
+                        error:
+                            annualActivitiesError
+                    } =
+                        await churchSupabase
+
+                            .from(
+                                "annual_activities"
+                            )
+
+                            .upsert(
+                                backup.annual_activities,
+                                {
+                                    onConflict:
+                                        "id"
+                                }
+                            );
+
+
+                    if (
+                        annualActivitiesError
+                    ) {
+
+                        throw new Error(
+                            "Annual Activities restore failed: " +
+                            annualActivitiesError.message
+                        );
+
+                    }
+
+                }
+
+
+                // =====================================
+                // RESTORE ANNOUNCEMENTS
+                // =====================================
+
+                if (
+                    backup.announcements
+                        .length > 0
+                ) {
+
+                    const {
+                        error:
+                            announcementsError
+                    } =
+                        await churchSupabase
+
+                            .from(
+                                "announcements"
+                            )
+
+                            .upsert(
+                                backup.announcements,
+                                {
+                                    onConflict:
+                                        "id"
+                                }
+                            );
+
+
+                    if (
+                        announcementsError
+                    ) {
+
+                        throw new Error(
+                            "Announcements restore failed: " +
+                            announcementsError.message
+                        );
+
+                    }
+
+                }
+
+
+                // =====================================
+                // RESTORE FILE FOLDERS
+                // =====================================
+
+                if (
+                    Array.isArray(
+                        backup.file_folders
+                    ) &&
+                    backup.file_folders
+                        .length > 0
+                ) {
+
+                    const {
+                        error:
+                            fileFoldersError
+                    } =
+                        await churchSupabase
+
+                            .from(
+                                "file_folders"
+                            )
+
+                            .upsert(
+                                backup.file_folders,
+                                {
+                                    onConflict:
+                                        "id"
+                                }
+                            );
+
+
+                    if (
+                        fileFoldersError
+                    ) {
+
+                        throw new Error(
+                            "File folders restore failed: " +
+                            fileFoldersError.message
+                        );
+
+                    }
+
+                }
+
+
+                // =====================================
+                // RESTORE CHURCH LEADERS LAST
+                // =====================================
+
+                if (
+                    backup.church_leaders
+                        .length > 0
+                ) {
+
+                    const {
+                        error:
+                            leadersError
+                    } =
+                        await churchSupabase
+
+                            .from(
+                                "church_leaders"
+                            )
+
+                            .upsert(
+                                backup.church_leaders,
+                                {
+                                    onConflict:
+                                        "id"
+                                }
+                            );
+
+
+                    if (leadersError) {
+
+                        throw new Error(
+                            "Church Leaders restore failed: " +
+                            leadersError.message
+                        );
+
+                    }
+
+                }
+
+
+                console.log(
+                    "✅ ChurchHQ Supabase restore completed."
                 );
 
-                event.target.value = "";
 
-                return;
-            }
-
-
-            const confirmed = confirm(
-                "⚠️ Restore this backup to the ChurchHQ Supabase database?\n\n" +
-                "Existing records with the same IDs will be updated.\n" +
-                "New records will be added.\n\n" +
-                "Continue?"
-            );
+                alert(
+                    "✅ ChurchHQ backup restored successfully!"
+                );
 
 
-            if (!confirmed) {
-
-                event.target.value = "";
-
-                return;
-            }
+                event.target.value =
+                    "";
 
 
-            console.log(
-                "📤 Starting Supabase restore..."
-            );
+                // =====================================
+                // RELOAD DATA
+                // =====================================
+
+                await initializeChurchHQ();
 
 
-            // =====================================
-            // RESTORE MEMBERS
-            // =====================================
+                if (
+                    typeof loadMinistriesFromSupabase ===
+                    "function"
+                ) {
 
-            if (backup.members.length > 0) {
-
-                const {
-                    error: membersError
-                } = await churchSupabase
-                    .from("members")
-                    .upsert(
-                        backup.members,
-                        {
-                            onConflict: "id"
-                        }
-                    );
-
-                if (membersError) {
-                    throw new Error(
-                        "Members restore failed: " +
-                        membersError.message
-                    );
-                }
-
-            }
-
-
-            // =====================================
-            // RESTORE PLANNER TASKS
-            // =====================================
-
-            if (backup.planner_tasks.length > 0) {
-
-                const {
-                    error: tasksError
-                } = await churchSupabase
-                    .from("planner_tasks")
-                    .upsert(
-                        backup.planner_tasks,
-                        {
-                            onConflict: "id"
-                        }
-                    );
-
-                if (tasksError) {
-                    throw new Error(
-                        "Planner tasks restore failed: " +
-                        tasksError.message
-                    );
-                }
-
-            }
-
-
-            // =====================================
-            // RESTORE SONGS
-            // =====================================
-
-            if (backup.songs.length > 0) {
-
-                const {
-                    error: songsError
-                } = await churchSupabase
-                    .from("songs")
-                    .upsert(
-                        backup.songs,
-                        {
-                            onConflict: "id"
-                        }
-                    );
-
-                if (songsError) {
-                    throw new Error(
-                        "Songs restore failed: " +
-                        songsError.message
-                    );
-                }
-
-            }
-
-
-            // =====================================
-            // RESTORE SERVICE RECORDS
-            // =====================================
-
-            if (backup.service_records.length > 0) {
-
-                const {
-                    error: servicesError
-                } = await churchSupabase
-                    .from("service_records")
-                    .upsert(
-                        backup.service_records,
-                        {
-                            onConflict: "id"
-                        }
-                    );
-
-                if (servicesError) {
-                    throw new Error(
-                        "Service records restore failed: " +
-                        servicesError.message
-                    );
-                }
-
-            }
-
-
-            // =====================================
-            // RESTORE ATTENDANCE
-            // =====================================
-
-            if (backup.attendance_records.length > 0) {
-
-                const {
-                    error: attendanceError
-                } = await churchSupabase
-                    .from("attendance_records")
-                    .upsert(
-                        backup.attendance_records,
-                        {
-                            onConflict: "id"
-                        }
-                    );
-
-                if (attendanceError) {
-                    throw new Error(
-                        "Attendance restore failed: " +
-                        attendanceError.message
-                    );
-                }
-
-            }
-
-
-            // =====================================
-            // RESTORE ACTIVITIES
-            // =====================================
-
-            if (backup.activities.length > 0) {
-
-                const {
-                    error: activitiesError
-                } = await churchSupabase
-                    .from("activities")
-                    .upsert(
-                        backup.activities,
-                        {
-                            onConflict: "id"
-                        }
-                    );
-
-                if (activitiesError) {
-                    throw new Error(
-                        "Activities restore failed: " +
-                        activitiesError.message
-                    );
-                }
-
-            }
-
-
-            // =====================================
-            // RESTORE ANNOUNCEMENTS
-            // =====================================
-
-            if (backup.announcements.length > 0) {
-
-                const {
-                    error: announcementsError
-                } = await churchSupabase
-                    .from("announcements")
-                    .upsert(
-                        backup.announcements,
-                        {
-                            onConflict: "id"
-                        }
-                    );
-
-                if (announcementsError) {
-                    throw new Error(
-                        "Announcements restore failed: " +
-                        announcementsError.message
-                    );
-                }
-
-            }
-            // =====================================
-            // RESTORE FILE FOLDERS
-            // =====================================
-
-            if (
-                Array.isArray(backup.file_folders) &&
-                backup.file_folders.length > 0
-            ) {
-
-                const {
-                    error: fileFoldersError
-                } = await churchSupabase
-                    .from("file_folders")
-                    .upsert(
-                        backup.file_folders,
-                        {
-                            onConflict: "id"
-                        }
-                    );
-
-
-                if (fileFoldersError) {
-
-                    throw new Error(
-                        "File folders restore failed: " +
-                        fileFoldersError.message
-                    );
+                    await loadMinistriesFromSupabase();
 
                 }
 
+
+                if (
+                    typeof loadLeadersFromSupabase ===
+                    "function"
+                ) {
+
+                    await loadLeadersFromSupabase();
+
+                }
+
+
+                if (
+                    typeof loadAnnualActivitiesFromSupabase ===
+                    "function"
+                ) {
+
+                    await loadAnnualActivitiesFromSupabase();
+
+                }
+
+
+                refreshDashboardStatus();
+
+
+            } catch (error) {
+
+                console.error(
+                    "❌ ChurchHQ restore error:",
+                    error
+                );
+
+
+                alert(
+                    "❌ Restore failed:\n\n" +
+                    error.message
+                );
+
+
+                event.target.value =
+                    "";
+
             }
 
-            console.log(
-                "✅ Supabase restore completed successfully."
-            );
+        };
 
 
-            alert(
-                "✅ ChurchHQ backup restored to Supabase successfully!"
-            );
-
-
-            event.target.value = "";
-
-
-            // Reload latest data from Supabase
-            await initializeChurchHQ();
-
-
-        } catch (error) {
-
-            console.error(
-                "❌ Supabase restore error:",
-                error
-            );
-
-
-            alert(
-                "❌ Restore failed:\n\n" +
-                error.message
-            );
-
-
-            event.target.value = "";
-
-        }
-
-    };
-
-
-    reader.readAsText(file);
+    reader.readAsText(
+        file
+    );
 
 }
 
@@ -8111,10 +14707,10 @@ function updateLastBackupDisplay() {
 
 }
 
-/* =========================================
-   CLEAR ALL CHURCH DATA
-   SUPABASE DATABASE RESET
-========================================= */
+// =====================================================
+// CLEAR ALL CHURCH DATA
+// SUPABASE DATABASE RESET
+// =====================================================
 
 async function clearAllChurchData() {
 
@@ -8122,43 +14718,65 @@ async function clearAllChurchData() {
         return;
     }
 
-    const firstConfirm = confirm(
-        "🚨 WARNING!\n\n" +
-        "This will permanently delete ALL ChurchHQ records from the Supabase database.\n\n" +
-        "This includes:\n" +
-        "• Members\n" +
-        "• Planner Tasks\n" +
-        "• Songs\n" +
-        "• Sunday & Midweek Services\n" +
-        "• Attendance\n" +
-        "• Activities\n" +
-        "• Announcements\n" +
-        "• File Folders\n\n" +
-        "Your login account will NOT be deleted.\n\n" +
-        "Continue?"
-    );
+
+    // =====================================
+    // FIRST CONFIRMATION
+    // =====================================
+
+    const firstConfirm =
+        confirm(
+
+            "🚨 WARNING!\n\n" +
+
+            "This will permanently delete ALL ChurchHQ records from the Supabase database.\n\n" +
+
+            "This includes:\n" +
+
+            "• Members\n" +
+            "• Planner Tasks\n" +
+            "• Songs\n" +
+            "• Sunday & Midweek Services\n" +
+            "• Attendance\n" +
+            "• Annual Activities\n" +
+            "• Announcements\n" +
+            "• File Folders\n" +
+            "• Church Leaders\n" +
+            "• Ministries\n\n" +
+
+            "Your login account will NOT be deleted.\n\n" +
+
+            "Make sure you exported a backup first.\n\n" +
+
+            "Continue?"
+
+        );
+
 
     if (!firstConfirm) {
         return;
     }
 
 
-    const secondConfirm = confirm(
-        "⚠️ FINAL WARNING\n\n" +
-        "This action cannot be undone unless you have a backup.\n\n" +
-        "Are you absolutely sure?"
-    );
+    // =====================================
+    // FINAL CONFIRMATION
+    // =====================================
 
-    if (!secondConfirm) {
-        return;
-    }
+    const confirmationText =
+        prompt(
+
+            "⚠️ FINAL CONFIRMATION\n\n" +
+
+            "Type exactly:\n\n" +
+
+            "DELETE ALL DATA"
+
+        );
 
 
-    const confirmationText = prompt(
-        'Type DELETE ALL DATA to confirm:'
-    );
-
-    if (confirmationText !== "DELETE ALL DATA") {
+    if (
+        confirmationText !==
+        "DELETE ALL DATA"
+    ) {
 
         alert(
             "❌ Database reset cancelled."
@@ -8175,21 +14793,46 @@ async function clearAllChurchData() {
         );
 
 
+        // =====================================
+        // DELETE ORDER
+        //
+        // Child/dependent records first.
+        // Members before ministry master list.
+        // =====================================
+
         const tables = [
 
+            "church_leaders",
+
             "attendance_records",
+
             "service_records",
+
             "planner_tasks",
+
             "songs",
-            "activities",
+
+            "annual_activities",
+
             "announcements",
+
             "file_folders",
-            "members"
+
+            "members",
+
+            "ministries"
 
         ];
 
 
-        for (const tableName of tables) {
+        // =====================================
+        // DELETE EACH TABLE
+        // =====================================
+
+        for (
+            const tableName
+            of tables
+        ) {
 
             console.log(
                 `Deleting ${tableName}...`
@@ -8198,9 +14841,18 @@ async function clearAllChurchData() {
 
             const { error } =
                 await churchSupabase
-                    .from(tableName)
+
+                    .from(
+                        tableName
+                    )
+
                     .delete()
-                    .not("id", "is", null);
+
+                    .not(
+                        "id",
+                        "is",
+                        null
+                    );
 
 
             if (error) {
@@ -8210,49 +14862,140 @@ async function clearAllChurchData() {
                     error
                 );
 
+
                 throw new Error(
                     `Failed to clear ${tableName}: ${error.message}`
                 );
+
             }
 
 
             console.log(
                 `✅ Cleared ${tableName}`
             );
+
         }
 
 
-        // Clear only ChurchHQ cache
+        // =====================================
+        // CLEAR LOCAL CHURCHHQ CACHE
+        // =====================================
+
         const localKeys = [
 
             "churchhq_tasks",
+
             "churchhq_songs",
+
             "churchhq_members",
+
             "churchhq_attendance",
+
             "churchhq_activities",
+
             "churchhq_announcements",
+
             "churchhq_sunday_services",
+
             "churchhq_midweek_services",
-            "churchhq_sunday_lineup"
+
+            "churchhq_sunday_lineup",
+
+            "churchhq_leaders",
+
+            "churchhq_ministries"
 
         ];
 
 
-        localKeys.forEach(key => {
-            localStorage.removeItem(key);
-        });
+        localKeys.forEach(
+            key => {
+
+                localStorage.removeItem(
+                    key
+                );
+
+            }
+        );
+
+
+        // =====================================
+        // RESET IN-MEMORY ARRAYS
+        // =====================================
+
+        if (
+            typeof members !==
+            "undefined"
+        ) {
+            members = [];
+        }
+
+
+        if (
+            typeof churchLeaders !==
+            "undefined"
+        ) {
+            churchLeaders = [];
+        }
+
+
+        if (
+            typeof annualActivities !==
+            "undefined"
+        ) {
+            annualActivities = [];
+        }
+
+
+        if (
+            typeof ministries !==
+            "undefined"
+        ) {
+            ministries = [];
+        }
+
+
+        if (
+            typeof sundayServices !==
+            "undefined"
+        ) {
+            sundayServices = [];
+        }
+
+
+        if (
+            typeof midweekServices !==
+            "undefined"
+        ) {
+            midweekServices = [];
+        }
+
+
+        if (
+            typeof attendanceRecords !==
+            "undefined"
+        ) {
+            attendanceRecords = [];
+        }
 
 
         console.log(
-            "✅ ChurchHQ local cache cleared."
+            "✅ ChurchHQ database and local cache cleared."
         );
 
 
         alert(
+
             "✅ ChurchHQ database has been completely cleared.\n\n" +
-            "Your login account was not deleted."
+
+            "Your login account was NOT deleted."
+
         );
 
+
+        // =====================================
+        // RELOAD APPLICATION
+        // =====================================
 
         location.reload();
 
@@ -8266,11 +15009,17 @@ async function clearAllChurchData() {
 
 
         alert(
+
             "❌ Database reset failed.\n\n" +
+
             error.message +
+
             "\n\nSome tables may not have been cleared."
+
         );
+
     }
+
 }
 
 /* =========================================
@@ -8871,6 +15620,24 @@ if (!saved) {
     return;
 }
 
+// =====================================
+// AUDIT - ADD ACTIVITY
+// =====================================
+
+await writeAuditLog(
+    "ADD",
+    "Activities",
+    `Added activity: ${newActivity.title}`,
+    newActivity.id,
+    {
+        title:
+            newActivity.title,
+
+        date:
+            newActivity.date
+    }
+);
+
     activities.sort(
         (a, b) => new Date(a.date) - new Date(b.date)
     );
@@ -8926,36 +15693,126 @@ function editActivityItem(id) {
     document.getElementById("editActTitleInput").value = act.title;
     document.getElementById("editActDateInput").value = act.date;
 
-    document.getElementById("saveEditBtn").onclick = function() {
-        let newTitle = document.getElementById("editActTitleInput").value.trim();
-        let newDate = document.getElementById("editActDateInput").value.trim();
+    document.getElementById(
+    "saveEditBtn"
+).onclick =
+    async function() {
 
-        if (!newTitle || !newDate) {
-            alert("Pakipunan ang pamagat at petsa.");
+        let newTitle =
+            document
+                .getElementById(
+                    "editActTitleInput"
+                )
+                .value
+                .trim();
+
+
+        let newDate =
+            document
+                .getElementById(
+                    "editActDateInput"
+                )
+                .value
+                .trim();
+
+
+        if (
+            !newTitle ||
+            !newDate
+        ) {
+
+            alert(
+                "Pakipunan ang pamagat at petsa."
+            );
+
             return;
         }
 
-        act.title = newTitle;
-        act.date = newDate;
 
-        // Supabase UPDATE
-        updateActivityToSupabase(act);
+        act.title =
+            newTitle;
 
-        activities.sort((a, b) => new Date(a.date) - new Date(b.date));
-        localStorage.setItem("churchhq_activities", JSON.stringify(activities));
-        
-        customModal.style.display = "none";
+        act.date =
+            newDate;
+
+
+        // =====================================
+        // SUPABASE UPDATE
+        // =====================================
+
+        const updated =
+            await updateActivityToSupabase(
+                act
+            );
+
+
+        if (!updated) {
+
+            alert(
+                "❌ Failed to update activity in Supabase."
+            );
+
+            return;
+        }
+
+
+        // =====================================
+        // AUDIT - EDIT ACTIVITY
+        // =====================================
+
+        await writeAuditLog(
+            "EDIT",
+            "Activities",
+            `Updated activity: ${act.title}`,
+            act.id,
+            {
+                title:
+                    act.title,
+
+                date:
+                    act.date
+            }
+        );
+
+
+        activities.sort(
+            (a, b) =>
+                new Date(a.date) -
+                new Date(b.date)
+        );
+
+
+        localStorage.setItem(
+            "churchhq_activities",
+            JSON.stringify(
+                activities
+            )
+        );
+
+
+        customModal.style.display =
+            "none";
+
+
         renderManageModalContent();
+
         renderDashboardLists();
+
         refreshDashboardStatus();
+
     };
 
-    document.getElementById("cancelEditBtn").onclick = function() {
-        customModal.style.display = "none";
-    };
+    document.getElementById(
+        "cancelEditBtn"
+    ).onclick =
+        function() {
+
+            customModal.style.display =
+                "none";
+
+        };
+
 }
-
-
 
 async function deleteActivityItem(id) {
 
@@ -8963,13 +15820,40 @@ async function deleteActivityItem(id) {
         return;
     }
 
+    let activityToDelete = null;
+
+try {
+
+    const savedActivities =
+        JSON.parse(
+            localStorage.getItem(
+                "churchhq_activities"
+            )
+        ) || [];
+
+
+    activityToDelete =
+        savedActivities.find(
+            activity =>
+                String(activity.id) ===
+                String(id)
+        ) || null;
+
+} catch (e) {
+
+    activityToDelete = null;
+
+}
+
     if (
         !confirm(
             "Are you sure you want to delete this?"
         )
     ) {
+
         return;
     }
+
 
 
     const deletedFromSupabase =
@@ -8985,6 +15869,26 @@ async function deleteActivityItem(id) {
         return;
     }
 
+    // =====================================
+// AUDIT - DELETE ACTIVITY
+// =====================================
+
+await writeAuditLog(
+    "DELETE",
+    "Activities",
+    `Deleted activity: ${
+        activityToDelete?.title ||
+        "Unknown Activity"
+    }`,
+    id,
+    {
+        title:
+            activityToDelete?.title || "",
+
+        date:
+            activityToDelete?.date || ""
+    }
+);
 
     let activities = [];
 
@@ -9026,7 +15930,7 @@ async function deleteActivityItem(id) {
 
 }
 
-function addNewAnnouncementItem() {
+async function addNewAnnouncementItem() {
     if (!requireAdmin()) {
     return;
 }
@@ -9049,7 +15953,36 @@ function addNewAnnouncementItem() {
 announcements.push(newAnnouncement);
 
 // Supabase INSERT
-saveAnnouncementToSupabase(newAnnouncement);
+const saved =
+    await saveAnnouncementToSupabase(
+        newAnnouncement
+    );
+
+
+if (!saved) {
+
+    alert(
+        "❌ Failed to save announcement."
+    );
+
+    return;
+}
+
+
+// =====================================
+// AUDIT - ADD ANNOUNCEMENT
+// =====================================
+
+await writeAuditLog(
+    "ADD",
+    "Announcements",
+    `Added announcement: ${newAnnouncement.text}`,
+    newAnnouncement.id,
+    {
+        text:
+            newAnnouncement.text
+    }
+);
     localStorage.setItem("churchhq_announcements", JSON.stringify(announcements));
     renderManageModalContent();
     renderDashboardLists();
@@ -9156,6 +16089,21 @@ function editAnnouncementItem(id) {
                 return;
             }
 
+            // =====================================
+// AUDIT - EDIT ANNOUNCEMENT
+// =====================================
+
+await writeAuditLog(
+    "EDIT",
+    "Announcements",
+    `Updated announcement: ${ann.text}`,
+    ann.id,
+    {
+        text:
+            ann.text
+    }
+);
+
             // LOCAL STORAGE
             localStorage.setItem(
                 "churchhq_announcements",
@@ -9182,6 +16130,34 @@ async function deleteAnnouncementItem(id) {
 }
     if (!confirm("Are you sure you want to delete this")) return;
 
+    let announcementToDelete = null;
+
+try {
+
+    const savedAnnouncements =
+        JSON.parse(
+            localStorage.getItem(
+                "churchhq_announcements"
+            )
+        ) || [];
+
+
+    announcementToDelete =
+        savedAnnouncements.find(
+            announcement =>
+                String(
+                    announcement.id
+                ) ===
+                String(id)
+        ) || null;
+
+} catch (e) {
+
+    announcementToDelete =
+        null;
+
+}
+
     // SUPABASE DELETE
     const deleted =
         await deleteAnnouncementFromSupabase(id);
@@ -9192,6 +16168,24 @@ async function deleteAnnouncementItem(id) {
         );
         return;
     }
+
+    // =====================================
+// AUDIT - DELETE ANNOUNCEMENT
+// =====================================
+
+await writeAuditLog(
+    "DELETE",
+    "Announcements",
+    `Deleted announcement: ${
+        announcementToDelete?.text ||
+        "Unknown Announcement"
+    }`,
+    id,
+    {
+        text:
+            announcementToDelete?.text || ""
+    }
+);
 
     let announcements = [];
 
@@ -9216,84 +16210,256 @@ async function deleteAnnouncementItem(id) {
     refreshDashboardStatus();
 }
 
+// =========================================
+// DASHBOARD ACTIVITIES + ANNOUNCEMENTS
+// =========================================
+
 function renderDashboardLists() {
-    const actList = document.getElementById("dashboardActivities");
-    const annList = document.getElementById("dashboardAnnouncements");
 
-    let activities = [];
-    try {
-        activities = JSON.parse(localStorage.getItem("churchhq_activities")) || [
-            { id: 1, title: "Sunday Worship", date: "July 27" },
-            { id: 2, title: "Prayer Meeting", date: "July 29" }
-        ];
-    } catch(e) {
-        activities = [];
-    }
+    const actList =
+        document.getElementById(
+            "dashboardActivities"
+        );
 
-    let announcements = [];
-    try {
-        announcements = JSON.parse(localStorage.getItem("churchhq_announcements")) || [
-            { id: 1, text: "Choir Practice - Friday" },
-            { id: 2, text: "Communion Next Sunday" }
-        ];
-    } catch(e) {
-        announcements = [];
-    }
+    const annList =
+        document.getElementById(
+            "dashboardAnnouncements"
+        );
 
-    activities.sort((a, b) => {
-        let dateA = new Date(a.date);
-        let dateB = new Date(b.date);
-        return (isNaN(dateA) || isNaN(dateB)) ? 0 : dateA - dateB;
-    });
+
+    // =====================================
+    // UPCOMING ANNUAL ACTIVITIES
+    // =====================================
 
     if (actList) {
-        if (activities.length === 0) {
-            actList.innerHTML = `<tr><td colspan="2" style="color:#9ca3af; padding:10px; text-align:center;">No upcoming activities.</td></tr>`;
-        } else {
-            const groupedByMonth = {};
-            activities.forEach(act => {
-                const monthKey = act.date ? act.date.split(' ')[0] : 'Iba pa';
-                if (!groupedByMonth[monthKey]) {
-                    groupedByMonth[monthKey] = [];
+
+        const today =
+            new Date();
+
+        today.setHours(
+            0, 0, 0, 0
+        );
+
+
+        const upcomingActivities =
+            (Array.isArray(annualActivities)
+                ? [...annualActivities]
+                : []
+            )
+
+            .filter(activity => {
+
+                if (!activity.date) {
+                    return false;
                 }
-                groupedByMonth[monthKey].push(act);
-            });
 
-            let htmlContent = '';
-            for (const [month, acts] of Object.entries(groupedByMonth)) {
-                htmlContent += `
-                    <div style="margin-bottom: 15px; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden;">
-                        <div style="background: #f1f5f9; padding: 6px 10px; font-weight: bold; font-size: 13px; color: #1e293b;">
-                            📅 ${month}
-                        </div>
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <tbody>
-                `;
+                const activityDate =
+                    new Date(
+                        activity.date +
+                        "T00:00:00"
+                    );
 
-                acts.forEach(a => {
-                    htmlContent += `
-                        <tr style="border-top: 1px solid #f1f5f9;">
-                            <td style="padding: 8px 10px; font-size: 13px;">${a.title}</td>
-                            <td style="padding: 8px 10px; font-size: 13px; text-align: right; color: #64748b;">${a.date}</td>
-                        </tr>
-                    `;
-                });
+                activityDate.setHours(
+                    0, 0, 0, 0
+                );
 
-                htmlContent += `
-                            </tbody>
-                        </table>
-                    </div>
-                `;
-            }
-            actList.innerHTML = htmlContent;
+                return (
+                    activityDate >= today
+                );
+
+            })
+
+            .sort(
+                (a, b) =>
+                    String(a.date)
+                        .localeCompare(
+                            String(b.date)
+                        )
+            )
+
+            // 3 NEAREST FUTURE ACTIVITIES
+            .slice(0, 3);
+
+
+        if (
+            upcomingActivities.length === 0
+        ) {
+
+            actList.innerHTML = `
+
+                <li
+                    style="
+                        color:#94a3b8;
+                        padding:10px 0;
+                    "
+                >
+                    No upcoming activities.
+                </li>
+
+            `;
+
+        } else {
+
+            actList.innerHTML =
+                upcomingActivities
+                    .map(activity => {
+
+                        const activityDate =
+                            new Date(
+                                activity.date +
+                                "T00:00:00"
+                            );
+
+
+                        const formattedDate =
+                            activityDate
+                                .toLocaleDateString(
+                                    "en-US",
+                                    {
+                                        month: "short",
+                                        day: "numeric",
+                                        year: "numeric"
+                                    }
+                                );
+
+const todayDate =
+    new Date();
+
+todayDate.setHours(
+    0, 0, 0, 0
+);
+
+const activityOnlyDate =
+    new Date(
+        activity.date +
+        "T00:00:00"
+    );
+
+activityOnlyDate.setHours(
+    0, 0, 0, 0
+);
+
+const daysLeft =
+    Math.round(
+        (
+            activityOnlyDate -
+            todayDate
+        ) /
+        (
+            1000 *
+            60 *
+            60 *
+            24
+        )
+    );
+
+
+let daysText = "";
+
+if (daysLeft === 0) {
+
+    daysText =
+        "Today";
+
+} else if (daysLeft === 1) {
+
+    daysText =
+        "Tomorrow";
+
+} else {
+
+    daysText =
+        `${daysLeft} days left`;
+
+}
+
+
+return `
+
+    <li class="dashboard-activity-item">
+
+        <div class="dashboard-activity-main">
+
+            <strong class="dashboard-activity-title">
+                ${
+                    activity.title ||
+                    "Untitled Activity"
+                }
+            </strong>
+
+            <span class="dashboard-activity-date">
+                ${formattedDate}
+            </span>
+
+        </div>
+
+        <div class="dashboard-activity-days">
+            ${daysText}
+        </div>
+
+    </li>
+
+`;
+                    })
+                    .join("");
+
         }
+
     }
+
+
+    // =====================================
+    // ANNOUNCEMENTS
+    // =====================================
 
     if (annList) {
-        annList.innerHTML = announcements.length === 0 
-            ? `<li>No announcements.</li>`
-            : announcements.map(ann => `<li>${ann.text}</li>`).join("");
+
+        let announcements = [];
+
+
+        try {
+
+            announcements =
+                JSON.parse(
+                    localStorage.getItem(
+                        "churchhq_announcements"
+                    )
+                ) || [];
+
+        } catch (error) {
+
+            announcements = [];
+
+        }
+
+
+        if (
+            announcements.length === 0
+        ) {
+
+            annList.innerHTML = `
+                <li>
+                    No announcements.
+                </li>
+            `;
+
+        } else {
+
+            annList.innerHTML =
+                announcements
+                    .map(
+                        announcement => `
+                            <li>
+                                ${announcement.text || ""}
+                            </li>
+                        `
+                    )
+                    .join("");
+
+        }
+
     }
+
 }
 
 function generateCOJTGKStreamDetailsFromSaved() {
@@ -9425,80 +16591,257 @@ function generateMidweekStreamContent() {
 }
 
 function generateCOJTGKMidweekStreamDetailsFromSaved() {
-    const midSelect = document.getElementById('midGenDateSelect');
+
+    const midSelect =
+        document.getElementById(
+            "midGenDateSelect"
+        );
+
     let serviceData = null;
 
-    if (midSelect && midSelect.value !== "") {
-        const index = Number(midSelect.value);
-        serviceData = midweekServices[index];
+
+    // =====================================
+    // GET SAVED MIDWEEK RECORD
+    // =====================================
+
+    if (
+        midSelect &&
+        midSelect.value !== ""
+    ) {
+
+        const index =
+            Number(
+                midSelect.value
+            );
+
+        serviceData =
+            midweekServices[index];
+
     }
+
+
+    // =====================================
+    // FALLBACK TO CURRENT FORM
+    // =====================================
 
     const prefix = "mid_";
-    const getVal = (fieldId) => {
-        const el = document.getElementById(prefix + fieldId);
-        return el ? el.value.trim() : "";
-    };
 
-    const dateVal = serviceData ? serviceData.date : getVal("serviceDate");
-    let formattedDate = dateVal;
-    
+
+    const getVal =
+        (fieldId) => {
+
+            const el =
+                document.getElementById(
+                    prefix + fieldId
+                );
+
+            return el
+                ? el.value.trim()
+                : "";
+
+        };
+
+
+    // =====================================
+    // VALUES
+    // =====================================
+
+    const dateVal =
+        serviceData
+            ? serviceData.date
+            : getVal(
+                "serviceDate"
+            );
+
+
+    const pptOperator =
+        serviceData
+            ? (
+                serviceData.pptOperator ||
+                ""
+            )
+            : getVal(
+                "pptOperator"
+            );
+
+
+    const soundEngineer =
+        serviceData
+            ? (
+                serviceData.soundEngineer ||
+                ""
+            )
+            : getVal(
+                "soundEngineer"
+            );
+
+
+    const liveStream =
+        serviceData
+            ? (
+                serviceData.liveStream ||
+                ""
+            )
+            : getVal(
+                "liveStream"
+            );
+
+
+    const speaker =
+        serviceData
+            ? (
+                serviceData.preacher ||
+                "To be announced"
+            )
+            : (
+                getVal("preacher") ||
+                "To be announced"
+            );
+
+
+    const messageTitle =
+        serviceData
+            ? (
+                serviceData.messageTitle ||
+                "Midweek Message"
+            )
+            : (
+                getVal("messageTitle") ||
+                "Midweek Message"
+            );
+
+
+    // =====================================
+    // FORMAT DATE
+    // =====================================
+
+    let formattedDate = "";
+
+
     if (dateVal) {
-        const parsedDate = new Date(dateVal);
-        if (!isNaN(parsedDate)) {
-            formattedDate = parsedDate.toLocaleDateString('en-US', { 
-                month: 'long', 
-                day: 'numeric', 
-                year: 'numeric' 
-            });
+
+        const parsedDate =
+            new Date(
+                dateVal + "T00:00:00"
+            );
+
+
+        if (
+            !isNaN(
+                parsedDate.getTime()
+            )
+        ) {
+
+            formattedDate =
+                parsedDate
+                    .toLocaleDateString(
+                        "en-US",
+                        {
+                            month:
+                                "long",
+
+                            day:
+                                "numeric",
+
+                            year:
+                                "numeric"
+                        }
+                    );
+
         }
-    } else {
-        formattedDate = new Date().toLocaleDateString('en-US', { 
-            month: 'long', 
-            day: 'numeric', 
-            year: 'numeric' 
-        });
+
     }
 
-    const worshipLeader = serviceData ? (serviceData.worshipLeader || "Eslee Abregana") : (getVal("worshipLeader") || "Eslee Abregana");
-    const speaker = serviceData ? (serviceData.preacher || "Ptr. Apolinario 'Jun' Bañez") : (getVal("preacher") || "Ptr. Apolinario 'Jun' Bañez");
-    const messageTitle = serviceData ? (serviceData.messageTitle || "Midweek Message") : (getVal("messageTitle") || "Midweek Message");
-    const rawSongs = serviceData ? serviceData.songsLineup : getVal("songsLineup");
 
-    const streamTitle = `COJTGK Midweek Service - ${formattedDate}`;
+    if (!formattedDate) {
 
-    let songsListText = "• Pagsamba at Pagpupuri";
-    if (rawSongs) {
-        const songLines = rawSongs.split("\n").filter(s => s.trim() !== "");
-        songsListText = songLines.map(s => s.startsWith("•") ? s : `• ${s}`).join("\n");
+        formattedDate =
+            new Date()
+                .toLocaleDateString(
+                    "en-US",
+                    {
+                        month:
+                            "long",
+
+                        day:
+                            "numeric",
+
+                        year:
+                            "numeric"
+                    }
+                );
+
     }
 
-    const streamDesc = 
+
+    // =====================================
+    // STREAM TITLE
+    // =====================================
+
+    const streamTitle =
+        `COJTGK Midweek Service - ${formattedDate}`;
+
+
+
+    // =====================================
+    // STREAM DESCRIPTION
+    // =====================================
+
+    const streamDesc =
 `COJTGK Midweek Service - ${formattedDate}
 ——————————
-𝗪𝗲𝗹𝗰𝗼𝗺𝗲 𝘁𝗼 𝗼𝘂𝗿 𝗠𝗶𝗱𝘄𝗲𝗲𝗸 𝗦𝗲𝗿𝘃𝗶𝗰𝗲! 
-Join us as we gather together to study God's Word, worship Him, and lift up one another in prayer.
 
-𝐏𝐑𝐀𝐈𝐒𝐄 & 𝐖𝐎𝐑𝐒𝐇𝐈𝐏 𝑙𝑒𝑑 𝑏𝑦 ${worshipLeader}
-${songsListText}
+𝗪𝗲𝗹𝗰𝗼𝗺𝗲 𝘁𝗼 𝗼𝘂𝗿 𝗠𝗶𝗱𝘄𝗲𝗲𝗸 𝗦𝗲𝗿𝘃𝗶𝗰𝗲!
+
+Join us as we gather together to study God's Word, pray, and encourage one another in faith.
 
 𝐓𝐎𝐃𝐀𝐘'𝐒 𝐌𝐄𝐒𝐒𝐀𝐆𝐄
- 𝘚𝘱𝘦𝘢𝘬𝘦𝘳: ${speaker}
- 𝘛𝘪𝘵𝘭𝗲: ${messageTitle} 
+Speaker: ${speaker}
+Title: ${messageTitle}
 
 Church of Jesus the Glorious King, Inc. (COJTGK)
-Recorded Live  ||  Midweek Service  || ${formattedDate}
+Recorded Live || Midweek Service || ${formattedDate}
+
 ——————————
- 𝑺𝑻𝑨𝒀 𝑪𝑶𝑵𝑵𝑬𝑪𝑻𝑬𝑫
- 𝘍𝘉: facebook.com/COJTGKofficial
- 𝘠𝘛: youtube.com/@cojtgkofficial
-#COJTGK #MidweekService #Worship2026`;
+𝑺𝑻𝑨𝒀 𝑪𝑶𝑵𝑵𝑬𝑪𝑻𝑬𝑫
+FB: facebook.com/COJTGKofficial
+YT: youtube.com/@cojtgkofficial
 
-    const outTitle = document.getElementById("outputMidweekTitle");
-    const outDesc = document.getElementById("outputMidweekDesc");
-    if (outTitle) outTitle.value = streamTitle;
-    if (outDesc) outDesc.value = streamDesc;
+#COJTGK #MidweekService #WordOfGod`;
+
+
+    // =====================================
+    // OUTPUT
+    // =====================================
+
+    const outTitle =
+        document.getElementById(
+            "outputMidweekTitle"
+        );
+
+
+    const outDesc =
+        document.getElementById(
+            "outputMidweekDesc"
+        );
+
+
+    if (outTitle) {
+
+        outTitle.value =
+            streamTitle;
+
+    }
+
+
+    if (outDesc) {
+
+        outDesc.value =
+            streamDesc;
+
+    }
+
 }
-
 function populateMidweekGeneratorFields() {
     const midSelect = document.getElementById('midGenDateSelect');
     if (!midSelect || midSelect.value === "") return;
@@ -10111,8 +17454,13 @@ async function initializeChurchHQ() {
 
         await testSupabaseConnection();
 
+        await loadMinistriesFromSupabase();
         await loadMembersFromSupabase();
+        await loadLeadersFromSupabase();
         await loadTasksFromSupabase();
+
+
+        await loadAnnualActivitiesFromSupabase();
         await loadServicesFromSupabase();
         await loadSongsFromSupabase();
         await loadActivitiesFromSupabase();
@@ -10193,20 +17541,757 @@ async function loginUser(){
 
 
 
-    console.log(
-        "✅ Login successful:",
-        data
-    );
+console.log(
+    "✅ Login successful:",
+    data
+);
 
 
 showChurchApp();
 
 await loadCurrentUserRole();
 
+
+// =====================================
+// AUDIT - LOGIN
+// =====================================
+
+const loginAuditSaved =
+    await writeAuditLog(
+        "LOGIN",
+        "Authentication",
+        `${currentUserRole || "Unknown"} account logged in.`
+    );
+
+
+console.log(
+    "LOGIN AUDIT RESULT:",
+    loginAuditSaved
+);
+
+
 applyRoleBasedUI();
 
-initializeChurchHQ();
+await initializeChurchHQ();
 
+
+}
+
+
+// =====================================================
+// LOAD AUDIT LOGS FROM SUPABASE
+// ADMIN ONLY
+// =====================================================
+
+async function loadAuditLogsFromSupabase() {
+
+    if (!isAdminUser()) {
+        return false;
+    }
+
+
+    try {
+
+        const { data, error } =
+            await churchSupabase
+                .from("audit_logs")
+                .select("*")
+                .order(
+                    "created_at",
+                    {
+                        ascending: false
+                    }
+                )
+                .limit(500);
+
+
+        if (error) {
+
+            console.error(
+                "❌ Failed to load audit logs:",
+                error
+            );
+
+            return false;
+        }
+
+
+        auditLogs =
+            Array.isArray(data)
+                ? data
+                : [];
+
+
+        console.log(
+            "✅ Audit logs loaded:",
+            auditLogs.length
+        );
+
+
+        if (
+            typeof populateAuditModuleFilter ===
+            "function"
+        ) {
+
+            populateAuditModuleFilter();
+
+        }
+
+
+        if (
+            typeof renderAuditLogs ===
+            "function"
+        ) {
+
+            renderAuditLogs();
+
+        }
+
+
+        return true;
+
+
+    } catch (error) {
+
+        console.error(
+            "❌ Audit log read error:",
+            error
+        );
+
+        return false;
+    }
+
+}
+
+// =====================================================
+// POPULATE AUDIT MODULE FILTER
+// =====================================================
+
+function populateAuditModuleFilter() {
+
+    const select =
+        document.getElementById(
+            "auditModuleFilter"
+        );
+
+    if (!select) {
+        return;
+    }
+
+
+    const currentValue =
+        select.value;
+
+
+    const modules =
+        [
+            ...new Set(
+                auditLogs
+                    .map(
+                        log =>
+                            log.module || ""
+                    )
+                    .filter(Boolean)
+            )
+        ]
+        .sort();
+
+
+    select.innerHTML = `
+        <option value="">
+            All Modules
+        </option>
+    `;
+
+
+    modules.forEach(module => {
+
+        const option =
+            document.createElement(
+                "option"
+            );
+
+        option.value =
+            module;
+
+        option.textContent =
+            module;
+
+        select.appendChild(
+            option
+        );
+
+    });
+
+
+    if (
+        modules.includes(
+            currentValue
+        )
+    ) {
+        select.value =
+            currentValue;
+    }
+
+}
+
+// =====================================================
+// RENDER AUDIT LOGS
+// =====================================================
+
+function renderAuditLogs() {
+
+    const body =
+        document.getElementById(
+            "auditLogBody"
+        );
+
+    if (!body) {
+        console.warn(
+            "⚠️ auditLogBody not found."
+        );
+        return;
+    }
+
+
+    const search =
+        (
+            document.getElementById(
+                "auditSearch"
+            )?.value || ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    const roleFilter =
+        document.getElementById(
+            "auditRoleFilter"
+        )?.value || "";
+
+
+    const moduleFilter =
+        document.getElementById(
+            "auditModuleFilter"
+        )?.value || "";
+
+
+    const dateFilter =
+        document.getElementById(
+            "auditDateFilter"
+        )?.value || "";
+
+
+    // =====================================
+    // FILTER
+    // =====================================
+
+    const filteredLogs =
+        auditLogs.filter(log => {
+
+            const searchText =
+                [
+                    log.user_email || "",
+                    log.user_role || "",
+                    log.action || "",
+                    log.module || "",
+                    log.description || ""
+                ]
+                .join(" ")
+                .toLowerCase();
+
+
+            const matchesSearch =
+                !search ||
+                searchText.includes(search);
+
+
+            const matchesRole =
+                !roleFilter ||
+                log.user_role === roleFilter;
+
+
+            const matchesModule =
+                !moduleFilter ||
+                log.module === moduleFilter;
+
+
+            let matchesDate = true;
+
+
+            if (
+                dateFilter &&
+                log.created_at
+            ) {
+
+                const d =
+                    new Date(
+                        log.created_at
+                    );
+
+                const localDate =
+                    `${d.getFullYear()}-${String(
+                        d.getMonth() + 1
+                    ).padStart(2, "0")}-${String(
+                        d.getDate()
+                    ).padStart(2, "0")}`;
+
+                matchesDate =
+                    localDate === dateFilter;
+            }
+
+
+            return (
+                matchesSearch &&
+                matchesRole &&
+                matchesModule &&
+                matchesDate
+            );
+
+        });
+
+
+    // =====================================
+    // PAGINATION
+    // =====================================
+
+    const totalPages =
+        Math.max(
+            1,
+            Math.ceil(
+                filteredLogs.length /
+                auditPageSize
+            )
+        );
+
+
+    if (
+        auditCurrentPage >
+        totalPages
+    ) {
+        auditCurrentPage =
+            totalPages;
+    }
+
+
+    if (
+        auditCurrentPage < 1
+    ) {
+        auditCurrentPage = 1;
+    }
+
+
+    const startIndex =
+        (auditCurrentPage - 1) *
+        auditPageSize;
+
+
+    const visibleLogs =
+        filteredLogs.slice(
+            startIndex,
+            startIndex +
+            auditPageSize
+        );
+
+
+    // =====================================
+    // CLEAR TABLE
+    // =====================================
+
+    body.innerHTML = "";
+
+
+    // =====================================
+    // EMPTY STATE
+    // =====================================
+
+    if (
+        filteredLogs.length === 0
+    ) {
+
+        body.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="6"
+                    style="
+                        padding:20px;
+                        text-align:center;
+                        color:#9ca3af;
+                    "
+                >
+                    No audit records found.
+                </td>
+
+            </tr>
+
+        `;
+
+
+        const pageInfo =
+            document.getElementById(
+                "auditPageInfo"
+            );
+
+
+        if (pageInfo) {
+            pageInfo.textContent =
+                "Page 1 of 1";
+        }
+
+
+        console.log(
+            "📋 Audit rows rendered: 0"
+        );
+
+        return;
+    }
+
+
+    // =====================================
+    // RENDER CURRENT PAGE ONLY
+    // =====================================
+
+    visibleLogs.forEach(log => {
+
+        const tr =
+            document.createElement(
+                "tr"
+            );
+
+
+        tr.style.borderBottom =
+            "1px solid #e5e7eb";
+
+
+        const dateText =
+            log.created_at
+                ? new Date(
+                    log.created_at
+                ).toLocaleString()
+                : "-";
+
+
+        tr.innerHTML = `
+
+            <td style="padding:12px;">
+                ${dateText}
+            </td>
+
+            <td style="padding:12px;">
+                ${log.user_email || "-"}
+            </td>
+
+            <td style="padding:12px;">
+                ${log.user_role || "-"}
+            </td>
+
+            <td style="padding:12px;">
+                <strong>
+                    ${log.action || "-"}
+                </strong>
+            </td>
+
+            <td style="padding:12px;">
+                ${log.module || "-"}
+            </td>
+
+            <td style="padding:12px;">
+                ${log.description || "-"}
+            </td>
+
+        `;
+
+
+        body.appendChild(
+            tr
+        );
+
+    });
+
+
+    // =====================================
+    // PAGE INFO
+    // =====================================
+
+    const pageInfo =
+        document.getElementById(
+            "auditPageInfo"
+        );
+
+
+    if (pageInfo) {
+
+        pageInfo.textContent =
+            `Page ${auditCurrentPage} of ${totalPages}`;
+
+    }
+
+
+    console.log(
+        "📋 Audit rows rendered:",
+        visibleLogs.length,
+        "of",
+        filteredLogs.length
+    );
+
+}
+
+function changeAuditPage(direction) {
+
+    const search =
+        (
+            document.getElementById(
+                "auditSearch"
+            )?.value || ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    const roleFilter =
+        document.getElementById(
+            "auditRoleFilter"
+        )?.value || "";
+
+
+    const moduleFilter =
+        document.getElementById(
+            "auditModuleFilter"
+        )?.value || "";
+
+
+    const dateFilter =
+        document.getElementById(
+            "auditDateFilter"
+        )?.value || "";
+
+
+    const filteredLogs =
+        auditLogs.filter(log => {
+
+            const searchText =
+                [
+                    log.user_email || "",
+                    log.user_role || "",
+                    log.action || "",
+                    log.module || "",
+                    log.description || ""
+                ]
+                .join(" ")
+                .toLowerCase();
+
+
+            const matchesSearch =
+                !search ||
+                searchText.includes(search);
+
+
+            const matchesRole =
+                !roleFilter ||
+                log.user_role === roleFilter;
+
+
+            const matchesModule =
+                !moduleFilter ||
+                log.module === moduleFilter;
+
+
+            let matchesDate = true;
+
+
+            if (
+                dateFilter &&
+                log.created_at
+            ) {
+
+                const d =
+                    new Date(
+                        log.created_at
+                    );
+
+
+                const localDate =
+                    `${d.getFullYear()}-${String(
+                        d.getMonth() + 1
+                    ).padStart(2, "0")}-${String(
+                        d.getDate()
+                    ).padStart(2, "0")}`;
+
+
+                matchesDate =
+                    localDate === dateFilter;
+
+            }
+
+
+            return (
+                matchesSearch &&
+                matchesRole &&
+                matchesModule &&
+                matchesDate
+            );
+
+        });
+
+
+    const totalPages =
+        Math.max(
+            1,
+            Math.ceil(
+                filteredLogs.length /
+                auditPageSize
+            )
+        );
+
+
+    auditCurrentPage += direction;
+
+
+    if (auditCurrentPage < 1) {
+        auditCurrentPage = 1;
+    }
+
+
+    if (
+        auditCurrentPage >
+        totalPages
+    ) {
+        auditCurrentPage = totalPages;
+    }
+
+
+    renderAuditLogs();
+
+}
+
+// =====================================================
+// CLEAR ALL AUDIT LOGS
+// ADMIN ONLY
+// =====================================================
+
+async function clearAuditLogs() {
+
+    if (!requireAdmin()) {
+        return;
+    }
+
+
+    const confirmed =
+        confirm(
+            "Clear all audit logs?\n\n" +
+            "This action cannot be undone."
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    try {
+
+        const { error } =
+            await churchSupabase
+                .from("audit_logs")
+                .delete()
+                .neq("id", 0);
+
+
+        if (error) {
+
+            console.error(
+                "❌ Failed to clear audit logs:",
+                error
+            );
+
+            alert(
+                "❌ Failed to clear audit logs."
+            );
+
+            return;
+        }
+
+
+        auditLogs = [];
+
+        auditCurrentPage = 1;
+
+
+        renderAuditLogs();
+
+
+        alert(
+            "✅ Audit logs cleared successfully."
+        );
+
+
+        console.log(
+            "🗑️ Audit logs cleared."
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "❌ Clear audit logs error:",
+            error
+        );
+
+        alert(
+            "❌ Failed to clear audit logs."
+        );
+
+    }
+
+}
+
+// =====================================================
+// CLEAR AUDIT FILTERS
+// =====================================================
+
+function clearAuditFilters() {
+
+    const search =
+        document.getElementById(
+            "auditSearch"
+        );
+
+    const role =
+        document.getElementById(
+            "auditRoleFilter"
+        );
+
+    const module =
+        document.getElementById(
+            "auditModuleFilter"
+        );
+
+    const date =
+        document.getElementById(
+            "auditDateFilter"
+        );
+
+
+    if (search) {
+        search.value = "";
+    }
+
+    if (role) {
+        role.value = "";
+    }
+
+    if (module) {
+        module.value = "";
+    }
+
+    if (date) {
+        date.value = "";
+    }
+
+
+    renderAuditLogs();
 
 }
 
@@ -10373,6 +18458,119 @@ function requireAdmin(){
 
 }
 
+// =====================================================
+// CHURCHHQ AUDIT LOGGER
+// =====================================================
+
+async function writeAuditLog(
+    action,
+    module,
+    description = "",
+    recordId = null,
+    metadata = {}
+) {
+
+    try {
+
+        if (!currentUser) {
+
+            console.warn(
+                "⚠️ Audit skipped: no authenticated user."
+            );
+
+            return false;
+        }
+
+
+        const { error } =
+            await churchSupabase.rpc(
+                "write_audit_log",
+                {
+                    p_action:
+                        action,
+
+                    p_module:
+                        module,
+
+                    p_record_id:
+                        recordId !== null
+                            ? String(recordId)
+                            : null,
+
+                    p_description:
+                        description || null,
+
+                    p_metadata:
+                        metadata || {}
+                }
+            );
+
+
+        if (error) {
+
+            console.error(
+                "❌ Audit log failed:",
+                error
+            );
+
+            return false;
+        }
+
+
+        console.log(
+            "📝 Audit log saved:",
+            action,
+            module
+        );
+
+
+        return true;
+
+    } catch (error) {
+
+        console.error(
+            "❌ Audit logger error:",
+            error
+        );
+
+        return false;
+    }
+
+}
+
+// =====================================
+// MEMBER MANAGEMENT PERMISSION
+// Admin + Attendance account
+// =====================================
+
+function canManageMembers() {
+
+    return (
+        isAdminUser() ||
+        isAttendanceUser()
+    );
+
+}
+
+
+function requireMemberManager() {
+
+    if (!canManageMembers()) {
+
+        alert(
+            "You do not have permission to manage members."
+        );
+
+        return false;
+    }
+
+    return true;
+}
+
+// =====================================
+// ROLE-BASED UI
+// =====================================
+
 function applyRoleBasedUI() {
 
     console.log(
@@ -10410,7 +18608,7 @@ function applyRoleBasedUI() {
 
     // =====================================
     // ATTENDANCE MANAGEMENT CONTROLS
-    // Admin + Attendance role
+    // Admin + Attendance
     // =====================================
 
     const attendanceControls =
@@ -10437,6 +18635,81 @@ function applyRoleBasedUI() {
 
 
     // =====================================
+    // MEMBER MANAGEMENT CONTROLS
+    // Admin + Attendance
+    // =====================================
+
+    const memberControls =
+        document.querySelectorAll(
+            '[data-member-manage="true"]'
+        );
+
+
+    memberControls.forEach(element => {
+
+        if (canManageMembers()) {
+
+            element.style.display = "";
+            element.disabled = false;
+
+        } else {
+
+            element.style.display = "none";
+            element.disabled = true;
+
+        }
+
+    });
+
+
+    // =====================================
+    // VIEWER SIDEBAR RESTRICTIONS
+    // =====================================
+
+    const viewerRestrictedPages = [
+
+        "members",
+        "leaders",
+        "attendance",
+        "reports",
+        "settings"
+
+    ];
+
+
+    viewerRestrictedPages.forEach(pageId => {
+
+        const navItem =
+            document.querySelector(
+                `.nav-item[onclick*="showPage('${pageId}')"]`
+            );
+
+
+        if (!navItem) {
+            return;
+        }
+
+
+        if (isViewerUser()) {
+
+            navItem.style.setProperty(
+                "display",
+                "none",
+                "important"
+            );
+
+        } else {
+
+            navItem.style.removeProperty(
+                "display"
+            );
+
+        }
+
+    });
+
+
+    // =====================================
     // ROLE LOG
     // =====================================
 
@@ -10452,7 +18725,7 @@ function applyRoleBasedUI() {
             "📋 Attendance UI enabled"
         );
 
-    } else {
+    } else if (isViewerUser()) {
 
         console.log(
             "👁️ Viewer UI enabled"
@@ -10463,36 +18736,46 @@ function applyRoleBasedUI() {
 }
 
 
-function showChurchApp(){
+// =====================================
+// SHOW CHURCH APP
+// =====================================
+
+function showChurchApp() {
 
     const login =
-    document.getElementById("loginScreen");
+        document.getElementById(
+            "loginScreen"
+        );
 
 
     const app =
-    document.getElementById("churchApp");
+        document.getElementById(
+            "churchApp"
+        );
 
 
-    if(login)
-        login.style.display="none";
+    if (login) {
+
+        login.style.display =
+            "none";
+
+    }
 
 
-    if(app)
-        app.style.display="block";
+    if (app) {
+
+        app.style.display =
+            "block";
+
+    }
 
 
     console.log(
         "✅ ChurchHQ App unlocked"
     );
 
-
 }
 
-
-
-// CHECK EXISTING SESSION
-
-// CHECK EXISTING SESSION
 
 async function checkLoginSession(){
 
@@ -10539,6 +18822,19 @@ document.addEventListener(
 
 async function logoutUser(){
 
+
+    // =====================================
+    // AUDIT - LOGOUT
+    // Must run BEFORE signOut
+    // =====================================
+
+    await writeAuditLog(
+        "LOGOUT",
+        "Authentication",
+        `${currentUserRole || "Unknown"} account logged out.`
+    );
+
+
     const { error } =
         await churchSupabase.auth.signOut();
 
@@ -10557,6 +18853,8 @@ async function logoutUser(){
     console.log(
         "✅ Logged out"
     );
+
+
 
 currentUser = null;
 currentUserRole = null;
