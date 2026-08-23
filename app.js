@@ -11588,6 +11588,39 @@ function calculateMemberStatusAlerts() {
 
         }
 
+        // =====================================
+// MISSING BIRTHDAY
+// =====================================
+
+const birthdayValue =
+    String(
+        originalMember.birthday || ""
+    ).trim();
+
+
+if (!birthdayValue) {
+
+    alerts.push({
+
+        memberId:
+            member.id,
+
+        memberName:
+            member.name,
+
+        type:
+            "missing-birthday",
+
+        level:
+            "info",
+
+        message:
+            "No birthday recorded."
+
+    });
+
+}
+
 
         // =====================================
         // NO MINISTRY
@@ -12398,6 +12431,7 @@ systemAlerts.push(
 
 // =========================================
 // SYSTEM STATUS ALERTS UI
+// ORGANIZED + SCROLLABLE
 // =========================================
 
 function renderSystemStatusAlerts() {
@@ -12422,6 +12456,10 @@ function renderSystemStatusAlerts() {
     const alerts =
         calculateSystemStatusAlerts();
 
+
+    // =====================================
+    // TOTAL ALERT COUNT
+    // =====================================
 
     if (countEl) {
 
@@ -12465,123 +12503,455 @@ function renderSystemStatusAlerts() {
 
         `;
 
+
         return;
 
     }
 
 
-    // Maximum 8 muna sa Dashboard
-    const visibleAlerts =
-        alerts.slice(
-            0,
-            8
-        );
+    // =====================================
+    // ALERT GROUP DEFINITIONS
+    // =====================================
+
+    const groups = [
+
+        {
+            key:
+                "member-contact",
+
+            title:
+                "Members — No Contact",
+
+            icon:
+                "📞",
+
+            alerts:
+                alerts.filter(
+                    alert =>
+                        alert.module === "Members" &&
+                        alert.type === "missing-contact"
+                )
+        },
 
 
-    visibleAlerts.forEach(alert => {
+        {
+            key:
+                "member-birthday",
+
+            title:
+                "Members — No Birthday",
+
+            icon:
+                "🎂",
+
+            alerts:
+                alerts.filter(
+                    alert =>
+                        alert.module === "Members" &&
+                        alert.type === "missing-birthday"
+                )
+        },
 
 
-        let icon = "ℹ️";
+        {
+            key:
+                "member-attendance",
 
-        let className =
-            "member-alert-info";
+            title:
+                "Members — No Attendance",
+
+            icon:
+                "📋",
+
+            alerts:
+                alerts.filter(
+                    alert =>
+                        alert.module === "Members" &&
+                        alert.type === "no-attendance"
+                )
+        },
 
 
-        if (
-            alert.level === "warning"
-        ) {
+        {
+            key:
+                "member-low-attendance",
 
-            icon = "⚠️";
+            title:
+                "Members — Low Attendance",
 
-            className =
-                "member-alert-warning";
+            icon:
+                "📉",
 
+            alerts:
+                alerts.filter(
+                    alert =>
+                        alert.module === "Members" &&
+                        alert.type === "low-attendance"
+                )
+        },
+
+
+        {
+            key:
+                "member-inactive",
+
+            title:
+                "Members — Inactive",
+
+            icon:
+                "👤",
+
+            alerts:
+                alerts.filter(
+                    alert =>
+                        alert.module === "Members" &&
+                        alert.type === "inactive"
+                )
+        },
+
+
+        {
+            key:
+                "member-no-ministry",
+
+            title:
+                "Members — No Ministry",
+
+            icon:
+                "🏛️",
+
+            alerts:
+                alerts.filter(
+                    alert =>
+                        alert.module === "Members" &&
+                        alert.type === "no-ministry"
+                )
+        },
+
+
+        {
+            key:
+                "member-upcoming-birthday",
+
+            title:
+                "Members — Upcoming Birthday",
+
+            icon:
+                "🎉",
+
+            alerts:
+                alerts.filter(
+                    alert =>
+                        alert.module === "Members" &&
+                        alert.type === "birthday"
+                )
+        },
+
+
+        {
+            key:
+                "planner",
+
+            title:
+                "Planner",
+
+            icon:
+                "📌",
+
+            alerts:
+                alerts.filter(
+                    alert =>
+                        alert.module === "Planner"
+                )
+        },
+
+
+        {
+            key:
+                "services",
+
+            title:
+                "Services",
+
+            icon:
+                "⛪",
+
+            alerts:
+                alerts.filter(
+                    alert =>
+                        alert.module === "Services" ||
+                        alert.module === "Sunday Service" ||
+                        alert.module === "Midweek Service"
+                )
+        },
+
+
+        {
+            key:
+                "files",
+
+            title:
+                "Files",
+
+            icon:
+                "📁",
+
+            alerts:
+                alerts.filter(
+                    alert =>
+                        alert.module === "Files"
+                )
+        },
+
+
+        {
+            key:
+                "activities",
+
+            title:
+                "Activities",
+
+            icon:
+                "📅",
+
+            alerts:
+                alerts.filter(
+                    alert =>
+                        alert.module === "Activities"
+                )
         }
 
-
-        if (
-            alert.level === "birthday"
-        ) {
-
-            icon = "🎂";
-
-            className =
-                "member-alert-birthday";
-
-        }
+    ];
 
 
-        const item =
-            document.createElement(
-                "div"
+    // =====================================
+    // FIND ALERTS NOT COVERED ABOVE
+    // =====================================
+
+    const groupedAlerts =
+        new Set();
+
+
+    groups.forEach(group => {
+
+        group.alerts.forEach(alert => {
+
+            groupedAlerts.add(
+                alert
             );
 
-
-        item.className =
-            `member-alert-item ${className}`;
-
-
-        item.innerHTML = `
-
-            <div class="member-alert-icon">
-                ${icon}
-            </div>
-
-
-            <div class="member-alert-content">
-
-                <strong>
-                    ${alert.module} • ${alert.name}
-                </strong>
-
-                <span>
-                    ${alert.message}
-                </span>
-
-            </div>
-
-        `;
-
-
-        container.appendChild(
-            item
-        );
+        });
 
     });
 
 
+    const otherAlerts =
+        alerts.filter(
+            alert =>
+                !groupedAlerts.has(
+                    alert
+                )
+        );
+
+
+    if (otherAlerts.length > 0) {
+
+        groups.push({
+
+            key:
+                "other",
+
+            title:
+                "Other System Alerts",
+
+            icon:
+                "ℹ️",
+
+            alerts:
+                otherAlerts
+
+        });
+
+    }
+
+
     // =====================================
-    // MORE ALERTS
+    // RENDER GROUPS
     // =====================================
 
-    if (
-        alerts.length >
-        visibleAlerts.length
-    ) {
+    groups.forEach(group => {
 
-        const more =
+        if (
+            group.alerts.length === 0
+        ) {
+
+            return;
+
+        }
+
+
+        // =====================================
+        // SORT ITEMS ALPHABETICALLY
+        // =====================================
+
+        group.alerts.sort(
+            (a, b) =>
+                String(
+                    a.name || ""
+                ).localeCompare(
+                    String(
+                        b.name || ""
+                    ),
+                    undefined,
+                    {
+                        sensitivity:
+                            "base"
+                    }
+                )
+        );
+
+
+        // =====================================
+        // GROUP WRAPPER
+        // =====================================
+
+        const groupElement =
             document.createElement(
                 "div"
             );
 
 
-        more.style.cssText = `
-            margin-top:10px;
-            font-size:12px;
-            color:#64748b;
-            text-align:center;
+        groupElement.className =
+            "system-alert-group";
+
+
+        // =====================================
+        // GROUP HEADER
+        // =====================================
+
+        const groupHeader =
+            document.createElement(
+                "div"
+            );
+
+
+        groupHeader.className =
+            "system-alert-group-header";
+
+
+        groupHeader.innerHTML = `
+
+            <div class="system-alert-group-title">
+
+                <span class="system-alert-group-icon">
+                    ${group.icon}
+                </span>
+
+                <strong>
+                    ${group.title}
+                </strong>
+
+            </div>
+
+
+            <span class="system-alert-group-count">
+                ${group.alerts.length}
+            </span>
+
         `;
 
 
-        more.textContent =
-            `+ ${alerts.length - visibleAlerts.length} more system alert(s)`;
+        groupElement.appendChild(
+            groupHeader
+        );
+
+
+        // =====================================
+        // ALERT ITEMS
+        // =====================================
+
+        group.alerts.forEach(alert => {
+
+            let icon =
+                "ℹ️";
+
+
+            let className =
+                "member-alert-info";
+
+
+            if (
+                alert.level ===
+                "warning"
+            ) {
+
+                icon =
+                    "⚠️";
+
+                className =
+                    "member-alert-warning";
+
+            }
+
+
+            if (
+                alert.level ===
+                "birthday"
+            ) {
+
+                icon =
+                    "🎂";
+
+                className =
+                    "member-alert-birthday";
+
+            }
+
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+
+            item.className =
+                `member-alert-item ${className}`;
+
+
+            item.innerHTML = `
+
+                <div class="member-alert-icon">
+                    ${icon}
+                </div>
+
+
+                <div class="member-alert-content">
+
+                    <strong>
+                        ${alert.name || "System Alert"}
+                    </strong>
+
+                    <span>
+                        ${alert.message || ""}
+                    </span>
+
+                </div>
+
+            `;
+
+
+            groupElement.appendChild(
+                item
+            );
+
+        });
 
 
         container.appendChild(
-            more
+            groupElement
         );
 
-    }
+    });
 
 }
 
@@ -15341,6 +15711,252 @@ async function generateReportsData() {
                     : "No records yet";
 
         }
+
+
+// =====================================
+// RECENT ATTENDANCE SUMMARY
+// =====================================
+
+const recentAttendanceContainer =
+    document.getElementById(
+        "rep-attendance-history"
+    );
+
+
+if (recentAttendanceContainer) {
+
+    recentAttendanceContainer.innerHTML =
+        "";
+
+
+    // =====================================
+    // NO ATTENDANCE RECORDS
+    // =====================================
+
+    if (
+        !Array.isArray(attendance) ||
+        attendance.length === 0
+    ) {
+
+        recentAttendanceContainer.innerHTML = `
+
+            <div
+                style="
+                    padding:20px;
+                    text-align:center;
+                    color:#94a3b8;
+                    font-size:13px;
+                "
+            >
+                No attendance records yet.
+            </div>
+
+        `;
+
+    } else {
+
+
+        // =====================================
+        // RECENT 5 RECORDS
+        // =====================================
+
+        const recentAttendance =
+            attendance.slice(
+                0,
+                5
+            );
+
+
+        recentAttendance.forEach(
+            record => {
+
+
+                // =====================================
+                // PRESENT COUNT
+                // =====================================
+
+                let recordPresentCount =
+                    0;
+
+
+                if (
+                    record.check_ins &&
+                    typeof record.check_ins ===
+                        "object"
+                ) {
+
+                    recordPresentCount =
+                        Object.values(
+                            record.check_ins
+                        )
+                        .filter(Boolean)
+                        .length;
+
+                } else {
+
+                    recordPresentCount =
+                        Number(
+                            record.present_count || 0
+                        );
+
+                }
+
+
+                // =====================================
+                // TOTAL MEMBERS
+                // =====================================
+
+                const recordTotalMembers =
+                    Number(
+                        record.total_members || 0
+                    );
+
+
+                // =====================================
+                // ATTENDANCE RATE
+                // =====================================
+
+                const attendanceRate =
+                    recordTotalMembers > 0
+                        ? Math.round(
+                            (
+                                recordPresentCount /
+                                recordTotalMembers
+                            ) * 100
+                        )
+                        : 0;
+
+
+                // =====================================
+                // SERVICE TYPE
+                // =====================================
+
+                const serviceType =
+                    String(
+                        record.service_type ||
+                        "sunday"
+                    )
+                    .toLowerCase();
+
+
+                const serviceLabel =
+                    serviceType === "midweek"
+                        ? "Midweek Service"
+                        : "Sunday Service";
+
+
+                // =====================================
+                // EVENT NAME
+                // =====================================
+
+                const eventName =
+                    record.event_name ||
+                    serviceLabel;
+
+
+                // =====================================
+                // FORMAT DATE
+                // =====================================
+
+                let formattedDate =
+                    record.date || "-";
+
+
+                if (record.date) {
+
+                    const dateObject =
+                        new Date(
+                            record.date +
+                            "T00:00:00"
+                        );
+
+
+                    if (
+                        !isNaN(
+                            dateObject.getTime()
+                        )
+                    ) {
+
+                        formattedDate =
+                            dateObject
+                                .toLocaleDateString(
+                                    "en-US",
+                                    {
+                                        month:
+                                            "short",
+
+                                        day:
+                                            "numeric",
+
+                                        year:
+                                            "numeric"
+                                    }
+                                );
+
+                    }
+
+                }
+
+
+                // =====================================
+                // CREATE ITEM
+                // =====================================
+
+                const item =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                item.className =
+                    "recent-attendance-item";
+
+
+                item.innerHTML = `
+
+                    <div class="recent-attendance-info">
+
+                        <strong>
+                            ${eventName}
+                        </strong>
+
+                        <span>
+                            ${serviceLabel}
+                            •
+                            ${formattedDate}
+                        </span>
+
+                    </div>
+
+
+                    <div class="recent-attendance-result">
+
+                        <strong>
+                            ${recordPresentCount}
+                            /
+                            ${recordTotalMembers}
+                        </strong>
+
+                        <span>
+                            ${attendanceRate}%
+                        </span>
+
+                    </div>
+
+                `;
+
+
+                recentAttendanceContainer
+                    .appendChild(
+                        item
+                    );
+
+            }
+        );
+
+    }
+
+}
 
 
         // =====================================

@@ -198,7 +198,7 @@
         </a>
 
         <a
-            href="https://www.youtube.com/@cojtgkofficial"
+            href="https://studio.youtube.com/channel/UCST4ypCVKY56bBHnXAoeRCA/livestreaming"
             target="_blank"
             rel="noopener noreferrer"
             class="login-social-link"
@@ -2823,66 +2823,72 @@
     >
 </div>
 
-<div class="form-row">
+     <!-- =========================================
+     MEMBER MINISTRY
+========================================= -->
 
-    <div class="form-group">
+<div class="form-group member-ministry-section">
 
-     <div class="ministry-header">
+    <div class="ministry-header">
 
-    <label>
-        Ministry Group
-    </label>
+        <label>
+            Ministry Group
+        </label>
 
-    <div class="ministry-actions">
+        <div class="ministry-actions">
 
-        <button
-            type="button"
-            class="ministry-action-btn"
-            onclick="addCustomMinistry()"
-            data-admin-only="true"
-        >
-            <span>＋</span>
-            Add Ministry
-        </button>
+            <button
+                type="button"
+                class="ministry-action-btn"
+                onclick="addCustomMinistry()"
+                data-admin-only="true"
+            >
+                <span>＋</span>
+                Add Ministry
+            </button>
 
-        <button
-            type="button"
-            class="ministry-action-btn"
-            onclick="openManageMinistries()"
-            data-admin-only="true"
-        >
-            <span>⚙</span>
-            Manage
-        </button>
+            <button
+                type="button"
+                class="ministry-action-btn"
+                onclick="openManageMinistries()"
+                data-admin-only="true"
+            >
+                <span>⚙</span>
+                Manage
+            </button>
 
-    </div>
-
-</div>
-
-        <div
-            id="memberMinistry"
-            class="ministry-checkbox-list"
-        >
-            <!-- Ministries loaded from Supabase -->
         </div>
 
     </div>
 
 
-    <div class="form-group">
-
-        <label>Role</label>
-
-        <input
-            type="text"
-            id="memberRole"
-            placeholder="e.g. Leader, Guitarist, Member"
-        >
-
+    <div
+        id="memberMinistry"
+        class="ministry-checkbox-list member-ministry-scroll"
+    >
+        <!-- Ministries loaded from Supabase -->
     </div>
 
 </div>
 
+
+<!-- =========================================
+     MEMBER ROLE
+========================================= -->
+
+<div class="form-group member-role-section">
+
+    <label>
+        Role
+    </label>
+
+    <input
+        type="text"
+        id="memberRole"
+        placeholder="e.g. Leader, Guitarist, Member"
+    >
+
+</div>
 
 <div class="modal-footer">
 

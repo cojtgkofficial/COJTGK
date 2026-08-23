@@ -14472,3 +14472,805 @@ body.dark .file-folder-modal-content .modal-actions {
         #34414C !important;
 
 }
+
+/* =========================================================
+   SYSTEM STATUS ALERTS
+   ORGANIZED + SCROLLABLE
+========================================================= */
+
+
+/* =========================================================
+   ALERT LIST SCROLL AREA
+========================================================= */
+
+#systemStatusAlertsList {
+
+    max-height:
+        520px;
+
+    overflow-y:
+        auto;
+
+    overflow-x:
+        hidden;
+
+    padding-right:
+        8px;
+
+    scroll-behavior:
+        smooth;
+
+}
+
+
+/* =========================================================
+   ALERT GROUP
+========================================================= */
+
+.system-alert-group {
+
+    margin-bottom:
+        18px;
+
+}
+
+
+.system-alert-group:last-child {
+
+    margin-bottom:
+        0;
+
+}
+
+
+/* =========================================================
+   GROUP HEADER
+========================================================= */
+
+.system-alert-group-header {
+
+    position:
+        sticky;
+
+    top:
+        0;
+
+    z-index:
+        5;
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+    gap:
+        12px;
+
+    margin-bottom:
+        8px;
+
+    padding:
+        9px 11px;
+
+    background:
+        var(
+            --church-cream,
+            #f8fafc
+        );
+
+    border:
+        1px solid
+        var(
+            --church-border,
+            #e2e8f0
+        );
+
+    border-left:
+        4px solid
+        var(
+            --church-blue,
+            #164f94
+        );
+
+    border-radius:
+        8px;
+
+}
+
+
+/* =========================================================
+   GROUP TITLE
+========================================================= */
+
+.system-alert-group-title {
+
+    min-width:
+        0;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        8px;
+
+}
+
+
+.system-alert-group-title strong {
+
+    color:
+        var(
+            --church-blue-dark,
+            #123f77
+        );
+
+    font-size:
+        12px;
+
+    font-weight:
+        700;
+
+}
+
+
+.system-alert-group-icon {
+
+    flex-shrink:
+        0;
+
+    font-size:
+        14px;
+
+}
+
+
+/* =========================================================
+   GROUP COUNT
+========================================================= */
+
+.system-alert-group-count {
+
+    min-width:
+        25px;
+
+    height:
+        25px;
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    padding:
+        0 7px;
+
+    background:
+        var(
+            --church-blue,
+            #164f94
+        );
+
+    color:
+        #ffffff;
+
+    border-radius:
+        999px;
+
+    font-size:
+        10px;
+
+    font-weight:
+        700;
+
+}
+
+
+/* =========================================================
+   ALERT ITEMS INSIDE GROUP
+========================================================= */
+
+.system-alert-group
+.member-alert-item {
+
+    margin-left:
+        6px;
+
+    margin-right:
+        2px;
+
+}
+
+
+/* =========================================================
+   CUSTOM SCROLLBAR
+========================================================= */
+
+#systemStatusAlertsList::-webkit-scrollbar {
+
+    width:
+        7px;
+
+}
+
+
+#systemStatusAlertsList::-webkit-scrollbar-track {
+
+    background:
+        var(
+            --church-cream,
+            #f8fafc
+        );
+
+    border-radius:
+        10px;
+
+}
+
+
+#systemStatusAlertsList::-webkit-scrollbar-thumb {
+
+    background:
+        var(
+            --church-beige,
+            #d7c6ad
+        );
+
+    border-radius:
+        10px;
+
+}
+
+
+#systemStatusAlertsList::-webkit-scrollbar-thumb:hover {
+
+    background:
+        var(
+            --church-blue,
+            #164f94
+        );
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+
+    #systemStatusAlertsList {
+
+        max-height:
+            420px;
+
+        padding-right:
+            5px;
+
+    }
+
+
+    .system-alert-group-header {
+
+        padding:
+            8px 9px;
+
+    }
+
+
+    .system-alert-group-title strong {
+
+        font-size:
+            11px;
+
+    }
+
+}
+
+
+/* =========================================================
+   DARK MODE
+========================================================= */
+
+body.dark
+.system-alert-group-header {
+
+    background:
+        #19232d;
+
+    border-color:
+        #34414c;
+
+    border-left-color:
+        var(
+            --church-blue,
+            #164f94
+        );
+
+}
+
+
+body.dark
+.system-alert-group-title strong {
+
+    color:
+        #f6f2ed;
+
+}
+
+/* =========================================================
+   REPORTS - RECENT ATTENDANCE SUMMARY
+========================================================= */
+
+#rep-attendance-history {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        8px;
+
+}
+
+
+.recent-attendance-item {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+    gap:
+        15px;
+
+    padding:
+        11px 12px;
+
+    background:
+        var(
+            --church-cream,
+            #f8fafc
+        );
+
+    border:
+        1px solid
+        var(
+            --church-border,
+            #e2e8f0
+        );
+
+    border-left:
+        4px solid
+        var(
+            --church-blue,
+            #164f94
+        );
+
+    border-radius:
+        9px;
+
+}
+
+
+.recent-attendance-info {
+
+    min-width:
+        0;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        3px;
+
+}
+
+
+.recent-attendance-info strong {
+
+    color:
+        var(
+            --church-dark,
+            #1f2937
+        );
+
+    font-size:
+        13px;
+
+    font-weight:
+        700;
+
+}
+
+
+.recent-attendance-info span {
+
+    color:
+        var(
+            --church-gray,
+            #64748b
+        );
+
+    font-size:
+        11px;
+
+}
+
+
+.recent-attendance-result {
+
+    flex-shrink:
+        0;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    align-items:
+        flex-end;
+
+    gap:
+        2px;
+
+}
+
+
+.recent-attendance-result strong {
+
+    color:
+        var(
+            --church-blue,
+            #164f94
+        );
+
+    font-size:
+        14px;
+
+    font-weight:
+        800;
+
+}
+
+
+.recent-attendance-result span {
+
+    color:
+        var(
+            --church-gray,
+            #64748b
+        );
+
+    font-size:
+        11px;
+
+    font-weight:
+        600;
+
+}
+
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+
+    .recent-attendance-item {
+
+        align-items:
+            flex-start;
+
+    }
+
+}
+
+
+/* DARK MODE */
+
+body.dark
+.recent-attendance-item {
+
+    background:
+        #19232d;
+
+    border-color:
+        #34414c;
+
+}
+
+
+body.dark
+.recent-attendance-info strong {
+
+    color:
+        #f6f2ed;
+
+}
+
+
+body.dark
+.recent-attendance-info span,
+body.dark
+.recent-attendance-result span {
+
+    color:
+        #aab4bf;
+
+}
+
+/* =========================================================
+   MEMBER MODAL - MINISTRY FIX
+========================================================= */
+
+#memberModal .modal-content {
+
+    width: min(620px, 94vw);
+
+    max-height: 90vh;
+
+    display: flex;
+
+    flex-direction: column;
+
+    overflow-y: auto;
+
+}
+
+
+/* =========================================================
+   MINISTRY SECTION
+========================================================= */
+
+#memberModal .member-ministry-section {
+
+    width: 100%;
+
+    margin-top: 4px;
+
+}
+
+
+#memberModal .ministry-header {
+
+    width: 100%;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 12px;
+
+    margin-bottom: 10px;
+
+}
+
+
+#memberModal .ministry-header > label {
+
+    margin: 0;
+
+    flex-shrink: 0;
+
+}
+
+
+/* =========================================================
+   MINISTRY BUTTONS
+========================================================= */
+
+#memberModal .ministry-actions {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    flex-wrap: wrap;
+
+}
+
+
+/* =========================================================
+   MINISTRY LIST
+========================================================= */
+
+#memberModal .member-ministry-scroll {
+
+    width: 100%;
+
+    max-height: 190px;
+
+    overflow-y: auto;
+
+    overflow-x: hidden;
+
+    box-sizing: border-box;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 8px 14px;
+
+    padding: 12px;
+
+    background: #f8fafc;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 9px;
+
+}
+
+
+/* EACH MINISTRY */
+
+#memberModal
+.member-ministry-scroll label {
+
+    min-width: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    margin: 0;
+
+    padding: 6px 7px;
+
+    border-radius: 6px;
+
+    cursor: pointer;
+
+}
+
+
+/* CHECKBOX */
+
+#memberModal
+.member-ministry-scroll
+input[type="checkbox"] {
+
+    width: 16px;
+
+    height: 16px;
+
+    margin: 0;
+
+    flex: 0 0 16px;
+
+}
+
+
+/* MINISTRY NAME */
+
+#memberModal
+.member-ministry-scroll
+label span {
+
+    min-width: 0;
+
+    overflow-wrap: anywhere;
+
+    font-size: 13px;
+
+}
+
+
+/* =========================================================
+   ROLE
+========================================================= */
+
+#memberModal .member-role-section {
+
+    width: 100%;
+
+    margin-top: 14px;
+
+}
+
+
+#memberModal .member-role-section input {
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+}
+
+
+/* =========================================================
+   SCROLLBAR
+========================================================= */
+
+#memberModal
+.member-ministry-scroll::-webkit-scrollbar {
+
+    width: 6px;
+
+}
+
+
+#memberModal
+.member-ministry-scroll::-webkit-scrollbar-thumb {
+
+    background: #cbd5e1;
+
+    border-radius: 10px;
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 600px) {
+
+    #memberModal .modal-content {
+
+        width: 94vw;
+
+        max-height: 92vh;
+
+    }
+
+
+    #memberModal .ministry-header {
+
+        align-items: flex-start;
+
+        flex-direction: column;
+
+    }
+
+
+    #memberModal .ministry-actions {
+
+        width: 100%;
+
+    }
+
+
+    #memberModal .ministry-action-btn {
+
+        flex: 1;
+
+    }
+
+
+    #memberModal .member-ministry-scroll {
+
+        grid-template-columns: 1fr;
+
+        max-height: 180px;
+
+    }
+
+}
