@@ -15974,52 +15974,132 @@ if (recentAttendanceContainer) {
         }
 
 
-        // =====================================
-        // TASKS
-        // =====================================
+       // =====================================
+// PLANNER REPORTS
+// ACCURATE STATUS COUNTS
+// =====================================
 
-        const totalTasks =
-            tasks.length;
+const normalizedTasks =
+    tasks.map(task => {
 
-        const completedTasks =
-            tasks.filter(task =>
-                task.status === "completed" ||
-                task.completed
-            ).length;
+        const status =
+            String(
+                task.status || "todo"
+            )
+            .trim()
+            .toLowerCase();
 
+        return {
+            ...task,
+            normalizedStatus:
+                status
+        };
 
-        const progressRate =
-            totalTasks > 0
-                ? Math.round(
-                    (completedTasks / totalTasks) * 100
-                )
-                : 0;
-
-
-        const taskProgressEl =
-            document.getElementById(
-                "rep-task-progress"
-            );
-
-        if (taskProgressEl) {
-
-            taskProgressEl.textContent =
-                `${progressRate}%`;
-
-        }
+    });
 
 
-        const taskCountsEl =
-            document.getElementById(
-                "rep-task-counts"
-            );
+// =====================================
+// TOTAL TASKS
+// =====================================
 
-        if (taskCountsEl) {
+const totalTasks =
+    normalizedTasks.length;
 
-            taskCountsEl.textContent =
-                `${completedTasks} of ${totalTasks} Completed`;
 
-        }
+// =====================================
+// TO DO
+// =====================================
+
+const todoTasks =
+    normalizedTasks.filter(
+        task =>
+            task.normalizedStatus ===
+            "todo"
+    ).length;
+
+
+// =====================================
+// IN PROGRESS
+// =====================================
+
+const progressTasks =
+    normalizedTasks.filter(
+        task =>
+            task.normalizedStatus ===
+            "progress"
+    ).length;
+
+
+// =====================================
+// COMPLETED
+// =====================================
+
+const completedTasks =
+    normalizedTasks.filter(
+        task =>
+            task.normalizedStatus ===
+            "completed"
+    ).length;
+
+
+// =====================================
+// COMPLETION RATE
+// =====================================
+
+const progressRate =
+    totalTasks > 0
+        ? Math.round(
+            (
+                completedTasks /
+                totalTasks
+            ) * 100
+        )
+        : 0;
+
+
+// =====================================
+// PROGRESS PERCENT
+// =====================================
+
+const taskProgressEl =
+    document.getElementById(
+        "rep-task-progress"
+    );
+
+
+if (taskProgressEl) {
+
+    taskProgressEl.textContent =
+        `${progressRate}%`;
+
+}
+
+
+// =====================================
+// TASK BREAKDOWN
+// =====================================
+
+const taskCountsEl =
+    document.getElementById(
+        "rep-task-counts"
+    );
+
+
+if (taskCountsEl) {
+
+    if (totalTasks === 0) {
+
+        taskCountsEl.textContent =
+            "No planner tasks";
+
+    } else {
+
+        taskCountsEl.textContent =
+            `${completedTasks} Completed • ${progressTasks} In Progress • ${todoTasks} To Do`;
+
+    }
+
+}
 
 
         // =====================================
