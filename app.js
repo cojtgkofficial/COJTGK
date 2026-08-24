@@ -16103,131 +16103,268 @@ if (taskCountsEl) {
 
 
         // =====================================
-        // MEMBERS PER MINISTRY
-        // =====================================
+// MEMBERS PER MINISTRY
+// MULTI-MINISTRY COUNT
+// =====================================
 
-        const ministryCounts = {};
+const ministryCounts = {};
 
 
-        members.forEach(member => {
+// =====================================
+// COUNT MEMBER IN ALL ASSIGNED MINISTRIES
+// =====================================
 
-            const ministry =
-                member.ministry ||
-                "Unassigned";
+members.forEach(member => {
+
+    let memberMinistries = [];
+
+
+    // =====================================
+    // USE NEW MULTI-MINISTRY ARRAY FIRST
+    // =====================================
+
+    if (
+        Array.isArray(member.ministries) &&
+        member.ministries.length > 0
+    ) {
+
+        memberMinistries =
+            member.ministries
+                .map(ministry =>
+                    String(
+                        ministry || ""
+                    ).trim()
+                )
+                .filter(Boolean);
+
+    }
+
+
+    // =====================================
+    // FALLBACK TO OLD PRIMARY MINISTRY
+    // =====================================
+
+    else if (
+        member.ministry &&
+        String(member.ministry).trim()
+    ) {
+
+        memberMinistries = [
+            String(
+                member.ministry
+            ).trim()
+        ];
+
+    }
+
+
+    // =====================================
+    // NO MINISTRY
+    // =====================================
+
+    else {
+
+        memberMinistries = [
+            "Unassigned"
+        ];
+
+    }
+
+
+    // =====================================
+    // REMOVE DUPLICATES PER MEMBER
+    // =====================================
+
+    const uniqueMinistries =
+        [
+            ...new Set(
+                memberMinistries
+            )
+        ];
+
+
+    // =====================================
+    // COUNT EACH MINISTRY
+    // =====================================
+
+    uniqueMinistries.forEach(
+        ministry => {
 
             ministryCounts[ministry] =
-                (ministryCounts[ministry] || 0) + 1;
+                (
+                    ministryCounts[ministry] ||
+                    0
+                ) + 1;
 
-        });
+        }
+    );
+
+});
 
 
-        const ministryContainer =
-            document.getElementById(
-                "rep-ministry-list"
+// =====================================
+// MINISTRY REPORT CONTAINER
+// =====================================
+
+const ministryContainer =
+    document.getElementById(
+        "rep-ministry-list"
+    );
+
+
+if (ministryContainer) {
+
+    ministryContainer.innerHTML = "";
+
+
+    // =====================================
+    // NO DATA
+    // =====================================
+
+    if (
+        Object.keys(
+            ministryCounts
+        ).length === 0
+    ) {
+
+        ministryContainer.innerHTML = `
+
+            <p
+                style="
+                    color:#9ca3af;
+                    font-size:14px;
+                "
+            >
+                No member data available.
+            </p>
+
+        `;
+
+    } else {
+
+
+        // =====================================
+        // SORT MINISTRIES
+        // HIGHEST COUNT FIRST
+        // =====================================
+
+        const sortedMinistries =
+            Object.entries(
+                ministryCounts
+            )
+            .sort(
+                (a, b) => {
+
+                    if (
+                        b[1] !== a[1]
+                    ) {
+
+                        return (
+                            b[1] -
+                            a[1]
+                        );
+
+                    }
+
+
+                    return String(
+                        a[0]
+                    ).localeCompare(
+                        String(
+                            b[0]
+                        ),
+                        undefined,
+                        {
+                            sensitivity:
+                                "base"
+                        }
+                    );
+
+                }
             );
 
 
-        if (ministryContainer) {
+        sortedMinistries.forEach(
+            ([ministry, count]) => {
 
-            ministryContainer.innerHTML = "";
+
+                // =====================================
+                // PERCENT OF TOTAL UNIQUE MEMBERS
+                // =====================================
+
+                const percentage =
+                    totalMembers > 0
+                        ? Math.round(
+                            (
+                                count /
+                                totalMembers
+                            ) * 100
+                        )
+                        : 0;
 
 
-            if (
-                Object.keys(ministryCounts).length === 0
-            ) {
+                ministryContainer.innerHTML += `
 
-                ministryContainer.innerHTML = `
-                    <p style="
-                        color:#9ca3af;
-                        font-size:14px;
-                    ">
-                        No member data available.
-                    </p>
+                    <div>
+
+                        <div
+                            style="
+                                display:flex;
+                                justify-content:space-between;
+                                gap:12px;
+                                font-size:13px;
+                                font-weight:500;
+                                margin-bottom:4px;
+                            "
+                        >
+
+                            <span>
+                                ${ministry}
+                            </span>
+
+
+                            <span
+                                style="
+                                    color:#6b7280;
+                                    white-space:nowrap;
+                                "
+                            >
+                                ${count}
+                                member${count === 1 ? "" : "s"}
+                                (${percentage}%)
+                            </span>
+
+                        </div>
+
+
+                        <div
+                            style="
+                                background-color:#e5e7eb;
+                                height:8px;
+                                border-radius:4px;
+                                overflow:hidden;
+                            "
+                        >
+
+                            <div
+                                style="
+                                    background-color:#2563eb;
+                                    width:${Math.min(
+                                        percentage,
+                                        100
+                                    )}%;
+                                    height:100%;
+                                    border-radius:4px;
+                                "
+                            ></div>
+
+                        </div>
+
+                    </div>
+
                 `;
 
-            } else {
-
-                Object.entries(
-                    ministryCounts
-                ).forEach(
-                    ([ministry, count]) => {
-
-                        const percentage =
-                            totalMembers > 0
-                                ? Math.round(
-                                    (count / totalMembers) * 100
-                                )
-                                : 0;
-
-
-                        ministryContainer.innerHTML += `
-                            <div>
-
-                                <div style="
-                                    display:flex;
-                                    justify-content:space-between;
-                                    font-size:13px;
-                                    font-weight:500;
-                                    margin-bottom:4px;
-                                ">
-
-                                    <span>
-                                        ${ministry}
-                                    </span>
-
-                                    <span style="
-                                        color:#6b7280;
-                                    ">
-                                        ${count}
-                                        members
-                                        (${percentage}%)
-                                    </span>
-
-                                </div>
-
-                                <div style="
-                                    background-color:#e5e7eb;
-                                    height:8px;
-                                    border-radius:4px;
-                                    overflow:hidden;
-                                ">
-
-                                    <div style="
-                                        background-color:#2563eb;
-                                        width:${percentage}%;
-                                        height:100%;
-                                        border-radius:4px;
-                                    "></div>
-
-                                </div>
-
-                            </div>
-                        `;
-
-                    }
-                );
-
             }
-
-        }
-
-
-        console.log(
-            "✅ Reports loaded from Supabase:",
-            {
-                members: members.length,
-                songs: songs.length,
-                tasks: tasks.length,
-                attendance: attendance.length
-            }
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "❌ Failed to load Reports from Supabase:",
-            error
         );
 
     }
