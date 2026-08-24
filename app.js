@@ -16370,6 +16370,32 @@ if (ministryContainer) {
     }
 
 }
+// =====================================
+// REPORT LOAD COMPLETE
+// =====================================
+
+console.log(
+    "✅ Reports loaded from Supabase:",
+    {
+        members: members.length,
+        songs: songs.length,
+        tasks: tasks.length,
+        attendance: attendance.length
+    }
+);
+
+
+} catch (error) {
+
+    console.error(
+        "❌ Failed to load Reports from Supabase:",
+        error
+    );
+
+}
+
+}
+        
 /* =========================================
    DASHBOARD DYNAMIC ACTIVITIES & ANNOUNCEMENTS
 ========================================= */
