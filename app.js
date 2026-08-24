@@ -6595,7 +6595,7 @@ try {
 let currentActiveSong = null;
 let currentTransposedKeyIndex = 0;
 let editingSongId = null; 
-const scale = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+const scale = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "G#", "A", "Bb", "B"];
 
 const songModal = document.getElementById("songModal");
 const addSongBtn = document.getElementById("addSongBtn");
