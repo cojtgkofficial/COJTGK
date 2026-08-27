@@ -198,7 +198,7 @@
         </a>
 
         <a
-            href="https://www.youtube.com/@cojtgkofficial"
+            href="https://studio.youtube.com/channel/UCST4ypCVKY56bBHnXAoeRCA/livestreaming"
             target="_blank"
             rel="noopener noreferrer"
             class="login-social-link"
@@ -245,14 +245,18 @@
                 <span>Planner</span>
             </div>
 
-            <div class="nav-item" onclick="showPage('sunday-service')">
-                <i data-lucide="sun"></i>
-                <span>Sunday Service</span>
+            <div class="nav-item" onclick="showPage('service-planner')">
+            <i data-lucide="calendar-range"></i>
+                <span>
+                    Service Planner
+                </span>
             </div>
 
-            <div class="nav-item" onclick="showPage('midweek-service')">
-                <i data-lucide="moon"></i>
-                <span>Midweek Service</span>
+            <div class="nav-item" onclick="showPage('program-planner')">
+                <i data-lucide="clipboard-list"></i>
+                 <span>
+                    Program Planner
+                </span>
             </div>
 
             <div class="nav-item" onclick="showPage('songs')">
@@ -756,8 +760,87 @@
 
         </section>
 
-        <!-- ================= SUNDAY SERVICE PAGE ================= -->
-        <section id="sunday-service" class="page hidden">
+        <!-- =====================================================
+     SERVICE PLANNER PAGE
+===================================================== -->
+
+<section
+    id="service-planner"
+    class="page hidden"
+>
+
+    <div class="planner-header">
+
+        <div>
+
+            <div
+                style="
+                    display:flex;
+                    align-items:center;
+                    gap:12px;
+                    margin-bottom:4px;
+                "
+            >
+                <i
+                    data-lucide="calendar-range"
+                    style="width:28px; height:28px;"
+                ></i>
+
+                <h1
+                    class="page-title"
+                    style="margin:0;"
+                >
+                    Service Planner
+                </h1>
+            </div>
+
+            <p class="page-subtitle">
+                Manage Sunday and Midweek service plans
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================
+         SERVICE TABS
+    ====================================== -->
+
+    <div class="service-planner-tabs">
+
+        <button
+            type="button"
+            id="serviceTabSunday"
+            class="service-planner-tab active"
+            onclick="switchServicePlannerTab('sunday')"
+        >
+            ☀️ Sunday Service
+        </button>
+
+
+        <button
+            type="button"
+            id="serviceTabMidweek"
+            class="service-planner-tab"
+            onclick="switchServicePlannerTab('midweek')"
+        >
+            🌙 Midweek Service
+        </button>
+
+    </div>
+
+
+    <!-- =====================================
+         SUNDAY PANEL
+    ====================================== -->
+
+    <div
+        id="serviceSundayPanel"
+        class="service-planner-panel"
+    >
+
+
             <div class="planner-header">
                 <div>
                     <h1 class="page-title">☀️ Sunday Service Planner</h1>
@@ -875,10 +958,18 @@
                     <button class="secondary-btn" onclick="copyMidweekDetails()" style="align-self: flex-start;">📋 Copy to Clipboard</button>
                 </div>
             </div>
-        </section>
+            </div>
+    <!-- END SUNDAY PANEL -->
 
-        <!-- ================= MIDWEEK SERVICE PAGE ================= -->
-        <section id="midweek-service" class="page hidden">
+
+    <!-- =====================================
+         MIDWEEK PANEL
+    ====================================== -->
+
+    <div
+        id="serviceMidweekPanel"
+        class="service-planner-panel hidden"
+    >
             <div class="planner-header">
                 <div>
                     <h1 class="page-title">🌙 Midweek Service Planner</h1>
@@ -967,8 +1058,11 @@
 
 </div>
 
-            <div class="card">
-                <h3>📜 Saved Midweek Service Records</h3>
+           <div
+    class="card midweek-records-card"
+    style="margin-top: 30px;"
+>
+    <h3>📜 Saved Midweek Service Records</h3>
                 <div style="max-height: 250px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 6px;">
                     <table style="width: 100%; border-collapse: collapse;">
                         <thead>
@@ -987,8 +1081,11 @@
                 </div>
             </div>
 
-            <div class="card" style="margin-top: 25px;">
-                <h3>🌙 Midweek Service Title & Description Generator</h3>
+            <div
+    class="card midweek-generator-card"
+    style="margin-top: 30px;"
+>
+    <h3>🌙 Midweek Service Title & Description Generator</h3>
                 <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">Automatically generate the title and description for Midweek Live based on your saved records.</p>
                 
                 <!-- INAYOS ANG FUNCTION DITO MULA SA generateMidweekStreamDetails() PATUNGONG generateCOJTGKStreamDetailsFromSaved('midweek') -->
@@ -1006,7 +1103,379 @@
                     <button class="secondary-btn" onclick="copyMidweekDetails()" style="align-self: flex-start;">📋 Copy to Clipboard</button>
                 </div>
             </div>
-        </section>
+            </div>
+    <!-- END MIDWEEK PANEL -->
+
+</section>
+<!-- END SERVICE PLANNER -->
+
+<!-- =====================================================
+     VIEW PROGRAM MODAL
+===================================================== -->
+
+<div
+    id="viewProgramModal"
+    class="modal hidden"
+>
+
+    <div class="modal-content program-view-modal">
+
+        <div class="modal-header">
+
+            <div>
+
+                <h2 id="viewProgramTitle">
+                    Program Details
+                </h2>
+
+                <p
+                    id="viewProgramSubtitle"
+                    style="
+                        margin:4px 0 0;
+                        color:#6f7780;
+                        font-size:13px;
+                    "
+                >
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="close-btn"
+                onclick="closeViewProgramModal()"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div
+            id="viewProgramItems"
+            class="program-view-list"
+        >
+        </div>
+
+
+        <div class="modal-footer">
+
+            <button
+                type="button"
+                class="secondary-btn"
+                onclick="closeViewProgramModal()"
+            >
+                Close
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- =====================================================
+     PROGRAM PLANNER PAGE
+===================================================== -->
+
+<section
+    id="program-planner"
+    class="page hidden"
+>
+
+    <!-- HEADER -->
+
+    <div class="planner-header">
+
+        <div>
+
+            <div class="program-planner-title">
+
+                <i data-lucide="clipboard-list"></i>
+
+                <h1 class="page-title">
+                    Program Planner
+                </h1>
+
+            </div>
+
+            <p class="page-subtitle">
+                Create and manage church service programs
+            </p>
+
+        </div>
+
+
+        <button
+            type="button"
+            class="primary-btn"
+            data-admin-only="true"
+            onclick="newProgramPlan()"
+        >
+            + New Program
+        </button>
+
+    </div>
+
+
+    <!-- =================================================
+         PROGRAM TYPE TABS
+    ================================================== -->
+
+    <div class="program-planner-tabs">
+
+        <button
+            type="button"
+            id="programTabSunday"
+            class="program-planner-tab active"
+            onclick="switchProgramPlannerTab('sunday')"
+        >
+            ☀️ Sunday Service
+        </button>
+
+
+        <button
+            type="button"
+            id="programTabMidweek"
+            class="program-planner-tab"
+            onclick="switchProgramPlannerTab('midweek')"
+        >
+            🌙 Midweek Service
+        </button>
+
+
+        <button
+            type="button"
+            id="programTabSpecial"
+            class="program-planner-tab"
+            onclick="switchProgramPlannerTab('special')"
+        >
+            ★ Special Event
+        </button>
+
+    </div>
+
+
+    <!-- =================================================
+         PROGRAM EDITOR
+    ================================================== -->
+
+    <div class="program-planner-card">
+
+        <!-- PROGRAM INFORMATION -->
+
+        <div class="program-info-grid">
+
+            <div class="form-group">
+
+                <label>
+                    Program Date
+                </label>
+
+                <input
+                    type="date"
+                    id="programDate"
+                >
+
+            </div>
+
+
+            <!-- SPECIAL EVENT NAME -->
+
+            <div
+                class="form-group hidden"
+                id="programEventNameGroup"
+            >
+
+                <label>
+                    Event Name
+                </label>
+
+                <input
+                    type="text"
+                    id="programEventName"
+                    placeholder="Example: Church Anniversary"
+                >
+
+            </div>
+
+        </div>
+
+
+        <!-- =============================================
+             PROGRAM ITEMS HEADER
+        ============================================== -->
+
+        <div class="program-items-header">
+
+            <div>
+
+                <h3>
+                    Program Flow
+                </h3>
+
+                <p>
+                    Arrange the program and assign members.
+                </p>
+
+            </div>
+
+
+            <div
+    style="
+        display:flex;
+        gap:8px;
+        flex-wrap:wrap;
+    "
+    data-admin-only="true"
+>
+
+    <button
+        type="button"
+        class="secondary-btn"
+        onclick="loadDefaultProgramItems()"
+    >
+        Use Default Program
+    </button>
+
+
+    <button
+        type="button"
+        class="secondary-btn"
+        onclick="addProgramItem()"
+    >
+        + Add Program Item
+    </button>
+
+</div>
+
+        </div>
+
+
+        <!-- =============================================
+             PROGRAM ITEMS
+        ============================================== -->
+
+        <div
+            id="programItemsList"
+            class="program-items-list"
+        >
+
+            <div class="program-empty-state">
+
+                No program items yet.
+
+            </div>
+
+        </div>
+
+
+        <!-- =============================================
+             SAVE CONTROLS
+        ============================================== -->
+
+        <div
+            class="program-actions"
+            data-admin-only="true"
+        >
+
+            <button
+                type="button"
+                class="secondary-btn"
+                onclick="clearProgramEditor()"
+            >
+                Clear
+            </button>
+
+
+            <button
+                type="button"
+                class="primary-btn"
+                onclick="saveProgramPlan()"
+            >
+                Save Program
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         SAVED PROGRAMS
+    ================================================== -->
+
+    <div class="program-planner-card">
+
+        <div class="program-saved-header">
+
+            <div>
+
+                <h3 id="programSavedTitle">
+                    Saved Sunday Service Programs
+                </h3>
+
+                <p>
+                    Previously saved program plans.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="program-table-wrapper">
+
+            <table class="program-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Date
+                        </th>
+
+                        <th>
+                            Program
+                        </th>
+
+                        <th>
+                            Items
+                        </th>
+
+                        <th>
+                            Actions
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="programHistoryBody">
+
+                    <tr>
+
+                        <td
+                            colspan="4"
+                            class="program-empty-table"
+                        >
+                            No saved programs.
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</section>
 
         <!---------------------------------------------------------------------- SONGS LIBRARY -------------------------------------------------------------------------->
         <section id="songs" class="page hidden">
@@ -2713,7 +3182,7 @@
                     <option value="F">F</option>
                     <option value="F#">F#</option>
                     <option value="G">G</option>
-                    <option value="Ab">Ab</option>
+                    <option value="G#">G#</option>
                     <option value="A">A</option>
                     <option value="Bb">Bb</option>
                     <option value="B">B</option>
@@ -2823,66 +3292,72 @@
     >
 </div>
 
-<div class="form-row">
+     <!-- =========================================
+     MEMBER MINISTRY
+========================================= -->
 
-    <div class="form-group">
+<div class="form-group member-ministry-section">
 
-     <div class="ministry-header">
+    <div class="ministry-header">
 
-    <label>
-        Ministry Group
-    </label>
+        <label>
+            Ministry Group
+        </label>
 
-    <div class="ministry-actions">
+        <div class="ministry-actions">
 
-        <button
-            type="button"
-            class="ministry-action-btn"
-            onclick="addCustomMinistry()"
-            data-admin-only="true"
-        >
-            <span>＋</span>
-            Add Ministry
-        </button>
+            <button
+                type="button"
+                class="ministry-action-btn"
+                onclick="addCustomMinistry()"
+                data-admin-only="true"
+            >
+                <span>＋</span>
+                Add Ministry
+            </button>
 
-        <button
-            type="button"
-            class="ministry-action-btn"
-            onclick="openManageMinistries()"
-            data-admin-only="true"
-        >
-            <span>⚙</span>
-            Manage
-        </button>
+            <button
+                type="button"
+                class="ministry-action-btn"
+                onclick="openManageMinistries()"
+                data-admin-only="true"
+            >
+                <span>⚙</span>
+                Manage
+            </button>
 
-    </div>
-
-</div>
-
-        <div
-            id="memberMinistry"
-            class="ministry-checkbox-list"
-        >
-            <!-- Ministries loaded from Supabase -->
         </div>
 
     </div>
 
 
-    <div class="form-group">
-
-        <label>Role</label>
-
-        <input
-            type="text"
-            id="memberRole"
-            placeholder="e.g. Leader, Guitarist, Member"
-        >
-
+    <div
+        id="memberMinistry"
+        class="ministry-checkbox-list member-ministry-scroll"
+    >
+        <!-- Ministries loaded from Supabase -->
     </div>
 
 </div>
 
+
+<!-- =========================================
+     MEMBER ROLE
+========================================= -->
+
+<div class="form-group member-role-section">
+
+    <label>
+        Role
+    </label>
+
+    <input
+        type="text"
+        id="memberRole"
+        placeholder="e.g. Leader, Guitarist, Member"
+    >
+
+</div>
 
 <div class="modal-footer">
 

@@ -14472,3 +14472,2522 @@ body.dark .file-folder-modal-content .modal-actions {
         #34414C !important;
 
 }
+
+/* =========================================================
+   SYSTEM STATUS ALERTS
+   ORGANIZED + SCROLLABLE
+========================================================= */
+
+
+/* =========================================================
+   ALERT LIST SCROLL AREA
+========================================================= */
+
+#systemStatusAlertsList {
+
+    max-height:
+        520px;
+
+    overflow-y:
+        auto;
+
+    overflow-x:
+        hidden;
+
+    padding-right:
+        8px;
+
+    scroll-behavior:
+        smooth;
+
+}
+
+
+/* =========================================================
+   ALERT GROUP
+========================================================= */
+
+.system-alert-group {
+
+    margin-bottom:
+        18px;
+
+}
+
+
+.system-alert-group:last-child {
+
+    margin-bottom:
+        0;
+
+}
+
+
+/* =========================================================
+   GROUP HEADER
+========================================================= */
+
+.system-alert-group-header {
+
+    position:
+        sticky;
+
+    top:
+        0;
+
+    z-index:
+        5;
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+    gap:
+        12px;
+
+    margin-bottom:
+        8px;
+
+    padding:
+        9px 11px;
+
+    background:
+        var(
+            --church-cream,
+            #f8fafc
+        );
+
+    border:
+        1px solid
+        var(
+            --church-border,
+            #e2e8f0
+        );
+
+    border-left:
+        4px solid
+        var(
+            --church-blue,
+            #164f94
+        );
+
+    border-radius:
+        8px;
+
+}
+
+
+/* =========================================================
+   GROUP TITLE
+========================================================= */
+
+.system-alert-group-title {
+
+    min-width:
+        0;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        8px;
+
+}
+
+
+.system-alert-group-title strong {
+
+    color:
+        var(
+            --church-blue-dark,
+            #123f77
+        );
+
+    font-size:
+        12px;
+
+    font-weight:
+        700;
+
+}
+
+
+.system-alert-group-icon {
+
+    flex-shrink:
+        0;
+
+    font-size:
+        14px;
+
+}
+
+
+/* =========================================================
+   GROUP COUNT
+========================================================= */
+
+.system-alert-group-count {
+
+    min-width:
+        25px;
+
+    height:
+        25px;
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    padding:
+        0 7px;
+
+    background:
+        var(
+            --church-blue,
+            #164f94
+        );
+
+    color:
+        #ffffff;
+
+    border-radius:
+        999px;
+
+    font-size:
+        10px;
+
+    font-weight:
+        700;
+
+}
+
+
+/* =========================================================
+   ALERT ITEMS INSIDE GROUP
+========================================================= */
+
+.system-alert-group
+.member-alert-item {
+
+    margin-left:
+        6px;
+
+    margin-right:
+        2px;
+
+}
+
+
+/* =========================================================
+   CUSTOM SCROLLBAR
+========================================================= */
+
+#systemStatusAlertsList::-webkit-scrollbar {
+
+    width:
+        7px;
+
+}
+
+
+#systemStatusAlertsList::-webkit-scrollbar-track {
+
+    background:
+        var(
+            --church-cream,
+            #f8fafc
+        );
+
+    border-radius:
+        10px;
+
+}
+
+
+#systemStatusAlertsList::-webkit-scrollbar-thumb {
+
+    background:
+        var(
+            --church-beige,
+            #d7c6ad
+        );
+
+    border-radius:
+        10px;
+
+}
+
+
+#systemStatusAlertsList::-webkit-scrollbar-thumb:hover {
+
+    background:
+        var(
+            --church-blue,
+            #164f94
+        );
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+
+    #systemStatusAlertsList {
+
+        max-height:
+            420px;
+
+        padding-right:
+            5px;
+
+    }
+
+
+    .system-alert-group-header {
+
+        padding:
+            8px 9px;
+
+    }
+
+
+    .system-alert-group-title strong {
+
+        font-size:
+            11px;
+
+    }
+
+}
+
+
+/* =========================================================
+   DARK MODE
+========================================================= */
+
+body.dark
+.system-alert-group-header {
+
+    background:
+        #19232d;
+
+    border-color:
+        #34414c;
+
+    border-left-color:
+        var(
+            --church-blue,
+            #164f94
+        );
+
+}
+
+
+body.dark
+.system-alert-group-title strong {
+
+    color:
+        #f6f2ed;
+
+}
+
+/* =========================================================
+   REPORTS - RECENT ATTENDANCE SUMMARY
+========================================================= */
+
+#rep-attendance-history {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        8px;
+
+}
+
+
+.recent-attendance-item {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+    gap:
+        15px;
+
+    padding:
+        11px 12px;
+
+    background:
+        var(
+            --church-cream,
+            #f8fafc
+        );
+
+    border:
+        1px solid
+        var(
+            --church-border,
+            #e2e8f0
+        );
+
+    border-left:
+        4px solid
+        var(
+            --church-blue,
+            #164f94
+        );
+
+    border-radius:
+        9px;
+
+}
+
+
+.recent-attendance-info {
+
+    min-width:
+        0;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        3px;
+
+}
+
+
+.recent-attendance-info strong {
+
+    color:
+        var(
+            --church-dark,
+            #1f2937
+        );
+
+    font-size:
+        13px;
+
+    font-weight:
+        700;
+
+}
+
+
+.recent-attendance-info span {
+
+    color:
+        var(
+            --church-gray,
+            #64748b
+        );
+
+    font-size:
+        11px;
+
+}
+
+
+.recent-attendance-result {
+
+    flex-shrink:
+        0;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    align-items:
+        flex-end;
+
+    gap:
+        2px;
+
+}
+
+
+.recent-attendance-result strong {
+
+    color:
+        var(
+            --church-blue,
+            #164f94
+        );
+
+    font-size:
+        14px;
+
+    font-weight:
+        800;
+
+}
+
+
+.recent-attendance-result span {
+
+    color:
+        var(
+            --church-gray,
+            #64748b
+        );
+
+    font-size:
+        11px;
+
+    font-weight:
+        600;
+
+}
+
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+
+    .recent-attendance-item {
+
+        align-items:
+            flex-start;
+
+    }
+
+}
+
+
+/* DARK MODE */
+
+body.dark
+.recent-attendance-item {
+
+    background:
+        #19232d;
+
+    border-color:
+        #34414c;
+
+}
+
+
+body.dark
+.recent-attendance-info strong {
+
+    color:
+        #f6f2ed;
+
+}
+
+
+body.dark
+.recent-attendance-info span,
+body.dark
+.recent-attendance-result span {
+
+    color:
+        #aab4bf;
+
+}
+
+/* =========================================================
+   MEMBER MODAL - MINISTRY FIX
+========================================================= */
+
+#memberModal .modal-content {
+
+    width: min(620px, 94vw);
+
+    max-height: 90vh;
+
+    display: flex;
+
+    flex-direction: column;
+
+    overflow-y: auto;
+
+}
+
+
+/* =========================================================
+   MINISTRY SECTION
+========================================================= */
+
+#memberModal .member-ministry-section {
+
+    width: 100%;
+
+    margin-top: 4px;
+
+}
+
+
+#memberModal .ministry-header {
+
+    width: 100%;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 12px;
+
+    margin-bottom: 10px;
+
+}
+
+
+#memberModal .ministry-header > label {
+
+    margin: 0;
+
+    flex-shrink: 0;
+
+}
+
+
+/* =========================================================
+   MINISTRY BUTTONS
+========================================================= */
+
+#memberModal .ministry-actions {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    flex-wrap: wrap;
+
+}
+
+
+/* =========================================================
+   MINISTRY LIST
+========================================================= */
+
+#memberModal .member-ministry-scroll {
+
+    width: 100%;
+
+    max-height: 190px;
+
+    overflow-y: auto;
+
+    overflow-x: hidden;
+
+    box-sizing: border-box;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 8px 14px;
+
+    padding: 12px;
+
+    background: #f8fafc;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 9px;
+
+}
+
+
+/* EACH MINISTRY */
+
+#memberModal
+.member-ministry-scroll label {
+
+    min-width: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    margin: 0;
+
+    padding: 6px 7px;
+
+    border-radius: 6px;
+
+    cursor: pointer;
+
+}
+
+
+/* CHECKBOX */
+
+#memberModal
+.member-ministry-scroll
+input[type="checkbox"] {
+
+    width: 16px;
+
+    height: 16px;
+
+    margin: 0;
+
+    flex: 0 0 16px;
+
+}
+
+
+/* MINISTRY NAME */
+
+#memberModal
+.member-ministry-scroll
+label span {
+
+    min-width: 0;
+
+    overflow-wrap: anywhere;
+
+    font-size: 13px;
+
+}
+
+
+/* =========================================================
+   ROLE
+========================================================= */
+
+#memberModal .member-role-section {
+
+    width: 100%;
+
+    margin-top: 14px;
+
+}
+
+
+#memberModal .member-role-section input {
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+}
+
+
+/* =========================================================
+   SCROLLBAR
+========================================================= */
+
+#memberModal
+.member-ministry-scroll::-webkit-scrollbar {
+
+    width: 6px;
+
+}
+
+
+#memberModal
+.member-ministry-scroll::-webkit-scrollbar-thumb {
+
+    background: #cbd5e1;
+
+    border-radius: 10px;
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 600px) {
+
+    #memberModal .modal-content {
+
+        width: 94vw;
+
+        max-height: 92vh;
+
+    }
+
+
+    #memberModal .ministry-header {
+
+        align-items: flex-start;
+
+        flex-direction: column;
+
+    }
+
+
+    #memberModal .ministry-actions {
+
+        width: 100%;
+
+    }
+
+
+    #memberModal .ministry-action-btn {
+
+        flex: 1;
+
+    }
+
+
+    #memberModal .member-ministry-scroll {
+
+        grid-template-columns: 1fr;
+
+        max-height: 180px;
+
+    }
+
+}
+
+/* =========================================================
+   SERVICE PLANNER TABS
+========================================================= */
+
+.service-planner-tabs {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin-bottom: 24px;
+
+    padding: 6px;
+
+    background: #f1f5f9;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 12px;
+
+    width: fit-content;
+}
+
+
+.service-planner-tab {
+
+    border: none;
+
+    background: transparent;
+
+    color: #64748b;
+
+    padding: 10px 18px;
+
+    border-radius: 9px;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+
+.service-planner-tab:hover {
+
+    background: #ffffff;
+
+    color: #2563eb;
+
+}
+
+
+.service-planner-tab.active {
+
+    background: #2563eb;
+
+    color: #ffffff;
+
+    box-shadow:
+        0 2px 6px
+        rgba(37, 99, 235, 0.20);
+
+}
+
+
+.service-planner-panel {
+
+    width: 100%;
+}
+
+
+.service-planner-panel.hidden {
+
+    display: none;
+}
+
+
+/* ATTENDANCE VIEW-ONLY */
+
+#service-planner
+input:disabled,
+
+#service-planner
+textarea:disabled,
+
+#service-planner
+select:disabled {
+
+    opacity: 1;
+
+    cursor: default;
+
+    background: #f8fafc;
+
+    color: #475569;
+}
+
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+
+    .service-planner-tabs {
+
+        width: 100%;
+
+    }
+
+
+    .service-planner-tab {
+
+        flex: 1;
+
+        padding: 10px 8px;
+
+        font-size: 12px;
+
+    }
+
+}
+
+/* =========================================================
+   SERVICE PLANNER
+   FINAL CHURCHHQ BLUE + CREAM THEME
+========================================================= */
+
+
+/* =========================================================
+   MAIN SERVICE CARDS
+========================================================= */
+
+#service-planner .service-card,
+#service-planner .card {
+
+    background:
+        var(--church-white);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-top:
+        4px solid
+        var(--church-blue);
+
+    border-radius:
+        12px;
+
+    box-shadow:
+        0 6px 18px
+        rgba(25, 27, 30, 0.06);
+
+}
+
+
+/* =========================================================
+   SERVICE BOXES
+========================================================= */
+
+#service-planner .service-box {
+
+    background:
+        var(--church-cream);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-left:
+        4px solid
+        var(--church-blue);
+
+    border-radius:
+        10px;
+
+    padding:
+        16px;
+
+}
+
+
+#service-planner .service-box h4 {
+
+    color:
+        var(--church-blue-dark) !important;
+
+    font-weight:
+        700;
+
+}
+
+
+/* =========================================================
+   LABELS
+========================================================= */
+
+#service-planner label {
+
+    color:
+        var(--church-dark);
+
+    font-weight:
+        600;
+
+}
+
+
+/* =========================================================
+   INPUT / SELECT / TEXTAREA
+========================================================= */
+
+#service-planner input,
+#service-planner select,
+#service-planner textarea {
+
+    background:
+        var(--church-white);
+
+    color:
+        var(--church-dark);
+
+    border:
+        1px solid
+        var(--church-border);
+
+}
+
+
+#service-planner input:focus,
+#service-planner select:focus,
+#service-planner textarea:focus {
+
+    border-color:
+        var(--church-blue);
+
+    outline:
+        none;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(22, 79, 148, 0.10);
+
+}
+
+
+/* =========================================================
+   SAVED SERVICE TABLE
+========================================================= */
+
+#service-planner table {
+
+    width:
+        100%;
+
+    border-collapse:
+        collapse;
+
+    background:
+        var(--church-white);
+
+}
+
+
+/* TABLE HEADER */
+
+#service-planner table thead,
+#service-planner table thead tr {
+
+    background:
+        var(--church-blue) !important;
+
+}
+
+
+#service-planner table th {
+
+    background:
+        var(--church-blue) !important;
+
+    color:
+        var(--church-white) !important;
+
+    font-weight:
+        700;
+
+    border-color:
+        rgba(255,255,255,.15) !important;
+
+}
+
+
+/* TABLE BODY */
+
+#service-planner table td {
+
+    background:
+        var(--church-white);
+
+    color:
+        var(--church-dark) !important;
+
+    border-color:
+        var(--church-border);
+
+}
+
+
+/* ROW HOVER */
+
+#service-planner table tbody tr:hover td {
+
+    background:
+        var(--church-blue-light);
+
+}
+
+
+/* =========================================================
+   SAVED RECORD CARD TITLE
+========================================================= */
+
+#service-planner .card h2,
+#service-planner .card h3 {
+
+    color:
+        var(--church-blue-dark) !important;
+
+}
+
+
+/* =========================================================
+   SERVICE PLANNER TABS
+========================================================= */
+
+#service-planner .service-planner-tabs {
+
+    background:
+        var(--church-beige-light);
+
+    border:
+        1px solid
+        var(--church-border);
+
+}
+
+
+#service-planner .service-planner-tab {
+
+    color:
+        var(--church-blue-dark);
+
+}
+
+
+#service-planner .service-planner-tab:hover {
+
+    background:
+        var(--church-white);
+
+    color:
+        var(--church-blue);
+
+}
+
+
+#service-planner .service-planner-tab.active {
+
+    background:
+        var(--church-blue);
+
+    color:
+        var(--church-white);
+
+}
+
+
+/* =========================================================
+   BUTTONS INSIDE SERVICE PLANNER
+========================================================= */
+
+#service-planner .primary-btn {
+
+    background:
+        var(--church-blue);
+
+    color:
+        var(--church-white);
+
+}
+
+
+#service-planner .primary-btn:hover {
+
+    background:
+        var(--church-blue-dark);
+
+}
+
+
+/* =========================================================
+   VIEW-ONLY ATTENDANCE USER
+========================================================= */
+
+#service-planner input:disabled,
+#service-planner select:disabled,
+#service-planner textarea:disabled {
+
+    opacity:
+        1;
+
+    background:
+        var(--church-cream);
+
+    color:
+        var(--church-dark);
+
+    border-color:
+        var(--church-border);
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+
+    #service-planner .service-card,
+    #service-planner .card {
+
+        border-radius:
+            10px;
+
+    }
+
+
+    #service-planner .service-box {
+
+        border-radius:
+            8px;
+
+    }
+
+}
+
+/* =========================================================
+   PROGRAM PLANNER
+   CHURCHHQ BLUE + CREAM THEME
+========================================================= */
+
+.program-planner-title {
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+}
+
+
+.program-planner-title svg {
+
+    width: 28px;
+    height: 28px;
+
+    color: var(--church-blue);
+
+}
+
+
+/* TABS */
+
+.program-planner-tabs {
+
+    display: flex;
+
+    gap: 8px;
+
+    width: fit-content;
+
+    margin-bottom: 22px;
+
+    padding: 6px;
+
+    background:
+        var(--church-beige-light);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-radius: 12px;
+
+}
+
+
+.program-planner-tab {
+
+    padding: 10px 18px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: transparent;
+
+    color:
+        var(--church-blue-dark);
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+}
+
+
+.program-planner-tab:hover {
+
+    background:
+        var(--church-white);
+
+}
+
+
+.program-planner-tab.active {
+
+    background:
+        var(--church-blue);
+
+    color:
+        var(--church-white);
+
+}
+
+
+/* MAIN CARD */
+
+.program-planner-card {
+
+    margin-bottom: 20px;
+
+    padding: 20px;
+
+    background:
+        var(--church-white);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-top:
+        4px solid
+        var(--church-blue);
+
+    border-radius: 12px;
+
+    box-shadow:
+        0 6px 18px
+        rgba(25, 27, 30, .06);
+
+}
+
+
+/* PROGRAM INFORMATION */
+
+.program-info-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(0, 1fr)
+        );
+
+    gap: 15px;
+
+    margin-bottom: 22px;
+
+}
+
+
+/* ITEMS HEADER */
+
+.program-items-header,
+.program-saved-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    margin-bottom: 15px;
+
+}
+
+
+.program-items-header h3,
+.program-saved-header h3 {
+
+    margin: 0;
+
+    color:
+        var(--church-blue-dark);
+
+}
+
+
+.program-items-header p,
+.program-saved-header p {
+
+    margin:
+        4px 0 0;
+
+    color:
+        var(--church-gray);
+
+    font-size:
+        13px;
+
+}
+
+
+/* EMPTY */
+
+.program-empty-state {
+
+    padding: 30px 15px;
+
+    text-align: center;
+
+    color:
+        var(--church-gray);
+
+    background:
+        var(--church-cream);
+
+    border:
+        1px dashed
+        var(--church-border);
+
+    border-radius: 10px;
+
+}
+
+
+/* ACTIONS */
+
+.program-actions {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    margin-top: 20px;
+
+    padding-top: 15px;
+
+    border-top:
+        1px solid
+        var(--church-border);
+
+}
+
+
+/* TABLE */
+
+.program-table-wrapper {
+
+    width: 100%;
+
+    overflow-x: auto;
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-radius: 10px;
+
+}
+
+
+.program-table {
+
+    width: 100%;
+
+    border-collapse: collapse;
+
+}
+
+
+.program-table thead {
+
+    background:
+        var(--church-blue);
+
+}
+
+
+.program-table th {
+
+    padding: 12px;
+
+    text-align: left;
+
+    color:
+        var(--church-white) !important;
+
+    font-size: 13px;
+
+}
+
+
+.program-table td {
+
+    padding: 12px;
+
+    color:
+        var(--church-dark);
+
+    border-bottom:
+        1px solid
+        var(--church-border);
+
+}
+
+
+.program-table tbody tr:hover {
+
+    background:
+        var(--church-blue-light);
+
+}
+
+
+.program-empty-table {
+
+    padding: 25px !important;
+
+    text-align: center;
+
+    color:
+        var(--church-gray) !important;
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+
+    .program-planner-tabs {
+
+        width: 100%;
+
+        overflow-x: auto;
+
+    }
+
+
+    .program-planner-tab {
+
+        flex: 1;
+
+        min-width: 130px;
+
+        padding:
+            10px 8px;
+
+        font-size:
+            12px;
+
+        white-space:
+            nowrap;
+
+    }
+
+
+    .program-info-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .program-items-header {
+
+        align-items:
+            flex-start;
+
+        flex-direction:
+            column;
+
+    }
+
+
+    .program-actions {
+
+        flex-direction:
+            column-reverse;
+
+    }
+
+
+    .program-actions button {
+
+        width:
+            100%;
+
+    }
+
+}
+
+/* =========================================================
+   SERVICE PLANNER
+   SECTION SPACING FIX
+========================================================= */
+
+/* Give each major block breathing room */
+
+#service-planner .service-planner-panel > .service-card,
+#service-planner .service-planner-panel > .card,
+#service-planner .service-planner-panel > .song-card {
+    margin-bottom: 24px !important;
+}
+
+
+/* Saved Service Records */
+
+#service-planner .service-history,
+#service-planner .history-section {
+    margin-top: 26px !important;
+    margin-bottom: 26px !important;
+}
+
+
+/* Live Title & Description Generator */
+
+#service-planner .stream-generator,
+#service-planner .live-generator {
+    margin-top: 26px !important;
+}
+
+
+/* Extra separation between direct major children */
+
+#service-planner .service-planner-panel > * + * {
+    margin-top: 24px;
+}
+
+
+/* Avoid double spacing inside grids/forms */
+
+#service-planner .service-grid > *,
+#service-planner .service-box > *,
+#service-planner .form-group > * {
+    margin-top: initial;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+
+    #service-planner .service-planner-panel > * + * {
+        margin-top: 18px;
+    }
+
+}
+
+/* =========================================================
+   MIDWEEK SERVICE - FORCE SECTION SPACING
+========================================================= */
+
+/* Form section */
+#serviceMidweekPanel > .service-card {
+    margin-bottom: 30px !important;
+}
+
+
+/* Saved Midweek Records */
+#serviceMidweekPanel > .card {
+    margin-top: 0 !important;
+    margin-bottom: 30px !important;
+}
+
+
+/* Generator card */
+#serviceMidweekPanel > .card + .card {
+    margin-top: 30px !important;
+}
+
+
+/* Extra protection so borders never touch */
+#serviceMidweekPanel > .service-card + .card {
+    margin-top: 30px !important;
+}
+
+
+/* =========================================================
+   SUNDAY SAME CONSISTENT SPACING
+========================================================= */
+
+#serviceSundayPanel > .service-card {
+    margin-bottom: 30px !important;
+}
+
+#serviceSundayPanel > .card {
+    margin-bottom: 30px !important;
+}
+
+#serviceSundayPanel > .service-card + .card,
+#serviceSundayPanel > .card + .card {
+    margin-top: 30px !important;
+}
+
+
+/* MOBILE */
+
+@media (max-width: 768px) {
+
+    #serviceMidweekPanel > .service-card,
+    #serviceMidweekPanel > .card,
+    #serviceSundayPanel > .service-card,
+    #serviceSundayPanel > .card {
+        margin-bottom: 20px !important;
+    }
+
+    #serviceMidweekPanel > .service-card + .card,
+    #serviceMidweekPanel > .card + .card,
+    #serviceSundayPanel > .service-card + .card,
+    #serviceSundayPanel > .card + .card {
+        margin-top: 20px !important;
+    }
+}
+
+/* =========================================================
+   MIDWEEK SERVICE CARD SPACING
+========================================================= */
+
+#serviceMidweekPanel .midweek-records-card {
+    margin-top: 30px !important;
+}
+
+#serviceMidweekPanel .midweek-generator-card {
+    margin-top: 30px !important;
+}
+
+/* =========================================================
+   PROGRAM PLANNER - PROGRAM ITEMS
+========================================================= */
+
+.program-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+
+.program-item-row {
+    display: grid;
+
+    grid-template-columns:
+        42px
+        minmax(220px, 1fr)
+        minmax(220px, 1fr)
+        auto;
+
+    gap: 12px;
+
+    align-items: end;
+
+    padding: 14px;
+
+    background:
+        var(--church-cream);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-left:
+        4px solid
+        var(--church-blue);
+
+    border-radius: 10px;
+}
+
+
+/* NUMBER */
+
+.program-item-order {
+    width: 34px;
+    height: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    align-self: center;
+
+    background:
+        var(--church-blue);
+
+    color:
+        var(--church-white);
+
+    border-radius: 50%;
+
+    font-size: 13px;
+    font-weight: 700;
+}
+
+
+/* FIELD */
+
+.program-item-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+
+.program-item-field label {
+    color:
+        var(--church-dark);
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+.program-item-field input,
+.program-item-field select {
+    width: 100%;
+
+    min-height: 40px;
+
+    padding: 8px 10px;
+
+    background:
+        var(--church-white);
+
+    color:
+        var(--church-dark);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-radius: 7px;
+}
+
+
+/* ACTIONS */
+
+.program-item-actions {
+    display: flex;
+    gap: 6px;
+
+    align-items: center;
+
+    padding-bottom: 2px;
+}
+
+
+.program-item-icon-btn {
+    width: 36px;
+    height: 36px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    background:
+        var(--church-white);
+
+    color:
+        var(--church-blue-dark);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-radius: 50%;
+
+    cursor: pointer;
+
+    font-size: 17px;
+    font-weight: 700;
+}
+
+
+.program-item-icon-btn:hover:not(:disabled) {
+    background:
+        var(--church-blue-light);
+
+    border-color:
+        var(--church-blue);
+}
+
+
+.program-item-icon-btn.delete {
+    color: #b43f3f;
+
+    border-color: #efc1c1;
+
+    background: #fff5f5;
+}
+
+
+.program-item-icon-btn:disabled {
+    opacity: .35;
+
+    cursor: not-allowed;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+
+    .program-item-row {
+        grid-template-columns:
+            36px
+            1fr;
+
+        align-items: start;
+    }
+
+
+    .program-item-order {
+        grid-row:
+            1 / 3;
+    }
+
+
+    .program-item-field {
+        grid-column:
+            2;
+    }
+
+
+    .program-item-actions {
+        grid-column:
+            2;
+
+        justify-content:
+            flex-end;
+
+        padding-top: 4px;
+    }
+
+}
+
+/* =========================================================
+   PROGRAM PLANNER - SEARCHABLE MEMBER PICKER
+========================================================= */
+
+.program-member-search-wrap {
+    position: relative;
+    width: 100%;
+}
+
+
+.program-member-search-wrap > input {
+    width: 100%;
+}
+
+
+/* SEARCH RESULTS */
+
+.program-member-results {
+    position: absolute;
+
+    top: calc(100% + 5px);
+    left: 0;
+    right: 0;
+
+    z-index: 1000;
+
+    max-height: 230px;
+
+    overflow-y: auto;
+
+    background:
+        var(--church-white);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-radius: 9px;
+
+    box-shadow:
+        0 10px 25px
+        rgba(25, 27, 30, .14);
+}
+
+
+.program-member-results.hidden {
+    display: none;
+}
+
+
+/* MEMBER RESULT */
+
+.program-member-result {
+    display: block;
+
+    width: 100%;
+
+    padding: 10px 12px;
+
+    background: transparent;
+
+    color:
+        var(--church-dark);
+
+    border: none;
+
+    border-bottom:
+        1px solid
+        var(--church-border);
+
+    text-align: left;
+
+    font-size: 13px;
+
+    cursor: pointer;
+}
+
+
+.program-member-result:last-child {
+    border-bottom: none;
+}
+
+
+.program-member-result:hover {
+    background:
+        var(--church-blue-light);
+
+    color:
+        var(--church-blue-dark);
+}
+
+
+/* NO RESULT */
+
+.program-member-no-result {
+    padding: 12px;
+
+    color:
+        var(--church-gray);
+
+    font-size: 13px;
+
+    text-align: center;
+}
+
+/* =========================================================
+   PROGRAM PLANNER - VIEW MODAL
+========================================================= */
+
+.program-view-modal {
+    width: min(620px, 94vw);
+
+    max-height: 88vh;
+
+    overflow-y: auto;
+}
+
+
+.program-view-list {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 9px;
+}
+
+
+.program-view-item {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 12px 14px;
+
+    background:
+        var(--church-cream);
+
+    border:
+        1px solid
+        var(--church-border);
+
+    border-left:
+        4px solid
+        var(--church-blue);
+
+    border-radius: 9px;
+}
+
+
+.program-view-order {
+    flex: 0 0 34px;
+
+    width: 34px;
+    height: 34px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background:
+        var(--church-blue);
+
+    color:
+        var(--church-white);
+
+    border-radius: 50%;
+
+    font-size: 13px;
+
+    font-weight: 800;
+}
+
+
+.program-view-info {
+    min-width: 0;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 3px;
+}
+
+
+.program-view-info strong {
+    color:
+        var(--church-blue-dark);
+
+    font-size: 14px;
+}
+
+
+.program-view-info span {
+    color:
+        var(--church-gray);
+
+    font-size: 13px;
+}
+
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+
+    .program-view-modal {
+        width: 94vw;
+
+        max-height: 90vh;
+
+        padding: 20px;
+    }
+
+}
+
+/* =========================================================
+   CHURCHHQ
+   FINAL MOBILE MODAL FIX
+   2026
+========================================================= */
+
+@media (max-width: 768px) {
+
+    /* =====================================================
+       MODAL BACKDROP
+       Allows the whole modal area to scroll safely
+    ===================================================== */
+
+    .modal {
+
+        position: fixed !important;
+        inset: 0 !important;
+
+        width: 100% !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+
+        padding: 12px !important;
+
+        display: flex !important;
+        align-items: flex-start !important;
+        justify-content: center !important;
+
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+
+        box-sizing: border-box !important;
+
+        -webkit-overflow-scrolling: touch;
+
+    }
+
+
+    /* Never override hidden state */
+
+    .modal.hidden {
+
+        display: none !important;
+
+    }
+
+
+    /* =====================================================
+       ALL STANDARD MODALS
+    ===================================================== */
+
+    .modal-content,
+    .leader-modal-content,
+    .file-folder-modal-content {
+
+        width: 100% !important;
+        max-width: 100% !important;
+
+        height: auto !important;
+        min-height: 0 !important;
+
+        max-height: calc(100dvh - 24px) !important;
+
+        margin: auto 0 !important;
+
+        padding: 18px 16px !important;
+
+        box-sizing: border-box !important;
+
+        border-radius: 14px !important;
+
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+
+        overscroll-behavior: contain;
+
+        -webkit-overflow-scrolling: touch;
+
+    }
+
+
+    /* =====================================================
+       HEADER
+       Remains visible while scrolling
+    ===================================================== */
+
+    .modal-content .modal-header,
+    .leader-modal-content .modal-header,
+    .file-folder-modal-content .modal-header {
+
+        position: sticky !important;
+
+        top: -18px !important;
+
+        z-index: 30 !important;
+
+        margin:
+            -2px 0 16px 0 !important;
+
+        padding:
+            8px 0 12px 0 !important;
+
+        background:
+            var(--church-white, #ffffff) !important;
+
+    }
+
+
+    /* Prevent long titles from hitting X button */
+
+    .modal-header h2,
+    .modal-header h3 {
+
+        min-width: 0 !important;
+
+        padding-right: 10px !important;
+
+        font-size: 18px !important;
+
+        line-height: 1.3 !important;
+
+        overflow-wrap: anywhere;
+
+    }
+
+
+    /* =====================================================
+       CLOSE BUTTON
+    ===================================================== */
+
+    .modal-content .close-btn,
+    .modal-content .modal-close,
+    .leader-modal-content .close-btn,
+    .leader-modal-content .modal-close {
+
+        flex:
+            0 0 34px !important;
+
+        width: 34px !important;
+        height: 34px !important;
+
+        min-width: 34px !important;
+
+        padding: 0 !important;
+
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+
+        border-radius: 50% !important;
+
+    }
+
+
+    /* =====================================================
+       FORMS
+    ===================================================== */
+
+    .modal-content .form-row,
+    .leader-modal-content .form-row,
+    .file-folder-modal-content .form-row {
+
+        display: grid !important;
+
+        grid-template-columns:
+            minmax(0, 1fr) !important;
+
+        gap: 12px !important;
+
+    }
+
+
+    .modal-content .form-group,
+    .leader-modal-content .form-group,
+    .file-folder-modal-content .form-group {
+
+        width: 100% !important;
+        min-width: 0 !important;
+
+    }
+
+
+    .modal-content input,
+    .modal-content select,
+    .modal-content textarea,
+    .leader-modal-content input,
+    .leader-modal-content select,
+    .leader-modal-content textarea,
+    .file-folder-modal-content input,
+    .file-folder-modal-content select,
+    .file-folder-modal-content textarea {
+
+        width: 100% !important;
+        max-width: 100% !important;
+
+        box-sizing: border-box !important;
+
+    }
+
+
+    /* =====================================================
+       TABLES / LONG CONTENT INSIDE MODAL
+    ===================================================== */
+
+    .modal-content table {
+
+        min-width: 600px;
+
+    }
+
+
+    .modal-content .table-wrapper,
+    .modal-content .table-container,
+    .modal-content .program-table-wrapper {
+
+        width: 100% !important;
+
+        overflow-x: auto !important;
+
+        -webkit-overflow-scrolling: touch;
+
+    }
+
+
+    /* =====================================================
+       FOOTER / ACTION BUTTONS
+    ===================================================== */
+
+    .modal-content .modal-footer,
+    .modal-content .modal-actions,
+    .leader-modal-content .modal-footer,
+    .leader-modal-content .modal-actions,
+    .file-folder-modal-content .modal-footer,
+    .file-folder-modal-content .modal-actions {
+
+        width: 100% !important;
+
+        display: flex !important;
+
+        flex-direction:
+            column-reverse !important;
+
+        gap: 8px !important;
+
+    }
+
+
+    .modal-content .modal-footer button,
+    .modal-content .modal-actions button,
+    .leader-modal-content .modal-footer button,
+    .leader-modal-content .modal-actions button,
+    .file-folder-modal-content .modal-footer button,
+    .file-folder-modal-content .modal-actions button {
+
+        width: 100% !important;
+
+    }
+
+
+    /* =====================================================
+       PROGRAM PLANNER MODAL
+    ===================================================== */
+
+    #programViewModal .modal-content {
+
+        width: 100% !important;
+
+        max-height:
+            calc(100dvh - 24px) !important;
+
+        overflow-y: auto !important;
+
+    }
+
+
+    #programViewModal .program-info-grid {
+
+        grid-template-columns:
+            1fr !important;
+
+    }
+
+
+    /* =====================================================
+       EXTRA SMALL PHONES
+    ===================================================== */
+
+}
+
+
+@media (max-width: 420px) {
+
+    .modal {
+
+        padding: 8px !important;
+
+    }
+
+
+    .modal-content,
+    .leader-modal-content,
+    .file-folder-modal-content {
+
+        max-height:
+            calc(100dvh - 16px) !important;
+
+        padding:
+            16px 13px !important;
+
+        border-radius:
+            12px !important;
+
+    }
+
+
+    .modal-header h2,
+    .modal-header h3 {
+
+        font-size:
+            17px !important;
+
+    }
+
+}

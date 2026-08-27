@@ -2517,15 +2517,18 @@ function showPage(pageId) {
     // VIEWER RESTRICTED PAGES
     // =====================================
 
-    const viewerRestrictedPages = [
+const viewerRestrictedPages = [
 
-        "members",
-        "leaders",
-        "attendance",
-        "reports",
-        "settings"
+    "service-planner",
+    "program-planner",
 
-    ];
+    "members",
+    "leaders",
+    "attendance",
+    "reports",
+    "settings"
+
+];
 
 
     if (
@@ -2604,15 +2607,51 @@ function showPage(pageId) {
 
     }
 
+// =====================================================
+// AUTO LOAD PROGRAM PLANNER
+// =====================================================
+
+if (pageId === "program-planner") {
+
+    currentProgramType =
+        currentProgramType ||
+        "sunday";
+
+
+    if (
+        typeof switchProgramPlannerTab ===
+        "function"
+    ) {
+
+        switchProgramPlannerTab(
+            currentProgramType
+        );
+
+    }
+
+}
+
+
+// =====================================================
+// AUTO LOAD AUDIT LOG
+// SETTINGS + ADMIN ONLY
+// =====================================================
+
 if (
     pageId === "settings" &&
     isAdminUser()
 ) {
 
-    loadAuditLogsFromSupabase();
+    if (
+        typeof loadAuditLogsFromSupabase ===
+        "function"
+    ) {
+
+        loadAuditLogsFromSupabase();
+
+    }
 
 }
-
 // =====================================
 // AUDIT - PAGE VIEW
 // =====================================
@@ -2629,6 +2668,12 @@ if (
 
         planner:
             "Planner",
+
+        "service-planner":
+            "Service Planner",
+
+        "program-planner":
+             "Program Planner",
 
         "sunday-service":
             "Sunday Service",
@@ -2716,6 +2761,120 @@ if (themeBtn) {
         }
     });
 }
+
+
+// =====================================================
+// SERVICE PLANNER TABS
+// =====================================================
+
+function switchServicePlannerTab(type) {
+
+    const sundayPanel =
+        document.getElementById(
+            "serviceSundayPanel"
+        );
+
+    const midweekPanel =
+        document.getElementById(
+            "serviceMidweekPanel"
+        );
+
+    const sundayTab =
+        document.getElementById(
+            "serviceTabSunday"
+        );
+
+    const midweekTab =
+        document.getElementById(
+            "serviceTabMidweek"
+        );
+
+
+    if (
+        !sundayPanel ||
+        !midweekPanel
+    ) {
+        return;
+    }
+
+
+    // =====================================
+    // SUNDAY
+    // =====================================
+
+    if (type === "sunday") {
+
+        sundayPanel.classList.remove(
+            "hidden"
+        );
+
+        midweekPanel.classList.add(
+            "hidden"
+        );
+
+
+        if (sundayTab) {
+            sundayTab.classList.add(
+                "active"
+            );
+        }
+
+
+        if (midweekTab) {
+            midweekTab.classList.remove(
+                "active"
+            );
+        }
+
+    }
+
+
+    // =====================================
+    // MIDWEEK
+    // =====================================
+
+    else {
+
+        sundayPanel.classList.add(
+            "hidden"
+        );
+
+        midweekPanel.classList.remove(
+            "hidden"
+        );
+
+
+        if (sundayTab) {
+            sundayTab.classList.remove(
+                "active"
+            );
+        }
+
+
+        if (midweekTab) {
+            midweekTab.classList.add(
+                "active"
+            );
+        }
+
+    }
+
+
+    // =====================================
+    // RESTORE ROLE PERMISSIONS
+    // =====================================
+
+    if (
+        typeof applyRoleBasedUI ===
+        "function"
+    ) {
+
+        applyRoleBasedUI();
+
+    }
+
+}
+
 
 /* =========================================
    SUNDAY & MIDWEEK SERVICE MULTI-RECORD ENGINE
@@ -6581,6 +6740,2872 @@ if (assigneeSelect) {
 }
 }
 
+
+
+// =====================================================
+// PROGRAM PLANNER
+// BASIC STATE + TABS
+// =====================================================
+
+let currentProgramType =
+    "sunday";
+
+let editingProgramId =
+    null;
+
+let programItems =
+    [];
+
+let programPlans =
+    [];
+
+// =====================================================
+// SWITCH PROGRAM TYPE
+// =====================================================
+
+function switchProgramPlannerTab(type) {
+
+    currentProgramType =
+        type;
+
+
+    const sundayTab =
+        document.getElementById(
+            "programTabSunday"
+        );
+
+    const midweekTab =
+        document.getElementById(
+            "programTabMidweek"
+        );
+
+    const specialTab =
+        document.getElementById(
+            "programTabSpecial"
+        );
+
+
+    const eventNameGroup =
+        document.getElementById(
+            "programEventNameGroup"
+        );
+
+
+    const savedTitle =
+        document.getElementById(
+            "programSavedTitle"
+        );
+
+
+    // RESET ACTIVE TAB
+
+    [
+        sundayTab,
+        midweekTab,
+        specialTab
+    ].forEach(tab => {
+
+        if (tab) {
+
+            tab.classList.remove(
+                "active"
+            );
+
+        }
+
+    });
+
+
+    // SUNDAY
+
+    if (type === "sunday") {
+
+        if (sundayTab) {
+
+            sundayTab.classList.add(
+                "active"
+            );
+
+        }
+
+
+        if (eventNameGroup) {
+
+            eventNameGroup.classList.add(
+                "hidden"
+            );
+
+        }
+
+
+        if (savedTitle) {
+
+            savedTitle.textContent =
+                "Saved Sunday Service Programs";
+
+        }
+
+    }
+
+
+    // MIDWEEK
+
+    else if (type === "midweek") {
+
+        if (midweekTab) {
+
+            midweekTab.classList.add(
+                "active"
+            );
+
+        }
+
+
+        if (eventNameGroup) {
+
+            eventNameGroup.classList.add(
+                "hidden"
+            );
+
+        }
+
+
+        if (savedTitle) {
+
+            savedTitle.textContent =
+                "Saved Midweek Service Programs";
+
+        }
+
+    }
+
+
+    // SPECIAL EVENT
+
+    else if (type === "special") {
+
+        if (specialTab) {
+
+            specialTab.classList.add(
+                "active"
+            );
+
+        }
+
+
+        if (eventNameGroup) {
+
+            eventNameGroup.classList.remove(
+                "hidden"
+            );
+
+        }
+
+
+        if (savedTitle) {
+
+            savedTitle.textContent =
+                "Saved Special Event Programs";
+
+        }
+
+    }
+
+
+    // Later this will load records
+    // from Supabase.
+
+    if (
+        typeof loadProgramPlans ===
+        "function"
+    ) {
+
+        loadProgramPlans();
+
+    }
+
+}
+
+
+// =====================================================
+// NEW PROGRAM
+// =====================================================
+
+function newProgramPlan() {
+
+    if (!isAdminUser()) {
+        return;
+    }
+
+
+    editingProgramId =
+        null;
+
+
+    programItems =
+        [];
+
+
+    const dateInput =
+        document.getElementById(
+            "programDate"
+        );
+
+
+    const eventInput =
+        document.getElementById(
+            "programEventName"
+        );
+
+
+    if (dateInput) {
+
+        dateInput.value =
+            "";
+
+    }
+
+
+    if (eventInput) {
+
+        eventInput.value =
+            "";
+
+    }
+
+
+    renderProgramItems();
+
+}
+
+// =====================================================
+// CLEAR PROGRAM EDITOR
+// =====================================================
+
+function clearProgramEditor() {
+
+    newProgramPlan();
+
+}
+
+
+
+
+// =====================================================
+// ADD PROGRAM ITEM
+// =====================================================
+
+function addProgramItem() {
+
+    if (!isAdminUser()) {
+        return;
+    }
+
+    const item = {
+
+        tempId:
+            Date.now() +
+            Math.floor(
+                Math.random() * 1000
+            ),
+
+        itemName:
+            "",
+
+        memberId:
+            null,
+
+        memberName:
+            ""
+
+    };
+
+
+    programItems.push(
+        item
+    );
+
+
+    renderProgramItems();
+
+}
+
+
+// =====================================================
+// RENDER PROGRAM ITEMS
+// =====================================================
+
+function renderProgramItems() {
+
+    const container =
+        document.getElementById(
+            "programItemsList"
+        );
+
+
+    if (!container) {
+        return;
+    }
+
+
+    // =====================================
+    // EMPTY STATE
+    // =====================================
+
+    if (
+        !programItems ||
+        programItems.length === 0
+    ) {
+
+        container.innerHTML = `
+            <div class="program-empty-state">
+                No program items yet.
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    container.innerHTML = "";
+
+
+    programItems.forEach(
+        (item, index) => {
+
+            const row =
+                document.createElement(
+                    "div"
+                );
+
+
+            row.className =
+                "program-item-row";
+
+
+            // =====================================
+            // ORDER
+            // =====================================
+
+            const order =
+                document.createElement(
+                    "div"
+                );
+
+            order.className =
+                "program-item-order";
+
+            order.textContent =
+                index + 1;
+
+
+            // =====================================
+            // PROGRAM ITEM NAME
+            // =====================================
+
+            const itemField =
+                document.createElement(
+                    "div"
+                );
+
+            itemField.className =
+                "program-item-field";
+
+
+            const itemLabel =
+                document.createElement(
+                    "label"
+                );
+
+            itemLabel.textContent =
+                "Program Item";
+
+
+            const itemInput =
+                document.createElement(
+                    "input"
+                );
+
+            itemInput.type =
+                "text";
+
+            itemInput.placeholder =
+                "Example: Opening Prayer";
+
+            itemInput.value =
+                item.itemName || "";
+
+
+            itemInput.disabled =
+                !isAdminUser();
+
+
+            itemInput.addEventListener(
+                "input",
+                event => {
+
+                    item.itemName =
+                        event.target.value;
+
+                }
+            );
+
+
+            itemField.appendChild(
+                itemLabel
+            );
+
+            itemField.appendChild(
+                itemInput
+            );
+
+
+            // =====================================
+// ASSIGNED MEMBER - SEARCHABLE
+// =====================================
+
+const memberField =
+    document.createElement(
+        "div"
+    );
+
+memberField.className =
+    "program-item-field program-member-field";
+
+
+const memberLabel =
+    document.createElement(
+        "label"
+    );
+
+memberLabel.textContent =
+    "Assigned Member";
+
+
+const searchWrap =
+    document.createElement(
+        "div"
+    );
+
+searchWrap.className =
+    "program-member-search-wrap";
+
+
+// =====================================
+// SEARCH INPUT
+// =====================================
+
+const memberSearch =
+    document.createElement(
+        "input"
+    );
+
+memberSearch.type =
+    "text";
+
+memberSearch.placeholder =
+    "Search member...";
+
+memberSearch.autocomplete =
+    "off";
+
+memberSearch.value =
+    item.memberName || "";
+
+memberSearch.disabled =
+    !isAdminUser();
+
+
+// =====================================
+// RESULTS DROPDOWN
+// =====================================
+
+const resultsBox =
+    document.createElement(
+        "div"
+    );
+
+resultsBox.className =
+    "program-member-results hidden";
+
+
+// =====================================
+// SHOW MATCHING MEMBERS
+// =====================================
+
+function showMemberResults(
+    searchText = ""
+) {
+
+    if (!isAdminUser()) {
+        return;
+    }
+
+
+    const query =
+        String(
+            searchText || ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    const sortedMembers =
+        [...members]
+        .sort(
+            (a, b) =>
+                String(
+                    a.name || ""
+                )
+                .localeCompare(
+                    String(
+                        b.name || ""
+                    ),
+                    undefined,
+                    {
+                        sensitivity:
+                            "base"
+                    }
+                )
+        );
+
+
+    const matches =
+        sortedMembers
+        .filter(member => {
+
+            const name =
+                String(
+                    member.name || ""
+                )
+                .toLowerCase();
+
+
+            return (
+                !query ||
+                name.includes(
+                    query
+                )
+            );
+
+        })
+        .slice(
+            0,
+            10
+        );
+
+
+    resultsBox.innerHTML =
+        "";
+
+
+    if (
+        matches.length === 0
+    ) {
+
+        resultsBox.innerHTML = `
+            <div class="program-member-no-result">
+                No member found.
+            </div>
+        `;
+
+        resultsBox.classList.remove(
+            "hidden"
+        );
+
+        return;
+
+    }
+
+
+    matches.forEach(
+        member => {
+
+            const option =
+                document.createElement(
+                    "button"
+                );
+
+            option.type =
+                "button";
+
+            option.className =
+                "program-member-result";
+
+
+            option.textContent =
+                member.name ||
+                "Unnamed Member";
+
+
+            option.addEventListener(
+                "click",
+                () => {
+
+                    item.memberId =
+                        member.id;
+
+                    item.memberName =
+                        member.name || "";
+
+
+                    memberSearch.value =
+                        item.memberName;
+
+
+                    resultsBox.classList.add(
+                        "hidden"
+                    );
+
+                }
+            );
+
+
+            resultsBox.appendChild(
+                option
+            );
+
+        }
+    );
+
+
+    resultsBox.classList.remove(
+        "hidden"
+    );
+
+}
+
+
+// =====================================
+// SEARCH EVENTS
+// =====================================
+
+memberSearch.addEventListener(
+    "focus",
+    () => {
+
+        showMemberResults(
+            memberSearch.value
+        );
+
+    }
+);
+
+
+memberSearch.addEventListener(
+    "input",
+    event => {
+
+        const value =
+            event.target.value;
+
+
+        // Clear previous selected member
+        // kapag binago ulit ang text.
+
+        item.memberId =
+            null;
+
+        item.memberName =
+            value;
+
+
+        showMemberResults(
+            value
+        );
+
+    }
+);
+
+
+// =====================================
+// CLOSE RESULTS WHEN CLICKING OUTSIDE
+// =====================================
+
+document.addEventListener(
+    "click",
+    event => {
+
+        if (
+            !searchWrap.contains(
+                event.target
+            )
+        ) {
+
+            resultsBox.classList.add(
+                "hidden"
+            );
+
+        }
+
+    }
+);
+
+
+// =====================================
+// BUILD MEMBER FIELD
+// =====================================
+
+searchWrap.appendChild(
+    memberSearch
+);
+
+searchWrap.appendChild(
+    resultsBox
+);
+
+memberField.appendChild(
+    memberLabel
+);
+
+memberField.appendChild(
+    searchWrap
+);
+
+            // =====================================
+            // ACTION BUTTONS
+            // =====================================
+
+            const actions =
+                document.createElement(
+                    "div"
+                );
+
+            actions.className =
+                "program-item-actions";
+
+
+            // MOVE UP
+
+            const upButton =
+                document.createElement(
+                    "button"
+                );
+
+            upButton.type =
+                "button";
+
+            upButton.className =
+                "program-item-icon-btn";
+
+            upButton.title =
+                "Move Up";
+
+            upButton.innerHTML =
+                "↑";
+
+
+            upButton.disabled =
+                index === 0;
+
+
+            upButton.onclick =
+                () => {
+
+                    moveProgramItem(
+                        index,
+                        -1
+                    );
+
+                };
+
+
+            // MOVE DOWN
+
+            const downButton =
+                document.createElement(
+                    "button"
+                );
+
+            downButton.type =
+                "button";
+
+            downButton.className =
+                "program-item-icon-btn";
+
+            downButton.title =
+                "Move Down";
+
+            downButton.innerHTML =
+                "↓";
+
+
+            downButton.disabled =
+                index ===
+                programItems.length - 1;
+
+
+            downButton.onclick =
+                () => {
+
+                    moveProgramItem(
+                        index,
+                        1
+                    );
+
+                };
+
+
+            // DELETE
+
+            const deleteButton =
+                document.createElement(
+                    "button"
+                );
+
+            deleteButton.type =
+                "button";
+
+            deleteButton.className =
+                "program-item-icon-btn delete";
+
+            deleteButton.title =
+                "Delete Item";
+
+            deleteButton.innerHTML =
+                "×";
+
+
+            deleteButton.onclick =
+                () => {
+
+                    deleteProgramItem(
+                        index
+                    );
+
+                };
+
+
+            // ATTENDANCE = VIEW ONLY
+
+            if (!isAdminUser()) {
+
+                actions.style.display =
+                    "none";
+
+            }
+
+
+            actions.appendChild(
+                upButton
+            );
+
+            actions.appendChild(
+                downButton
+            );
+
+            actions.appendChild(
+                deleteButton
+            );
+
+
+            // =====================================
+            // BUILD ROW
+            // =====================================
+
+            row.appendChild(
+                order
+            );
+
+            row.appendChild(
+                itemField
+            );
+
+            row.appendChild(
+                memberField
+            );
+
+            row.appendChild(
+                actions
+            );
+
+
+            container.appendChild(
+                row
+            );
+
+        }
+    );
+
+}
+
+
+// =====================================================
+// MOVE PROGRAM ITEM
+// =====================================================
+
+function moveProgramItem(
+    index,
+    direction
+) {
+
+    if (!isAdminUser()) {
+        return;
+    }
+
+
+    const newIndex =
+        index + direction;
+
+
+    if (
+        newIndex < 0 ||
+        newIndex >=
+            programItems.length
+    ) {
+
+        return;
+
+    }
+
+
+    const temp =
+        programItems[index];
+
+
+    programItems[index] =
+        programItems[newIndex];
+
+
+    programItems[newIndex] =
+        temp;
+
+
+    renderProgramItems();
+
+}
+
+
+// =====================================================
+// DELETE PROGRAM ITEM
+// =====================================================
+
+function deleteProgramItem(index) {
+
+    if (!isAdminUser()) {
+        return;
+    }
+
+
+    programItems.splice(
+        index,
+        1
+    );
+
+
+    renderProgramItems();
+
+}
+
+// =====================================================
+// DEFAULT PROGRAM ITEMS
+// =====================================================
+
+function loadDefaultProgramItems() {
+
+    if (!isAdminUser()) {
+        return;
+    }
+
+
+    let defaults = [];
+
+
+    // =====================================
+    // SUNDAY
+    // =====================================
+
+    if (
+        currentProgramType ===
+        "sunday"
+    ) {
+
+        defaults = [
+
+            "Opening Prayer",
+
+            "Praise & Worship",
+
+            "Welcome",
+
+            "Offering",
+
+            "Message",
+
+            "Announcements",
+
+            "Closing Prayer"
+
+        ];
+
+    }
+
+
+    // =====================================
+    // MIDWEEK
+    // =====================================
+
+    else if (
+        currentProgramType ===
+        "midweek"
+    ) {
+
+        defaults = [
+
+            "Opening Prayer",
+
+            "Praise & Worship",
+
+            "Devotion / Message",
+
+            "Prayer Time",
+
+            "Announcements",
+
+            "Closing Prayer"
+
+        ];
+
+    }
+
+
+    // =====================================
+    // SPECIAL EVENT
+    // =====================================
+
+    else {
+
+        defaults = [
+
+            "Opening Prayer",
+
+            "Welcome",
+
+            "Praise & Worship",
+
+            "Special Number",
+
+            "Message",
+
+            "Announcements",
+
+            "Closing Prayer"
+
+        ];
+
+    }
+
+
+    programItems =
+        defaults.map(
+            (name, index) => ({
+
+                tempId:
+                    Date.now() +
+                    index,
+
+                itemName:
+                    name,
+
+                memberId:
+                    null,
+
+                memberName:
+                    ""
+
+            })
+        );
+
+
+    renderProgramItems();
+
+}
+
+
+// =====================================================
+// PROGRAM PLANNER - SAVE / UPDATE
+// =====================================================
+
+async function saveProgramPlan() {
+
+    if (!isAdminUser()) {
+        return;
+    }
+
+
+    const dateInput =
+        document.getElementById(
+            "programDate"
+        );
+
+    const eventInput =
+        document.getElementById(
+            "programEventName"
+        );
+
+
+    const programDate =
+        dateInput
+            ? dateInput.value
+            : "";
+
+
+    const eventName =
+        eventInput
+            ? eventInput.value.trim()
+            : "";
+
+
+    // =====================================
+    // VALIDATION
+    // =====================================
+
+    if (!programDate) {
+
+        alert(
+            "Please select a program date."
+        );
+
+        return;
+    }
+
+
+    if (
+        currentProgramType ===
+            "special" &&
+        !eventName
+    ) {
+
+        alert(
+            "Please enter the special event name."
+        );
+
+        return;
+    }
+
+
+    if (
+        !Array.isArray(programItems) ||
+        programItems.length === 0
+    ) {
+
+        alert(
+            "Please add at least one program item."
+        );
+
+        return;
+    }
+
+
+    const cleanedItems =
+        programItems
+            .map(
+                (item, index) => ({
+
+                    item_order:
+                        index + 1,
+
+                    item_name:
+                        String(
+                            item.itemName || ""
+                        ).trim(),
+
+                    member_id:
+                        item.memberId ||
+                        null,
+
+                    member_name:
+                        String(
+                            item.memberName || ""
+                        ).trim()
+
+                })
+            )
+            .filter(
+                item =>
+                    item.item_name
+            );
+
+
+    if (
+        cleanedItems.length === 0
+    ) {
+
+        alert(
+            "Please enter at least one valid program item."
+        );
+
+        return;
+    }
+
+
+    try {
+
+        // =====================================================
+        // EDIT EXISTING PROGRAM
+        // =====================================================
+
+        if (editingProgramId) {
+
+            const programId =
+                editingProgramId;
+
+
+            // -------------------------------------
+            // UPDATE MAIN PROGRAM
+            // -------------------------------------
+
+            const {
+                error: updateError
+            } =
+                await churchSupabase
+                    .from(
+                        "program_plans"
+                    )
+                    .update({
+
+                        program_type:
+                            currentProgramType,
+
+                        program_date:
+                            programDate,
+
+                        event_name:
+                            currentProgramType ===
+                                "special"
+                                ? eventName
+                                : null,
+
+                        updated_at:
+                            new Date()
+                                .toISOString()
+
+                    })
+                    .eq(
+                        "id",
+                        programId
+                    );
+
+
+            if (updateError) {
+
+                console.error(
+                    "❌ Failed to update program:",
+                    updateError
+                );
+
+
+                alert(
+                    "❌ Program was not updated."
+                );
+
+                return;
+            }
+
+
+            // -------------------------------------
+            // DELETE OLD ITEMS
+            // -------------------------------------
+
+            const {
+                error: deleteItemsError
+            } =
+                await churchSupabase
+                    .from(
+                        "program_items"
+                    )
+                    .delete()
+                    .eq(
+                        "program_id",
+                        programId
+                    );
+
+
+            if (deleteItemsError) {
+
+                console.error(
+                    "❌ Failed to remove old program items:",
+                    deleteItemsError
+                );
+
+                alert(
+                    "❌ Failed to update program items."
+                );
+
+                return;
+            }
+
+
+            // -------------------------------------
+            // INSERT UPDATED ITEMS
+            // -------------------------------------
+
+            const updatedItems =
+                cleanedItems.map(
+                    item => ({
+
+                        program_id:
+                            programId,
+
+                        item_order:
+                            item.item_order,
+
+                        item_name:
+                            item.item_name,
+
+                        member_id:
+                            item.member_id,
+
+                        member_name:
+                            item.member_name
+
+                    })
+                );
+
+
+            const {
+                error: insertItemsError
+            } =
+                await churchSupabase
+                    .from(
+                        "program_items"
+                    )
+                    .insert(
+                        updatedItems
+                    );
+
+
+            if (insertItemsError) {
+
+                console.error(
+                    "❌ Failed to insert updated items:",
+                    insertItemsError
+                );
+
+                alert(
+                    "❌ Updated program items were not saved."
+                );
+
+                return;
+            }
+
+
+            console.log(
+                "✅ Program updated:",
+                programId
+            );
+
+            // =====================================================
+// AUDIT - EDIT PROGRAM
+// =====================================================
+
+await writeAuditLog(
+    "EDIT",
+    "Program Planner",
+    `Updated ${currentProgramType} program for ${programDate}`,
+    programId,
+    {
+        programType:
+            currentProgramType,
+
+        programDate:
+            programDate,
+
+        eventName:
+            eventName || "",
+
+        totalItems:
+            cleanedItems.length
+    }
+);
+
+            alert(
+                "✅ Program updated successfully."
+            );
+
+        }
+
+
+        // =====================================================
+        // ADD NEW PROGRAM
+        // =====================================================
+
+        else {
+
+            const {
+                data: planData,
+                error: planError
+            } =
+                await churchSupabase
+                    .from(
+                        "program_plans"
+                    )
+                    .insert([
+                        {
+
+                            program_type:
+                                currentProgramType,
+
+                            program_date:
+                                programDate,
+
+                            event_name:
+                                currentProgramType ===
+                                    "special"
+                                    ? eventName
+                                    : null,
+
+                            updated_at:
+                                new Date()
+                                    .toISOString()
+
+                        }
+                    ])
+                    .select()
+                    .single();
+
+
+            if (planError) {
+
+                console.error(
+                    "❌ Failed to save program plan:",
+                    planError
+                );
+
+                alert(
+                    "❌ Program plan was not saved."
+                );
+
+                return;
+            }
+
+
+            if (!planData) {
+                return;
+            }
+
+
+            const itemsToInsert =
+                cleanedItems.map(
+                    item => ({
+
+                        program_id:
+                            planData.id,
+
+                        item_order:
+                            item.item_order,
+
+                        item_name:
+                            item.item_name,
+
+                        member_id:
+                            item.member_id,
+
+                        member_name:
+                            item.member_name
+
+                    })
+                );
+
+
+            const {
+                error: itemsError
+            } =
+                await churchSupabase
+                    .from(
+                        "program_items"
+                    )
+                    .insert(
+                        itemsToInsert
+                    );
+
+
+            if (itemsError) {
+
+                console.error(
+                    "❌ Failed to save program items:",
+                    itemsError
+                );
+
+
+                await churchSupabase
+                    .from(
+                        "program_plans"
+                    )
+                    .delete()
+                    .eq(
+                        "id",
+                        planData.id
+                    );
+
+
+                alert(
+                    "❌ Program items were not saved."
+                );
+
+                return;
+            }
+
+
+            console.log(
+                "✅ Program saved:",
+                planData
+            );
+
+            // =====================================================
+// AUDIT - ADD PROGRAM
+// =====================================================
+
+await writeAuditLog(
+    "ADD",
+    "Program Planner",
+    `Added ${currentProgramType} program for ${programDate}`,
+    planData.id,
+    {
+        programType:
+            currentProgramType,
+
+        programDate:
+            programDate,
+
+        eventName:
+            eventName || "",
+
+        totalItems:
+            cleanedItems.length
+    }
+);
+
+            alert(
+                "✅ Program saved successfully."
+            );
+
+        }
+
+
+        // =====================================================
+        // RESET EDITOR
+        // =====================================================
+
+        editingProgramId =
+            null;
+
+
+        programItems =
+            [];
+
+
+        if (dateInput) {
+
+            dateInput.value =
+                "";
+
+        }
+
+
+        if (eventInput) {
+
+            eventInput.value =
+                "";
+
+        }
+
+
+        const saveButton =
+            document.querySelector(
+                '#program-planner button[onclick="saveProgramPlan()"]'
+            );
+
+
+        if (saveButton) {
+
+            saveButton.textContent =
+                "Save Program";
+
+        }
+
+
+        renderProgramItems();
+
+
+        await loadProgramPlans();
+
+
+    } catch (error) {
+
+        console.error(
+            "❌ Program Planner save/update error:",
+            error
+        );
+
+
+        alert(
+            "❌ Failed to save program."
+        );
+
+    }
+
+}
+
+// =====================================================
+// PROGRAM PLANNER - FAST SUPABASE LOAD
+// 2 DATABASE REQUESTS ONLY
+// =====================================================
+
+async function loadProgramPlans() {
+
+    const body =
+        document.getElementById(
+            "programHistoryBody"
+        );
+
+
+    // =====================================
+    // SHOW LOADING STATE
+    // =====================================
+
+    if (body) {
+
+        body.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="4"
+                    style="
+                        padding:25px;
+                        text-align:center;
+                        color:#6f7780;
+                    "
+                >
+                    Loading programs...
+                </td>
+
+            </tr>
+
+        `;
+
+    }
+
+
+    try {
+
+        // =====================================
+        // 1. LOAD PROGRAM PLANS
+        // =====================================
+
+        const {
+            data: plans,
+            error: plansError
+        } =
+            await churchSupabase
+                .from(
+                    "program_plans"
+                )
+                .select("*")
+                .eq(
+                    "program_type",
+                    currentProgramType
+                )
+                .order(
+                    "program_date",
+                    {
+                        ascending:
+                            false
+                    }
+                );
+
+
+        if (plansError) {
+
+            console.error(
+                "❌ Failed to load program plans:",
+                plansError
+            );
+
+            programPlans =
+                [];
+
+            renderProgramHistory();
+
+            return false;
+
+        }
+
+
+        const safePlans =
+            Array.isArray(plans)
+                ? plans
+                : [];
+
+
+        // =====================================
+        // NO PROGRAMS
+        // =====================================
+
+        if (
+            safePlans.length === 0
+        ) {
+
+            programPlans =
+                [];
+
+            renderProgramHistory();
+
+            return true;
+
+        }
+
+
+        // =====================================
+        // GET ALL PROGRAM IDS
+        // =====================================
+
+        const programIds =
+            safePlans.map(
+                plan =>
+                    plan.id
+            );
+
+
+        // =====================================
+        // 2. LOAD ALL ITEMS IN ONE QUERY
+        // =====================================
+
+        const {
+            data: allItems,
+            error: itemsError
+        } =
+            await churchSupabase
+                .from(
+                    "program_items"
+                )
+                .select("*")
+                .in(
+                    "program_id",
+                    programIds
+                )
+                .order(
+                    "item_order",
+                    {
+                        ascending:
+                            true
+                    }
+                );
+
+
+        if (itemsError) {
+
+            console.error(
+                "❌ Failed to load program items:",
+                itemsError
+            );
+
+        }
+
+
+        const safeItems =
+            Array.isArray(allItems)
+                ? allItems
+                : [];
+
+
+        // =====================================
+        // GROUP ITEMS BY PROGRAM ID
+        // =====================================
+
+        const itemsByProgram =
+            {};
+
+
+        safeItems.forEach(
+            item => {
+
+                const key =
+                    String(
+                        item.program_id
+                    );
+
+
+                if (
+                    !itemsByProgram[key]
+                ) {
+
+                    itemsByProgram[key] =
+                        [];
+
+                }
+
+
+                itemsByProgram[key].push(
+                    item
+                );
+
+            }
+        );
+
+
+        // =====================================
+        // COMBINE PLANS + ITEMS
+        // =====================================
+
+        programPlans =
+            safePlans.map(
+                plan => ({
+
+                    ...plan,
+
+                    items:
+                        itemsByProgram[
+                            String(
+                                plan.id
+                            )
+                        ] || []
+
+                })
+            );
+
+
+        console.log(
+            "⚡ Program plans loaded:",
+            programPlans.length,
+            "programs /",
+            safeItems.length,
+            "items"
+        );
+
+
+        // =====================================
+        // RENDER
+        // =====================================
+
+        renderProgramHistory();
+
+
+        return true;
+
+    } catch (error) {
+
+        console.error(
+            "❌ Program Planner read error:",
+            error
+        );
+
+
+        programPlans =
+            [];
+
+        renderProgramHistory();
+
+
+        return false;
+
+    }
+
+}
+
+// =====================================================
+// PROGRAM PLANNER - HISTORY
+// =====================================================
+
+function renderProgramHistory() {
+
+    const body =
+        document.getElementById(
+            "programHistoryBody"
+        );
+
+
+    if (!body) {
+        return;
+    }
+
+
+    body.innerHTML =
+        "";
+
+
+    // =====================================
+    // EMPTY
+    // =====================================
+
+    if (
+        !Array.isArray(programPlans) ||
+        programPlans.length === 0
+    ) {
+
+        body.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="4"
+                    class="program-empty-table"
+                >
+                    No saved programs.
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    // =====================================
+    // RECORDS
+    // =====================================
+
+    programPlans.forEach(
+        plan => {
+
+            const tr =
+                document.createElement(
+                    "tr"
+                );
+
+
+            // =====================================
+            // FORMAT DATE
+            // =====================================
+
+            let formattedDate =
+                plan.program_date ||
+                "-";
+
+
+            if (plan.program_date) {
+
+                const d =
+                    new Date(
+                        plan.program_date +
+                        "T00:00:00"
+                    );
+
+
+                if (
+                    !isNaN(
+                        d.getTime()
+                    )
+                ) {
+
+                    formattedDate =
+                        d.toLocaleDateString(
+                            "en-US",
+                            {
+                                month:
+                                    "short",
+
+                                day:
+                                    "numeric",
+
+                                year:
+                                    "numeric"
+                            }
+                        );
+
+                }
+
+            }
+
+
+            // =====================================
+            // PROGRAM NAME
+            // =====================================
+
+            let programName =
+                "Sunday Service";
+
+
+            if (
+                plan.program_type ===
+                "midweek"
+            ) {
+
+                programName =
+                    "Midweek Service";
+
+            }
+
+
+            if (
+                plan.program_type ===
+                "special"
+            ) {
+
+                programName =
+                    plan.event_name ||
+                    "Special Event";
+
+            }
+
+
+            // =====================================
+            // ITEM COUNT
+            // =====================================
+
+            const itemCount =
+                Array.isArray(
+                    plan.items
+                )
+                    ? plan.items.length
+                    : 0;
+
+
+            // =====================================
+            // ACTIONS
+            // =====================================
+
+            let actionsHTML = `
+
+                <button
+                    type="button"
+                    class="secondary-btn"
+                    style="
+                        padding:5px 9px;
+                        font-size:12px;
+                    "
+                    onclick="viewProgramPlan(${plan.id})"
+                >
+                    👁 View
+                </button>
+
+            `;
+
+
+            // Admin only later gets Edit/Delete
+            if (isAdminUser()) {
+
+                actionsHTML += `
+
+                    <button
+                        type="button"
+                        class="secondary-btn"
+                        style="
+                            padding:5px 9px;
+                            font-size:12px;
+                        "
+                        onclick="editProgramPlan(${plan.id})"
+                    >
+                        ✏️ Edit
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="secondary-btn"
+                        style="
+                            padding:5px 9px;
+                            font-size:12px;
+                            color:#dc2626;
+                            border-color:#fca5a5;
+                        "
+                        onclick="deleteProgramPlan(${plan.id})"
+                    >
+                        × Delete
+                    </button>
+
+                `;
+
+            }
+
+
+            tr.innerHTML = `
+
+                <td>
+                    ${formattedDate}
+                </td>
+
+
+                <td>
+                    <strong>
+                        ${programName}
+                    </strong>
+                </td>
+
+
+                <td>
+                    ${itemCount}
+                    item${itemCount === 1 ? "" : "s"}
+                </td>
+
+
+                <td>
+
+                    <div
+                        style="
+                            display:flex;
+                            gap:6px;
+                            flex-wrap:wrap;
+                        "
+                    >
+
+                        ${actionsHTML}
+
+                    </div>
+
+                </td>
+
+            `;
+
+
+            body.appendChild(
+                tr
+            );
+
+        }
+    );
+
+}
+
+// =====================================================
+// PROGRAM PLANNER - VIEW MODAL
+// =====================================================
+
+function viewProgramPlan(programId) {
+
+    const plan =
+        programPlans.find(
+            record =>
+                String(record.id) ===
+                String(programId)
+        );
+
+
+    if (!plan) {
+
+        console.warn(
+            "Program not found:",
+            programId
+        );
+
+        return;
+
+    }
+
+
+    const modal =
+        document.getElementById(
+            "viewProgramModal"
+        );
+
+    const title =
+        document.getElementById(
+            "viewProgramTitle"
+        );
+
+    const subtitle =
+        document.getElementById(
+            "viewProgramSubtitle"
+        );
+
+    const itemsContainer =
+        document.getElementById(
+            "viewProgramItems"
+        );
+
+
+    if (
+        !modal ||
+        !title ||
+        !subtitle ||
+        !itemsContainer
+    ) {
+        return;
+    }
+
+
+    // =====================================
+    // PROGRAM NAME
+    // =====================================
+
+    let programName =
+        "Sunday Service Program";
+
+
+    if (
+        plan.program_type ===
+        "midweek"
+    ) {
+
+        programName =
+            "Midweek Service Program";
+
+    }
+
+
+    if (
+        plan.program_type ===
+        "special"
+    ) {
+
+        programName =
+            plan.event_name ||
+            "Special Event Program";
+
+    }
+
+
+    title.textContent =
+        programName;
+
+
+    // =====================================
+    // DATE
+    // =====================================
+
+    let formattedDate =
+        plan.program_date ||
+        "-";
+
+
+    if (plan.program_date) {
+
+        const d =
+            new Date(
+                plan.program_date +
+                "T00:00:00"
+            );
+
+
+        if (!isNaN(d.getTime())) {
+
+            formattedDate =
+                d.toLocaleDateString(
+                    "en-US",
+                    {
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric"
+                    }
+                );
+
+        }
+
+    }
+
+
+    subtitle.textContent =
+        formattedDate;
+
+
+    // =====================================
+    // ITEMS
+    // =====================================
+
+    itemsContainer.innerHTML =
+        "";
+
+
+    const items =
+        Array.isArray(plan.items)
+            ? [...plan.items]
+            : [];
+
+
+    items.sort(
+        (a, b) =>
+            Number(a.item_order || 0) -
+            Number(b.item_order || 0)
+    );
+
+
+    if (items.length === 0) {
+
+        itemsContainer.innerHTML = `
+
+            <div class="program-empty-state">
+                No program items found.
+            </div>
+
+        `;
+
+    } else {
+
+        items.forEach(
+            item => {
+
+                const row =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                row.className =
+                    "program-view-item";
+
+
+                row.innerHTML = `
+
+                    <div class="program-view-order">
+                        ${item.item_order || ""}
+                    </div>
+
+
+                    <div class="program-view-info">
+
+                        <strong>
+                            ${item.item_name || "-"}
+                        </strong>
+
+                        <span>
+                            ${item.member_name || "Unassigned"}
+                        </span>
+
+                    </div>
+
+                `;
+
+
+                itemsContainer.appendChild(
+                    row
+                );
+
+            }
+        );
+
+    }
+
+
+    modal.classList.remove(
+        "hidden"
+    );
+
+}
+
+
+// =====================================================
+// CLOSE VIEW PROGRAM MODAL
+// =====================================================
+
+function closeViewProgramModal() {
+
+    const modal =
+        document.getElementById(
+            "viewProgramModal"
+        );
+
+
+    if (modal) {
+
+        modal.classList.add(
+            "hidden"
+        );
+
+    }
+
+}
+
+// =====================================================
+// PROGRAM PLANNER - EDIT EXISTING PROGRAM
+// =====================================================
+
+function editProgramPlan(programId) {
+
+    if (!isAdminUser()) {
+        return;
+    }
+
+
+    const plan =
+        programPlans.find(
+            record =>
+                String(record.id) ===
+                String(programId)
+        );
+
+
+    if (!plan) {
+
+        alert(
+            "Program record was not found."
+        );
+
+        return;
+    }
+
+
+    // =====================================
+    // SET EDIT MODE
+    // =====================================
+
+    editingProgramId =
+        plan.id;
+
+
+    currentProgramType =
+        plan.program_type ||
+        "sunday";
+
+
+ // =====================================
+// SWITCH TO CORRECT TAB
+// Visual only — no Supabase reload
+// =====================================
+
+const sundayTab =
+    document.getElementById(
+        "programTabSunday"
+    );
+
+const midweekTab =
+    document.getElementById(
+        "programTabMidweek"
+    );
+
+const specialTab =
+    document.getElementById(
+        "programTabSpecial"
+    );
+
+const eventNameGroup =
+    document.getElementById(
+        "programEventNameGroup"
+    );
+
+
+[
+    sundayTab,
+    midweekTab,
+    specialTab
+].forEach(tab => {
+
+    if (tab) {
+
+        tab.classList.remove(
+            "active"
+        );
+
+    }
+
+});
+
+
+if (
+    currentProgramType ===
+    "sunday"
+) {
+
+    if (sundayTab) {
+        sundayTab.classList.add(
+            "active"
+        );
+    }
+
+    if (eventNameGroup) {
+        eventNameGroup.classList.add(
+            "hidden"
+        );
+    }
+
+}
+
+else if (
+    currentProgramType ===
+    "midweek"
+) {
+
+    if (midweekTab) {
+        midweekTab.classList.add(
+            "active"
+        );
+    }
+
+    if (eventNameGroup) {
+        eventNameGroup.classList.add(
+            "hidden"
+        );
+    }
+
+}
+
+else {
+
+    if (specialTab) {
+        specialTab.classList.add(
+            "active"
+        );
+    }
+
+    if (eventNameGroup) {
+        eventNameGroup.classList.remove(
+            "hidden"
+        );
+    }
+
+}
+
+    // =====================================
+    // LOAD DATE
+    // =====================================
+
+    const dateInput =
+        document.getElementById(
+            "programDate"
+        );
+
+
+    if (dateInput) {
+
+        dateInput.value =
+            plan.program_date ||
+            "";
+
+    }
+
+
+    // =====================================
+    // LOAD SPECIAL EVENT NAME
+    // =====================================
+
+    const eventInput =
+        document.getElementById(
+            "programEventName"
+        );
+
+
+    if (eventInput) {
+
+        eventInput.value =
+            plan.event_name ||
+            "";
+
+    }
+
+
+    // =====================================
+    // LOAD PROGRAM ITEMS
+    // =====================================
+
+    const savedItems =
+        Array.isArray(plan.items)
+            ? [...plan.items]
+            : [];
+
+
+    savedItems.sort(
+        (a, b) =>
+            Number(
+                a.item_order || 0
+            ) -
+            Number(
+                b.item_order || 0
+            )
+    );
+
+
+    programItems =
+        savedItems.map(
+            item => ({
+
+                id:
+                    item.id,
+
+                tempId:
+                    item.id,
+
+                itemName:
+                    item.item_name ||
+                    "",
+
+                memberId:
+                    item.member_id ||
+                    null,
+
+                memberName:
+                    item.member_name ||
+                    ""
+
+            })
+        );
+
+
+    renderProgramItems();
+
+
+    // =====================================
+    // CHANGE SAVE BUTTON TEXT
+    // =====================================
+
+    const saveButton =
+        document.querySelector(
+            '#program-planner button[onclick="saveProgramPlan()"]'
+        );
+
+
+    if (saveButton) {
+
+        saveButton.textContent =
+            "Update Program";
+
+    }
+
+
+    // =====================================
+    // SCROLL TO EDITOR
+    // =====================================
+
+    const editor =
+        document.querySelector(
+            "#program-planner .program-planner-card"
+        );
+
+
+    if (editor) {
+
+        editor.scrollIntoView({
+            behavior:
+                "smooth",
+
+            block:
+                "start"
+        });
+
+    }
+
+}
+
+// =====================================================
+// PROGRAM PLANNER - DELETE PROGRAM
+// =====================================================
+
+async function deleteProgramPlan(programId) {
+
+    if (!isAdminUser()) {
+        return;
+    }
+
+
+    // =====================================
+    // FIND PROGRAM
+    // =====================================
+
+    const plan =
+        programPlans.find(
+            record =>
+                String(record.id) ===
+                String(programId)
+        );
+
+
+    if (!plan) {
+
+        alert(
+            "Program record was not found."
+        );
+
+        return;
+    }
+
+
+    // =====================================
+    // PROGRAM NAME
+    // =====================================
+
+    let programName =
+        "Sunday Service Program";
+
+
+    if (
+        plan.program_type ===
+        "midweek"
+    ) {
+
+        programName =
+            "Midweek Service Program";
+
+    }
+
+
+    if (
+        plan.program_type ===
+        "special"
+    ) {
+
+        programName =
+            plan.event_name ||
+            "Special Event Program";
+
+    }
+
+
+    // =====================================
+    // CONFIRM DELETE
+    // =====================================
+
+    const confirmed =
+        confirm(
+            `Delete "${programName}"?\n\n` +
+            `Date: ${plan.program_date || "-"}\n\n` +
+            `All program items and assignments ` +
+            `inside this program will also be deleted.`
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    try {
+
+        // =====================================
+        // DELETE MAIN PROGRAM
+        // =====================================
+
+        const {
+            error
+        } =
+            await churchSupabase
+                .from(
+                    "program_plans"
+                )
+                .delete()
+                .eq(
+                    "id",
+                    programId
+                );
+
+
+        if (error) {
+
+            console.error(
+                "❌ Failed to delete program:",
+                error
+            );
+
+            // =====================================================
+// AUDIT - DELETE PROGRAM
+// =====================================================
+
+await writeAuditLog(
+    "DELETE",
+    "Program Planner",
+    `Deleted ${plan.program_type || "program"} program for ${plan.program_date || "-"}`,
+    plan.id,
+    {
+        programType:
+            plan.program_type || "",
+
+        programDate:
+            plan.program_date || "",
+
+        eventName:
+            plan.event_name || "",
+
+        totalItems:
+            Array.isArray(plan.items)
+                ? plan.items.length
+                : 0
+    }
+);
+
+            alert(
+                "❌ Program was not deleted."
+            );
+
+            return;
+        }
+
+
+        // =====================================
+        // RESET EDITOR IF SAME PROGRAM
+        // =====================================
+
+        if (
+            String(editingProgramId) ===
+            String(programId)
+        ) {
+
+            editingProgramId =
+                null;
+
+            programItems =
+                [];
+
+
+            const dateInput =
+                document.getElementById(
+                    "programDate"
+                );
+
+
+            const eventInput =
+                document.getElementById(
+                    "programEventName"
+                );
+
+
+            if (dateInput) {
+                dateInput.value = "";
+            }
+
+
+            if (eventInput) {
+                eventInput.value = "";
+            }
+
+
+            const saveButton =
+                document.querySelector(
+                    '#program-planner button[onclick="saveProgramPlan()"]'
+                );
+
+
+            if (saveButton) {
+
+                saveButton.textContent =
+                    "Save Program";
+
+            }
+
+
+            renderProgramItems();
+
+        }
+
+
+        // =====================================
+        // SUCCESS
+        // =====================================
+
+        console.log(
+            "✅ Program deleted:",
+            programId
+        );
+
+
+        alert(
+            "✅ Program deleted successfully."
+        );
+
+
+        // =====================================
+        // REFRESH SAVED PROGRAMS
+        // =====================================
+
+        await loadProgramPlans();
+
+
+    } catch (error) {
+
+        console.error(
+            "❌ Program Planner delete error:",
+            error
+        );
+
+
+        alert(
+            "❌ Failed to delete program."
+        );
+
+    }
+
+}
+
 /* =========================================
    SONG LIBRARY & SUNDAY SERVICE PLANNER ENGINE
 ========================================= */
@@ -6595,7 +9620,7 @@ try {
 let currentActiveSong = null;
 let currentTransposedKeyIndex = 0;
 let editingSongId = null; 
-const scale = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+const scale = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "G#", "A", "Bb", "B"];
 
 const songModal = document.getElementById("songModal");
 const addSongBtn = document.getElementById("addSongBtn");
@@ -9573,6 +12598,40 @@ function clearMemberForm() {
     if (mBirthday) mBirthday.value = "";
 }
 
+// =====================================
+// SERVICE PLANNER FORM PERMISSIONS
+//
+// Admin      = Editable
+// Attendance = View Only
+// Viewer     = No access to page
+// =====================================
+
+const servicePlannerFields =
+    document.querySelectorAll(
+        "#service-planner input, " +
+        "#service-planner textarea, " +
+        "#service-planner select"
+    );
+
+
+servicePlannerFields.forEach(
+    field => {
+
+        if (isAdminUser()) {
+
+            field.disabled =
+                false;
+
+        } else {
+
+            field.disabled =
+                true;
+
+        }
+
+    }
+);
+
 // =====================================================
 // ATTENDANCE - OPEN ADD MEMBER MODAL
 // =====================================================
@@ -11588,6 +14647,39 @@ function calculateMemberStatusAlerts() {
 
         }
 
+        // =====================================
+// MISSING BIRTHDAY
+// =====================================
+
+const birthdayValue =
+    String(
+        originalMember.birthday || ""
+    ).trim();
+
+
+if (!birthdayValue) {
+
+    alerts.push({
+
+        memberId:
+            member.id,
+
+        memberName:
+            member.name,
+
+        type:
+            "missing-birthday",
+
+        level:
+            "info",
+
+        message:
+            "No birthday recorded."
+
+    });
+
+}
+
 
         // =====================================
         // NO MINISTRY
@@ -12398,6 +15490,7 @@ systemAlerts.push(
 
 // =========================================
 // SYSTEM STATUS ALERTS UI
+// ORGANIZED + SCROLLABLE
 // =========================================
 
 function renderSystemStatusAlerts() {
@@ -12422,6 +15515,10 @@ function renderSystemStatusAlerts() {
     const alerts =
         calculateSystemStatusAlerts();
 
+
+    // =====================================
+    // TOTAL ALERT COUNT
+    // =====================================
 
     if (countEl) {
 
@@ -12465,123 +15562,455 @@ function renderSystemStatusAlerts() {
 
         `;
 
+
         return;
 
     }
 
 
-    // Maximum 8 muna sa Dashboard
-    const visibleAlerts =
-        alerts.slice(
-            0,
-            8
-        );
+    // =====================================
+    // ALERT GROUP DEFINITIONS
+    // =====================================
+
+    const groups = [
+
+        {
+            key:
+                "member-contact",
+
+            title:
+                "Members — No Contact",
+
+            icon:
+                "📞",
+
+            alerts:
+                alerts.filter(
+                    alert =>
+                        alert.module === "Members" &&
+                        alert.type === "missing-contact"
+                )
+        },
 
 
-    visibleAlerts.forEach(alert => {
+        {
+            key:
+                "member-birthday",
+
+            title:
+                "Members — No Birthday",
+
+            icon:
+                "🎂",
+
+            alerts:
+                alerts.filter(
+                    alert =>
+                        alert.module === "Members" &&
+                        alert.type === "missing-birthday"
+                )
+        },
 
 
-        let icon = "ℹ️";
+        {
+            key:
+                "member-attendance",
 
-        let className =
-            "member-alert-info";
+            title:
+                "Members — No Attendance",
+
+            icon:
+                "📋",
+
+            alerts:
+                alerts.filter(
+                    alert =>
+                        alert.module === "Members" &&
+                        alert.type === "no-attendance"
+                )
+        },
 
 
-        if (
-            alert.level === "warning"
-        ) {
+        {
+            key:
+                "member-low-attendance",
 
-            icon = "⚠️";
+            title:
+                "Members — Low Attendance",
 
-            className =
-                "member-alert-warning";
+            icon:
+                "📉",
 
+            alerts:
+                alerts.filter(
+                    alert =>
+                        alert.module === "Members" &&
+                        alert.type === "low-attendance"
+                )
+        },
+
+
+        {
+            key:
+                "member-inactive",
+
+            title:
+                "Members — Inactive",
+
+            icon:
+                "👤",
+
+            alerts:
+                alerts.filter(
+                    alert =>
+                        alert.module === "Members" &&
+                        alert.type === "inactive"
+                )
+        },
+
+
+        {
+            key:
+                "member-no-ministry",
+
+            title:
+                "Members — No Ministry",
+
+            icon:
+                "🏛️",
+
+            alerts:
+                alerts.filter(
+                    alert =>
+                        alert.module === "Members" &&
+                        alert.type === "no-ministry"
+                )
+        },
+
+
+        {
+            key:
+                "member-upcoming-birthday",
+
+            title:
+                "Members — Upcoming Birthday",
+
+            icon:
+                "🎉",
+
+            alerts:
+                alerts.filter(
+                    alert =>
+                        alert.module === "Members" &&
+                        alert.type === "birthday"
+                )
+        },
+
+
+        {
+            key:
+                "planner",
+
+            title:
+                "Planner",
+
+            icon:
+                "📌",
+
+            alerts:
+                alerts.filter(
+                    alert =>
+                        alert.module === "Planner"
+                )
+        },
+
+
+        {
+            key:
+                "services",
+
+            title:
+                "Services",
+
+            icon:
+                "⛪",
+
+            alerts:
+                alerts.filter(
+                    alert =>
+                        alert.module === "Services" ||
+                        alert.module === "Sunday Service" ||
+                        alert.module === "Midweek Service"
+                )
+        },
+
+
+        {
+            key:
+                "files",
+
+            title:
+                "Files",
+
+            icon:
+                "📁",
+
+            alerts:
+                alerts.filter(
+                    alert =>
+                        alert.module === "Files"
+                )
+        },
+
+
+        {
+            key:
+                "activities",
+
+            title:
+                "Activities",
+
+            icon:
+                "📅",
+
+            alerts:
+                alerts.filter(
+                    alert =>
+                        alert.module === "Activities"
+                )
         }
 
-
-        if (
-            alert.level === "birthday"
-        ) {
-
-            icon = "🎂";
-
-            className =
-                "member-alert-birthday";
-
-        }
+    ];
 
 
-        const item =
-            document.createElement(
-                "div"
+    // =====================================
+    // FIND ALERTS NOT COVERED ABOVE
+    // =====================================
+
+    const groupedAlerts =
+        new Set();
+
+
+    groups.forEach(group => {
+
+        group.alerts.forEach(alert => {
+
+            groupedAlerts.add(
+                alert
             );
 
-
-        item.className =
-            `member-alert-item ${className}`;
-
-
-        item.innerHTML = `
-
-            <div class="member-alert-icon">
-                ${icon}
-            </div>
-
-
-            <div class="member-alert-content">
-
-                <strong>
-                    ${alert.module} • ${alert.name}
-                </strong>
-
-                <span>
-                    ${alert.message}
-                </span>
-
-            </div>
-
-        `;
-
-
-        container.appendChild(
-            item
-        );
+        });
 
     });
 
 
+    const otherAlerts =
+        alerts.filter(
+            alert =>
+                !groupedAlerts.has(
+                    alert
+                )
+        );
+
+
+    if (otherAlerts.length > 0) {
+
+        groups.push({
+
+            key:
+                "other",
+
+            title:
+                "Other System Alerts",
+
+            icon:
+                "ℹ️",
+
+            alerts:
+                otherAlerts
+
+        });
+
+    }
+
+
     // =====================================
-    // MORE ALERTS
+    // RENDER GROUPS
     // =====================================
 
-    if (
-        alerts.length >
-        visibleAlerts.length
-    ) {
+    groups.forEach(group => {
 
-        const more =
+        if (
+            group.alerts.length === 0
+        ) {
+
+            return;
+
+        }
+
+
+        // =====================================
+        // SORT ITEMS ALPHABETICALLY
+        // =====================================
+
+        group.alerts.sort(
+            (a, b) =>
+                String(
+                    a.name || ""
+                ).localeCompare(
+                    String(
+                        b.name || ""
+                    ),
+                    undefined,
+                    {
+                        sensitivity:
+                            "base"
+                    }
+                )
+        );
+
+
+        // =====================================
+        // GROUP WRAPPER
+        // =====================================
+
+        const groupElement =
             document.createElement(
                 "div"
             );
 
 
-        more.style.cssText = `
-            margin-top:10px;
-            font-size:12px;
-            color:#64748b;
-            text-align:center;
+        groupElement.className =
+            "system-alert-group";
+
+
+        // =====================================
+        // GROUP HEADER
+        // =====================================
+
+        const groupHeader =
+            document.createElement(
+                "div"
+            );
+
+
+        groupHeader.className =
+            "system-alert-group-header";
+
+
+        groupHeader.innerHTML = `
+
+            <div class="system-alert-group-title">
+
+                <span class="system-alert-group-icon">
+                    ${group.icon}
+                </span>
+
+                <strong>
+                    ${group.title}
+                </strong>
+
+            </div>
+
+
+            <span class="system-alert-group-count">
+                ${group.alerts.length}
+            </span>
+
         `;
 
 
-        more.textContent =
-            `+ ${alerts.length - visibleAlerts.length} more system alert(s)`;
+        groupElement.appendChild(
+            groupHeader
+        );
+
+
+        // =====================================
+        // ALERT ITEMS
+        // =====================================
+
+        group.alerts.forEach(alert => {
+
+            let icon =
+                "ℹ️";
+
+
+            let className =
+                "member-alert-info";
+
+
+            if (
+                alert.level ===
+                "warning"
+            ) {
+
+                icon =
+                    "⚠️";
+
+                className =
+                    "member-alert-warning";
+
+            }
+
+
+            if (
+                alert.level ===
+                "birthday"
+            ) {
+
+                icon =
+                    "🎂";
+
+                className =
+                    "member-alert-birthday";
+
+            }
+
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+
+            item.className =
+                `member-alert-item ${className}`;
+
+
+            item.innerHTML = `
+
+                <div class="member-alert-icon">
+                    ${icon}
+                </div>
+
+
+                <div class="member-alert-content">
+
+                    <strong>
+                        ${alert.name || "System Alert"}
+                    </strong>
+
+                    <span>
+                        ${alert.message || ""}
+                    </span>
+
+                </div>
+
+            `;
+
+
+            groupElement.appendChild(
+                item
+            );
+
+        });
 
 
         container.appendChild(
-            more
+            groupElement
         );
 
-    }
+    });
 
 }
 
@@ -13657,23 +17086,28 @@ if (!canManageAttendance()) {
 // VERSION 6.0
 // =====================================================
 
+// =====================================================
+// CHURCHHQ SETTINGS
+// COMPLETE SUPABASE BACKUP
+// VERSION 7.0
+// =====================================================
+
 async function exportChurchData() {
 
     if (!requireAdmin()) {
         return;
     }
 
-
     try {
 
         console.log(
-            "📦 Creating ChurchHQ Backup v6..."
+            "📦 Creating ChurchHQ Backup v7..."
         );
 
 
-        // =====================================
+        // =====================================================
         // LOAD ALL OPERATIONAL TABLES
-        // =====================================
+        // =====================================================
 
         const [
 
@@ -13687,7 +17121,9 @@ async function exportChurchData() {
             announcementsResult,
             fileFoldersResult,
             leadersResult,
-            ministriesResult
+            ministriesResult,
+            programPlansResult,
+            programItemsResult
 
         ] = await Promise.all([
 
@@ -13733,46 +17169,39 @@ async function exportChurchData() {
 
             churchSupabase
                 .from("ministries")
+                .select("*"),
+
+            churchSupabase
+                .from("program_plans")
+                .select("*"),
+
+            churchSupabase
+                .from("program_items")
                 .select("*")
 
         ]);
 
 
-        // =====================================
+        // =====================================================
         // CHECK SUPABASE ERRORS
-        // =====================================
+        // =====================================================
 
         const results = [
 
-            [
-                "members",
-                membersResult
-            ],
+            ["members", membersResult],
 
-            [
-                "planner_tasks",
-                tasksResult
-            ],
+            ["planner_tasks", tasksResult],
 
-            [
-                "songs",
-                songsResult
-            ],
+            ["songs", songsResult],
 
-            [
-                "service_records",
-                servicesResult
-            ],
+            ["service_records", servicesResult],
 
             [
                 "attendance_records",
                 attendanceResult
             ],
 
-            [
-                "activities",
-                activitiesResult
-            ],
+            ["activities", activitiesResult],
 
             [
                 "annual_activities",
@@ -13797,6 +17226,16 @@ async function exportChurchData() {
             [
                 "ministries",
                 ministriesResult
+            ],
+
+            [
+                "program_plans",
+                programPlansResult
+            ],
+
+            [
+                "program_items",
+                programItemsResult
             ]
 
         ];
@@ -13807,6 +17246,15 @@ async function exportChurchData() {
             of results
         ) {
 
+            if (!result) {
+
+                throw new Error(
+                    `No response received from ${tableName}.`
+                );
+
+            }
+
+
             if (result.error) {
 
                 console.error(
@@ -13814,21 +17262,24 @@ async function exportChurchData() {
                     result.error
                 );
 
-
                 alert(
-                    `❌ Backup failed while reading ${tableName}.`
+                    `❌ Backup failed while reading ${tableName}.\n\n` +
+                    (
+                        result.error.message ||
+                        "Unknown Supabase error."
+                    )
                 );
 
-
                 return;
+
             }
 
         }
 
 
-        // =====================================
+        // =====================================================
         // CREATE BACKUP OBJECT
-        // =====================================
+        // =====================================================
 
         const backupData = {
 
@@ -13836,7 +17287,7 @@ async function exportChurchData() {
                 "ChurchHQ",
 
             version:
-                "6.0",
+                "7.0",
 
             source:
                 "Supabase",
@@ -13878,16 +17329,22 @@ async function exportChurchData() {
                     leadersResult.data || [],
 
                 ministries:
-                    ministriesResult.data || []
+                    ministriesResult.data || [],
+
+                program_plans:
+                    programPlansResult.data || [],
+
+                program_items:
+                    programItemsResult.data || []
 
             }
 
         };
 
 
-        // =====================================
+        // =====================================================
         // CREATE JSON DOWNLOAD
-        // =====================================
+        // =====================================================
 
         const jsonData =
             JSON.stringify(
@@ -13933,7 +17390,7 @@ async function exportChurchData() {
 
 
         downloadAnchor.download =
-            `churchhq_backup_v6_${today}.json`;
+            `churchhq_backup_v7_${today}.json`;
 
 
         document.body.appendChild(
@@ -13952,9 +17409,9 @@ async function exportChurchData() {
         );
 
 
-        // =====================================
+        // =====================================================
         // SAVE LAST BACKUP DATE
-        // =====================================
+        // =====================================================
 
         const backupTime =
             new Date()
@@ -13967,12 +17424,19 @@ async function exportChurchData() {
         );
 
 
-        updateLastBackupDisplay();
+        if (
+            typeof updateLastBackupDisplay ===
+            "function"
+        ) {
+
+            updateLastBackupDisplay();
+
+        }
 
 
-        // =====================================
+        // =====================================================
         // AUDIT - EXPORT
-        // =====================================
+        // =====================================================
 
         if (
             typeof writeAuditLog ===
@@ -13980,92 +17444,138 @@ async function exportChurchData() {
         ) {
 
             await writeAuditLog(
+
                 "EXPORT",
+
                 "Settings",
+
                 "Exported complete ChurchHQ backup.",
+
                 null,
+
                 {
+
                     version:
-                        "6.0",
+                        "7.0",
 
                     members:
-                        backupData.data.members.length,
+                        backupData.data
+                            .members.length,
 
                     plannerTasks:
-                        backupData.data.planner_tasks.length,
+                        backupData.data
+                            .planner_tasks.length,
 
                     songs:
-                        backupData.data.songs.length,
+                        backupData.data
+                            .songs.length,
 
                     services:
-                        backupData.data.service_records.length,
+                        backupData.data
+                            .service_records.length,
 
                     attendance:
-                        backupData.data.attendance_records.length,
+                        backupData.data
+                            .attendance_records.length,
 
                     activities:
-                        backupData.data.activities.length,
+                        backupData.data
+                            .activities.length,
 
                     annualActivities:
-                        backupData.data.annual_activities.length,
+                        backupData.data
+                            .annual_activities.length,
 
                     announcements:
-                        backupData.data.announcements.length,
+                        backupData.data
+                            .announcements.length,
 
                     fileFolders:
-                        backupData.data.file_folders.length,
+                        backupData.data
+                            .file_folders.length,
 
                     churchLeaders:
-                        backupData.data.church_leaders.length,
+                        backupData.data
+                            .church_leaders.length,
 
                     ministries:
-                        backupData.data.ministries.length
+                        backupData.data
+                            .ministries.length,
+
+                    programPlans:
+                        backupData.data
+                            .program_plans.length,
+
+                    programItems:
+                        backupData.data
+                            .program_items.length
+
                 }
+
             );
 
         }
 
 
-        // =====================================
+        // =====================================================
         // CONSOLE SUMMARY
-        // =====================================
+        // =====================================================
 
         console.log(
-            "✅ ChurchHQ Backup v6 created:",
+            "✅ ChurchHQ Backup v7 created:",
             {
 
                 members:
-                    backupData.data.members.length,
+                    backupData.data
+                        .members.length,
 
                 planner_tasks:
-                    backupData.data.planner_tasks.length,
+                    backupData.data
+                        .planner_tasks.length,
 
                 songs:
-                    backupData.data.songs.length,
+                    backupData.data
+                        .songs.length,
 
                 service_records:
-                    backupData.data.service_records.length,
+                    backupData.data
+                        .service_records.length,
 
                 attendance_records:
-                    backupData.data.attendance_records.length,
+                    backupData.data
+                        .attendance_records.length,
 
                 activities:
-                    backupData.data.activities.length,
+                    backupData.data
+                        .activities.length,
 
                 annual_activities:
-                    backupData.data.annual_activities.length,
+                    backupData.data
+                        .annual_activities.length,
 
                 announcements:
-                    backupData.data.announcements.length,
+                    backupData.data
+                        .announcements.length,
 
                 file_folders:
-                    backupData.data.file_folders.length,
+                    backupData.data
+                        .file_folders.length,
 
                 church_leaders:
-                    backupData.data.church_leaders.length,
+                    backupData.data
+                        .church_leaders.length,
 
                 ministries:
-                    backupData.data.ministries.length
+                    backupData.data
+                        .ministries.length,
+
+                program_plans:
+                    backupData.data
+                        .program_plans.length,
+
+                program_items:
+                    backupData.data
+                        .program_items.length
 
             }
         );
@@ -14086,16 +17596,21 @@ async function exportChurchData() {
 
         alert(
             "❌ Failed to create ChurchHQ backup.\n\n" +
-            error.message
+            (
+                error &&
+                error.message
+                    ? error.message
+                    : "Unknown backup error."
+            )
         );
 
     }
 
 }
-
 // =====================================================
 // CHURCHHQ SETTINGS
 // IMPORT / RESTORE COMPLETE BACKUP
+// VERSION 7.0
 // SUPPORTS OLD + NEW BACKUPS
 // =====================================================
 
@@ -14129,9 +17644,9 @@ async function importChurchData(event) {
 
             try {
 
-                // =====================================
+                // =====================================================
                 // READ JSON
-                // =====================================
+                // =====================================================
 
                 const importedJSON =
                     JSON.parse(
@@ -14139,9 +17654,9 @@ async function importChurchData(event) {
                     );
 
 
-                // =====================================
+                // =====================================================
                 // BASIC VALIDATION
-                // =====================================
+                // =====================================================
 
                 if (
                     !importedJSON ||
@@ -14167,9 +17682,12 @@ async function importChurchData(event) {
                     importedJSON.data;
 
 
-                // =====================================
+                // =====================================================
                 // REQUIRED CORE TABLES
-                // =====================================
+                //
+                // We keep these as the minimum requirement
+                // so older ChurchHQ backups still work.
+                // =====================================================
 
                 const validBackup =
 
@@ -14207,9 +17725,11 @@ async function importChurchData(event) {
                 }
 
 
-                // =====================================
+                // =====================================================
                 // BACKWARD COMPATIBILITY
-                // =====================================
+                //
+                // Missing tables from older backups become [].
+                // =====================================================
 
                 const backup = {
 
@@ -14228,12 +17748,14 @@ async function importChurchData(event) {
                     attendance_records:
                         rawBackup.attendance_records || [],
 
+
                     activities:
                         Array.isArray(
                             rawBackup.activities
                         )
                             ? rawBackup.activities
                             : [],
+
 
                     annual_activities:
                         Array.isArray(
@@ -14242,12 +17764,14 @@ async function importChurchData(event) {
                             ? rawBackup.annual_activities
                             : [],
 
+
                     announcements:
                         Array.isArray(
                             rawBackup.announcements
                         )
                             ? rawBackup.announcements
                             : [],
+
 
                     file_folders:
                         Array.isArray(
@@ -14256,6 +17780,7 @@ async function importChurchData(event) {
                             ? rawBackup.file_folders
                             : [],
 
+
                     church_leaders:
                         Array.isArray(
                             rawBackup.church_leaders
@@ -14263,19 +17788,40 @@ async function importChurchData(event) {
                             ? rawBackup.church_leaders
                             : [],
 
+
                     ministries:
                         Array.isArray(
                             rawBackup.ministries
                         )
                             ? rawBackup.ministries
+                            : [],
+
+
+                    // =====================================
+                    // PROGRAM PLANNER v7
+                    // =====================================
+
+                    program_plans:
+                        Array.isArray(
+                            rawBackup.program_plans
+                        )
+                            ? rawBackup.program_plans
+                            : [],
+
+
+                    program_items:
+                        Array.isArray(
+                            rawBackup.program_items
+                        )
+                            ? rawBackup.program_items
                             : []
 
                 };
 
 
-                // =====================================
+                // =====================================================
                 // CONFIRM RESTORE
-                // =====================================
+                // =====================================================
 
                 const confirmed =
                     confirm(
@@ -14299,6 +17845,8 @@ async function importChurchData(event) {
                         "• Planner Tasks\n" +
                         "• Songs\n" +
                         "• Sunday & Midweek Services\n" +
+                        "• Program Planner\n" +
+                        "• Program Assignments\n" +
                         "• Attendance\n" +
                         "• Dashboard Activities\n" +
                         "• Annual Activities\n" +
@@ -14328,9 +17876,9 @@ async function importChurchData(event) {
                 );
 
 
-                // =====================================
+                // =====================================================
                 // RESTORE HELPER
-                // =====================================
+                // =====================================================
 
                 async function restoreTable(
                     tableName,
@@ -14354,9 +17902,11 @@ async function importChurchData(event) {
 
                     const { error } =
                         await churchSupabase
+
                             .from(
                                 tableName
                             )
+
                             .upsert(
                                 records,
                                 {
@@ -14383,59 +17933,118 @@ async function importChurchData(event) {
                 }
 
 
-                // =====================================
+                // =====================================================
                 // RESTORE ORDER
-                // =====================================
+                //
+                // Parent/reference tables first.
+                // program_plans MUST be before program_items.
+                // =====================================================
+
+
+                // 1. Ministries first
 
                 await restoreTable(
                     "ministries",
                     backup.ministries
                 );
 
+
+                // 2. Members
+
                 await restoreTable(
                     "members",
                     backup.members
                 );
+
+
+                // 3. Planner
 
                 await restoreTable(
                     "planner_tasks",
                     backup.planner_tasks
                 );
 
+
+                // 4. Songs
+
                 await restoreTable(
                     "songs",
                     backup.songs
                 );
+
+
+                // 5. Service Planner
 
                 await restoreTable(
                     "service_records",
                     backup.service_records
                 );
 
+
+                // =====================================================
+                // 6. PROGRAM PLANNER PARENT
+                // =====================================================
+
+                await restoreTable(
+                    "program_plans",
+                    backup.program_plans
+                );
+
+
+                // =====================================================
+                // 7. PROGRAM PLANNER ITEMS
+                //
+                // Must come AFTER program_plans because
+                // program_items.program_id points to program_plans.id
+                // =====================================================
+
+                await restoreTable(
+                    "program_items",
+                    backup.program_items
+                );
+
+
+                // 8. Attendance
+
                 await restoreTable(
                     "attendance_records",
                     backup.attendance_records
                 );
+
+
+                // 9. Dashboard activities
 
                 await restoreTable(
                     "activities",
                     backup.activities
                 );
 
+
+                // 10. Annual activities
+
                 await restoreTable(
                     "annual_activities",
                     backup.annual_activities
                 );
+
+
+                // 11. Announcements
 
                 await restoreTable(
                     "announcements",
                     backup.announcements
                 );
 
+
+                // 12. File folders
+
                 await restoreTable(
                     "file_folders",
                     backup.file_folders
                 );
+
+
+                // 13. Church leaders
 
                 await restoreTable(
                     "church_leaders",
@@ -14443,9 +18052,9 @@ async function importChurchData(event) {
                 );
 
 
-                // =====================================
-                // AUDIT - IMPORT
-                // =====================================
+                // =====================================================
+                // AUDIT - IMPORT / RESTORE
+                // =====================================================
 
                 if (
                     typeof writeAuditLog ===
@@ -14453,11 +18062,17 @@ async function importChurchData(event) {
                 ) {
 
                     await writeAuditLog(
+
                         "IMPORT",
+
                         "Settings",
+
                         "Restored ChurchHQ backup.",
+
                         null,
+
                         {
+
                             backupVersion:
                                 importedJSON.version ||
                                 "Legacy",
@@ -14473,6 +18088,12 @@ async function importChurchData(event) {
 
                             services:
                                 backup.service_records.length,
+
+                            programPlans:
+                                backup.program_plans.length,
+
+                            programItems:
+                                backup.program_items.length,
 
                             attendance:
                                 backup.attendance_records.length,
@@ -14494,15 +18115,17 @@ async function importChurchData(event) {
 
                             ministries:
                                 backup.ministries.length
+
                         }
+
                     );
 
                 }
 
 
-                // =====================================
-                // RELOAD DATA
-                // =====================================
+                // =====================================================
+                // RELOAD MAIN CHURCHHQ DATA
+                // =====================================================
 
                 if (
                     typeof initializeChurchHQ ===
@@ -14514,6 +18137,10 @@ async function importChurchData(event) {
                 }
 
 
+                // =====================================================
+                // RELOAD ACTIVITIES
+                // =====================================================
+
                 if (
                     typeof loadActivitiesFromSupabase ===
                     "function"
@@ -14523,6 +18150,10 @@ async function importChurchData(event) {
 
                 }
 
+
+                // =====================================================
+                // RELOAD ANNOUNCEMENTS
+                // =====================================================
 
                 if (
                     typeof loadAnnouncementsFromSupabase ===
@@ -14534,6 +18165,10 @@ async function importChurchData(event) {
                 }
 
 
+                // =====================================================
+                // RELOAD MINISTRIES
+                // =====================================================
+
                 if (
                     typeof loadMinistriesFromSupabase ===
                     "function"
@@ -14543,6 +18178,10 @@ async function importChurchData(event) {
 
                 }
 
+
+                // =====================================================
+                // RELOAD LEADERS
+                // =====================================================
 
                 if (
                     typeof loadLeadersFromSupabase ===
@@ -14554,6 +18193,10 @@ async function importChurchData(event) {
                 }
 
 
+                // =====================================================
+                // RELOAD ANNUAL ACTIVITIES
+                // =====================================================
+
                 if (
                     typeof loadAnnualActivitiesFromSupabase ===
                     "function"
@@ -14563,6 +18206,10 @@ async function importChurchData(event) {
 
                 }
 
+
+                // =====================================================
+                // RELOAD FILE FOLDERS
+                // =====================================================
 
                 if (
                     typeof loadFileFoldersFromSupabase ===
@@ -14574,6 +18221,24 @@ async function importChurchData(event) {
                 }
 
 
+                // =====================================================
+                // RELOAD PROGRAM PLANNER
+                // =====================================================
+
+                if (
+                    typeof loadProgramPlans ===
+                    "function"
+                ) {
+
+                    await loadProgramPlans();
+
+                }
+
+
+                // =====================================================
+                // REFRESH DASHBOARD
+                // =====================================================
+
                 if (
                     typeof refreshDashboardStatus ===
                     "function"
@@ -14584,12 +18249,29 @@ async function importChurchData(event) {
                 }
 
 
+                // =====================================================
+                // COMPLETE
+                // =====================================================
+
                 input.value =
                     "";
 
 
                 console.log(
-                    "✅ ChurchHQ restore completed."
+                    "✅ ChurchHQ Backup restore completed.",
+                    {
+
+                        version:
+                            importedJSON.version ||
+                            "Legacy",
+
+                        program_plans:
+                            backup.program_plans.length,
+
+                        program_items:
+                            backup.program_items.length
+
+                    }
                 );
 
 
@@ -14608,7 +18290,12 @@ async function importChurchData(event) {
 
                 alert(
                     "❌ Restore failed:\n\n" +
-                    error.message
+                    (
+                        error &&
+                        error.message
+                            ? error.message
+                            : "Unknown restore error."
+                    )
                 );
 
 
@@ -14619,6 +18306,10 @@ async function importChurchData(event) {
 
         };
 
+
+    // =====================================================
+    // FILE READER ERROR
+    // =====================================================
 
     reader.onerror =
         function() {
@@ -14717,6 +18408,8 @@ async function clearAllChurchData() {
             "• Planner Tasks\n" +
             "• Songs\n" +
             "• Sunday & Midweek Services\n" +
+            "• Program Planner\n" +
+            "• Program Assignments\n" +
             "• Attendance Records\n" +
             "• Dashboard Activities\n" +
             "• Annual Activities\n" +
@@ -14802,29 +18495,42 @@ async function clearAllChurchData() {
 
         const tables = [
 
-            "church_leaders",
+    // =====================================
+    // DEPENDENT / CHILD TABLES FIRST
+    // =====================================
 
-            "attendance_records",
+    "program_items",
 
-            "service_records",
+    "church_leaders",
 
-            "planner_tasks",
+    "attendance_records",
 
-            "songs",
 
-            "activities",
+    // =====================================
+    // PARENT / MAIN TABLES
+    // =====================================
 
-            "annual_activities",
+    "program_plans",
 
-            "announcements",
+    "service_records",
 
-            "file_folders",
+    "planner_tasks",
 
-            "members",
+    "songs",
 
-            "ministries"
+    "activities",
 
-        ];
+    "annual_activities",
+
+    "announcements",
+
+    "file_folders",
+
+    "members",
+
+    "ministries"
+
+];
 
 
         // =====================================
@@ -15045,6 +18751,39 @@ async function clearAllChurchData() {
 
         }
 
+        // =====================================
+// RESET PROGRAM PLANNER
+// =====================================
+
+if (
+    typeof programPlans !==
+    "undefined"
+) {
+
+    programPlans = [];
+
+}
+
+
+if (
+    typeof programItems !==
+    "undefined"
+) {
+
+    programItems = [];
+
+}
+
+
+if (
+    typeof editingProgramId !==
+    "undefined"
+) {
+
+    editingProgramId = null;
+
+}
+
 
         // =====================================
         // AUDIT - SYSTEM RESET
@@ -15067,7 +18806,7 @@ async function clearAllChurchData() {
                 {
 
                     version:
-                        "6.0",
+                        "7.0",
 
                     clearedTables:
                         tables,
@@ -15343,6 +19082,252 @@ async function generateReportsData() {
         }
 
 
+// =====================================
+// RECENT ATTENDANCE SUMMARY
+// =====================================
+
+const recentAttendanceContainer =
+    document.getElementById(
+        "rep-attendance-history"
+    );
+
+
+if (recentAttendanceContainer) {
+
+    recentAttendanceContainer.innerHTML =
+        "";
+
+
+    // =====================================
+    // NO ATTENDANCE RECORDS
+    // =====================================
+
+    if (
+        !Array.isArray(attendance) ||
+        attendance.length === 0
+    ) {
+
+        recentAttendanceContainer.innerHTML = `
+
+            <div
+                style="
+                    padding:20px;
+                    text-align:center;
+                    color:#94a3b8;
+                    font-size:13px;
+                "
+            >
+                No attendance records yet.
+            </div>
+
+        `;
+
+    } else {
+
+
+        // =====================================
+        // RECENT 5 RECORDS
+        // =====================================
+
+        const recentAttendance =
+            attendance.slice(
+                0,
+                5
+            );
+
+
+        recentAttendance.forEach(
+            record => {
+
+
+                // =====================================
+                // PRESENT COUNT
+                // =====================================
+
+                let recordPresentCount =
+                    0;
+
+
+                if (
+                    record.check_ins &&
+                    typeof record.check_ins ===
+                        "object"
+                ) {
+
+                    recordPresentCount =
+                        Object.values(
+                            record.check_ins
+                        )
+                        .filter(Boolean)
+                        .length;
+
+                } else {
+
+                    recordPresentCount =
+                        Number(
+                            record.present_count || 0
+                        );
+
+                }
+
+
+                // =====================================
+                // TOTAL MEMBERS
+                // =====================================
+
+                const recordTotalMembers =
+                    Number(
+                        record.total_members || 0
+                    );
+
+
+                // =====================================
+                // ATTENDANCE RATE
+                // =====================================
+
+                const attendanceRate =
+                    recordTotalMembers > 0
+                        ? Math.round(
+                            (
+                                recordPresentCount /
+                                recordTotalMembers
+                            ) * 100
+                        )
+                        : 0;
+
+
+                // =====================================
+                // SERVICE TYPE
+                // =====================================
+
+                const serviceType =
+                    String(
+                        record.service_type ||
+                        "sunday"
+                    )
+                    .toLowerCase();
+
+
+                const serviceLabel =
+                    serviceType === "midweek"
+                        ? "Midweek Service"
+                        : "Sunday Service";
+
+
+                // =====================================
+                // EVENT NAME
+                // =====================================
+
+                const eventName =
+                    record.event_name ||
+                    serviceLabel;
+
+
+                // =====================================
+                // FORMAT DATE
+                // =====================================
+
+                let formattedDate =
+                    record.date || "-";
+
+
+                if (record.date) {
+
+                    const dateObject =
+                        new Date(
+                            record.date +
+                            "T00:00:00"
+                        );
+
+
+                    if (
+                        !isNaN(
+                            dateObject.getTime()
+                        )
+                    ) {
+
+                        formattedDate =
+                            dateObject
+                                .toLocaleDateString(
+                                    "en-US",
+                                    {
+                                        month:
+                                            "short",
+
+                                        day:
+                                            "numeric",
+
+                                        year:
+                                            "numeric"
+                                    }
+                                );
+
+                    }
+
+                }
+
+
+                // =====================================
+                // CREATE ITEM
+                // =====================================
+
+                const item =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                item.className =
+                    "recent-attendance-item";
+
+
+                item.innerHTML = `
+
+                    <div class="recent-attendance-info">
+
+                        <strong>
+                            ${eventName}
+                        </strong>
+
+                        <span>
+                            ${serviceLabel}
+                            •
+                            ${formattedDate}
+                        </span>
+
+                    </div>
+
+
+                    <div class="recent-attendance-result">
+
+                        <strong>
+                            ${recordPresentCount}
+                            /
+                            ${recordTotalMembers}
+                        </strong>
+
+                        <span>
+                            ${attendanceRate}%
+                        </span>
+
+                    </div>
+
+                `;
+
+
+                recentAttendanceContainer
+                    .appendChild(
+                        item
+                    );
+
+            }
+        );
+
+    }
+
+}
+
+
         // =====================================
         // SONGS
         // =====================================
@@ -15358,185 +19343,428 @@ async function generateReportsData() {
         }
 
 
+       // =====================================
+// PLANNER REPORTS
+// ACCURATE STATUS COUNTS
+// =====================================
+
+const normalizedTasks =
+    tasks.map(task => {
+
+        const status =
+            String(
+                task.status || "todo"
+            )
+            .trim()
+            .toLowerCase();
+
+        return {
+            ...task,
+            normalizedStatus:
+                status
+        };
+
+    });
+
+
+// =====================================
+// TOTAL TASKS
+// =====================================
+
+const totalTasks =
+    normalizedTasks.length;
+
+
+// =====================================
+// TO DO
+// =====================================
+
+const todoTasks =
+    normalizedTasks.filter(
+        task =>
+            task.normalizedStatus ===
+            "todo"
+    ).length;
+
+
+// =====================================
+// IN PROGRESS
+// =====================================
+
+const progressTasks =
+    normalizedTasks.filter(
+        task =>
+            task.normalizedStatus ===
+            "progress"
+    ).length;
+
+
+// =====================================
+// COMPLETED
+// =====================================
+
+const completedTasks =
+    normalizedTasks.filter(
+        task =>
+            task.normalizedStatus ===
+            "completed"
+    ).length;
+
+
+// =====================================
+// COMPLETION RATE
+// =====================================
+
+const progressRate =
+    totalTasks > 0
+        ? Math.round(
+            (
+                completedTasks /
+                totalTasks
+            ) * 100
+        )
+        : 0;
+
+
+// =====================================
+// PROGRESS PERCENT
+// =====================================
+
+const taskProgressEl =
+    document.getElementById(
+        "rep-task-progress"
+    );
+
+
+if (taskProgressEl) {
+
+    taskProgressEl.textContent =
+        `${progressRate}%`;
+
+}
+
+
+// =====================================
+// TASK BREAKDOWN
+// =====================================
+
+const taskCountsEl =
+    document.getElementById(
+        "rep-task-counts"
+    );
+
+
+if (taskCountsEl) {
+
+    if (totalTasks === 0) {
+
+        taskCountsEl.textContent =
+            "No planner tasks";
+
+    } else {
+
+        taskCountsEl.textContent =
+            `${completedTasks} Completed • ${progressTasks} In Progress • ${todoTasks} To Do`;
+
+    }
+
+}
+
+
         // =====================================
-        // TASKS
-        // =====================================
+// MEMBERS PER MINISTRY
+// MULTI-MINISTRY COUNT
+// =====================================
 
-        const totalTasks =
-            tasks.length;
-
-        const completedTasks =
-            tasks.filter(task =>
-                task.status === "completed" ||
-                task.completed
-            ).length;
+const ministryCounts = {};
 
 
-        const progressRate =
-            totalTasks > 0
-                ? Math.round(
-                    (completedTasks / totalTasks) * 100
+// =====================================
+// COUNT MEMBER IN ALL ASSIGNED MINISTRIES
+// =====================================
+
+members.forEach(member => {
+
+    let memberMinistries = [];
+
+
+    // =====================================
+    // USE NEW MULTI-MINISTRY ARRAY FIRST
+    // =====================================
+
+    if (
+        Array.isArray(member.ministries) &&
+        member.ministries.length > 0
+    ) {
+
+        memberMinistries =
+            member.ministries
+                .map(ministry =>
+                    String(
+                        ministry || ""
+                    ).trim()
                 )
-                : 0;
+                .filter(Boolean);
+
+    }
 
 
-        const taskProgressEl =
-            document.getElementById(
-                "rep-task-progress"
-            );
+    // =====================================
+    // FALLBACK TO OLD PRIMARY MINISTRY
+    // =====================================
 
-        if (taskProgressEl) {
+    else if (
+        member.ministry &&
+        String(member.ministry).trim()
+    ) {
 
-            taskProgressEl.textContent =
-                `${progressRate}%`;
+        memberMinistries = [
+            String(
+                member.ministry
+            ).trim()
+        ];
 
-        }
-
-
-        const taskCountsEl =
-            document.getElementById(
-                "rep-task-counts"
-            );
-
-        if (taskCountsEl) {
-
-            taskCountsEl.textContent =
-                `${completedTasks} of ${totalTasks} Completed`;
-
-        }
+    }
 
 
-        // =====================================
-        // MEMBERS PER MINISTRY
-        // =====================================
+    // =====================================
+    // NO MINISTRY
+    // =====================================
 
-        const ministryCounts = {};
+    else {
+
+        memberMinistries = [
+            "Unassigned"
+        ];
+
+    }
 
 
-        members.forEach(member => {
+    // =====================================
+    // REMOVE DUPLICATES PER MEMBER
+    // =====================================
 
-            const ministry =
-                member.ministry ||
-                "Unassigned";
+    const uniqueMinistries =
+        [
+            ...new Set(
+                memberMinistries
+            )
+        ];
+
+
+    // =====================================
+    // COUNT EACH MINISTRY
+    // =====================================
+
+    uniqueMinistries.forEach(
+        ministry => {
 
             ministryCounts[ministry] =
-                (ministryCounts[ministry] || 0) + 1;
+                (
+                    ministryCounts[ministry] ||
+                    0
+                ) + 1;
 
-        });
+        }
+    );
+
+});
 
 
-        const ministryContainer =
-            document.getElementById(
-                "rep-ministry-list"
+// =====================================
+// MINISTRY REPORT CONTAINER
+// =====================================
+
+const ministryContainer =
+    document.getElementById(
+        "rep-ministry-list"
+    );
+
+
+if (ministryContainer) {
+
+    ministryContainer.innerHTML = "";
+
+
+    // =====================================
+    // NO DATA
+    // =====================================
+
+    if (
+        Object.keys(
+            ministryCounts
+        ).length === 0
+    ) {
+
+        ministryContainer.innerHTML = `
+
+            <p
+                style="
+                    color:#9ca3af;
+                    font-size:14px;
+                "
+            >
+                No member data available.
+            </p>
+
+        `;
+
+    } else {
+
+
+        // =====================================
+        // SORT MINISTRIES
+        // HIGHEST COUNT FIRST
+        // =====================================
+
+        const sortedMinistries =
+            Object.entries(
+                ministryCounts
+            )
+            .sort(
+                (a, b) => {
+
+                    if (
+                        b[1] !== a[1]
+                    ) {
+
+                        return (
+                            b[1] -
+                            a[1]
+                        );
+
+                    }
+
+
+                    return String(
+                        a[0]
+                    ).localeCompare(
+                        String(
+                            b[0]
+                        ),
+                        undefined,
+                        {
+                            sensitivity:
+                                "base"
+                        }
+                    );
+
+                }
             );
 
 
-        if (ministryContainer) {
+        sortedMinistries.forEach(
+            ([ministry, count]) => {
 
-            ministryContainer.innerHTML = "";
+
+                // =====================================
+                // PERCENT OF TOTAL UNIQUE MEMBERS
+                // =====================================
+
+                const percentage =
+                    totalMembers > 0
+                        ? Math.round(
+                            (
+                                count /
+                                totalMembers
+                            ) * 100
+                        )
+                        : 0;
 
 
-            if (
-                Object.keys(ministryCounts).length === 0
-            ) {
+                ministryContainer.innerHTML += `
 
-                ministryContainer.innerHTML = `
-                    <p style="
-                        color:#9ca3af;
-                        font-size:14px;
-                    ">
-                        No member data available.
-                    </p>
+                    <div>
+
+                        <div
+                            style="
+                                display:flex;
+                                justify-content:space-between;
+                                gap:12px;
+                                font-size:13px;
+                                font-weight:500;
+                                margin-bottom:4px;
+                            "
+                        >
+
+                            <span>
+                                ${ministry}
+                            </span>
+
+
+                            <span
+                                style="
+                                    color:#6b7280;
+                                    white-space:nowrap;
+                                "
+                            >
+                                ${count}
+                                member${count === 1 ? "" : "s"}
+                                (${percentage}%)
+                            </span>
+
+                        </div>
+
+
+                        <div
+                            style="
+                                background-color:#e5e7eb;
+                                height:8px;
+                                border-radius:4px;
+                                overflow:hidden;
+                            "
+                        >
+
+                            <div
+                                style="
+                                    background-color:#2563eb;
+                                    width:${Math.min(
+                                        percentage,
+                                        100
+                                    )}%;
+                                    height:100%;
+                                    border-radius:4px;
+                                "
+                            ></div>
+
+                        </div>
+
+                    </div>
+
                 `;
 
-            } else {
-
-                Object.entries(
-                    ministryCounts
-                ).forEach(
-                    ([ministry, count]) => {
-
-                        const percentage =
-                            totalMembers > 0
-                                ? Math.round(
-                                    (count / totalMembers) * 100
-                                )
-                                : 0;
-
-
-                        ministryContainer.innerHTML += `
-                            <div>
-
-                                <div style="
-                                    display:flex;
-                                    justify-content:space-between;
-                                    font-size:13px;
-                                    font-weight:500;
-                                    margin-bottom:4px;
-                                ">
-
-                                    <span>
-                                        ${ministry}
-                                    </span>
-
-                                    <span style="
-                                        color:#6b7280;
-                                    ">
-                                        ${count}
-                                        members
-                                        (${percentage}%)
-                                    </span>
-
-                                </div>
-
-                                <div style="
-                                    background-color:#e5e7eb;
-                                    height:8px;
-                                    border-radius:4px;
-                                    overflow:hidden;
-                                ">
-
-                                    <div style="
-                                        background-color:#2563eb;
-                                        width:${percentage}%;
-                                        height:100%;
-                                        border-radius:4px;
-                                    "></div>
-
-                                </div>
-
-                            </div>
-                        `;
-
-                    }
-                );
-
             }
-
-        }
-
-
-        console.log(
-            "✅ Reports loaded from Supabase:",
-            {
-                members: members.length,
-                songs: songs.length,
-                tasks: tasks.length,
-                attendance: attendance.length
-            }
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "❌ Failed to load Reports from Supabase:",
-            error
         );
 
     }
 
 }
+// =====================================
+// REPORT LOAD COMPLETE
+// =====================================
+
+console.log(
+    "✅ Reports loaded from Supabase:",
+    {
+        members: members.length,
+        songs: songs.length,
+        tasks: tasks.length,
+        attendance: attendance.length
+    }
+);
+
+
+} catch (error) {
+
+    console.error(
+        "❌ Failed to load Reports from Supabase:",
+        error
+    );
+
+}
+
+}
+        
 /* =========================================
    DASHBOARD DYNAMIC ACTIVITIES & ANNOUNCEMENTS
 ========================================= */
@@ -18788,15 +23016,18 @@ function applyRoleBasedUI() {
     // VIEWER SIDEBAR RESTRICTIONS
     // =====================================
 
-    const viewerRestrictedPages = [
+const viewerRestrictedPages = [
 
-        "members",
-        "leaders",
-        "attendance",
-        "reports",
-        "settings"
+    "service-planner",
+    "program-planner",
 
-    ];
+    "members",
+    "leaders",
+    "attendance",
+    "reports",
+    "settings"
+
+];
 
 
     viewerRestrictedPages.forEach(pageId => {
