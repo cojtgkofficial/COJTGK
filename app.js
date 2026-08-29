@@ -25,6 +25,13 @@ let auditCurrentPage = 1;
 
 const auditPageSize = 10;
 
+// =====================================
+// GLOBAL MINISTRIES STATE
+// =====================================
+
+var ministries = [];
+var members = [];
+
 console.log("✅ ChurchHQ Supabase client created.");
 console.log(
     "Supabase .from():",
@@ -2881,6 +2888,8 @@ function switchServicePlannerTab(type) {
 ========================================= */
 let sundayServices = [];
 let midweekServices = [];
+let editingSundayServiceId = null;
+let editingMidweekServiceId = null;
 
 async function saveServiceData(type) {
 
@@ -2919,16 +2928,53 @@ async function saveServiceData(type) {
         songsLineup: getVal("songsLineup")
     };
 
-    let targetArray = type === "sunday" ? sundayServices : midweekServices;
-    const existingIndex = targetArray.findIndex(item => item.date === dateValue);
+let targetArray =
+    type === "sunday"
+        ? sundayServices
+        : midweekServices;
 
-if (existingIndex !== -1) {
 
-const updatedInSupabase =
-    await updateServiceToSupabase(
-        type,
-        serviceRecord
-    );
+const editingId =
+    type === "sunday"
+        ? editingSundayServiceId
+        : editingMidweekServiceId;
+
+
+// =====================================
+// UPDATE EXISTING SERVICE
+// =====================================
+
+if (editingId !== null) {
+
+    const existingIndex =
+        targetArray.findIndex(
+            item =>
+                String(item.id) ===
+                String(editingId)
+        );
+
+
+    if (existingIndex === -1) {
+
+        alert(
+            "❌ Existing service record was not found."
+        );
+
+        return;
+    }
+
+
+    serviceRecord.id =
+        editingId;
+
+
+    const updatedInSupabase =
+        await updateServiceToSupabase(
+            type,
+            serviceRecord
+        );
+
+
     if (!updatedInSupabase) {
 
         alert(
@@ -2938,55 +2984,79 @@ const updatedInSupabase =
         return;
     }
 
-    targetArray[existingIndex] = serviceRecord;
 
-// =====================================
-// AUDIT - EDIT SERVICE RECORD
-// =====================================
+    targetArray[existingIndex] = {
+        ...serviceRecord,
+        id: editingId
+    };
 
-await writeAuditLog(
-    "EDIT",
-    type === "sunday"
-        ? "Sunday Service"
-        : "Midweek Service",
-    `Updated ${
+
+    await writeAuditLog(
+        "EDIT",
+
         type === "sunday"
-            ? "Sunday"
-            : "Midweek"
-    } Service record for ${dateValue}`,
-    dateValue,
-    {
-        date: dateValue,
-        preacher:
-            serviceRecord.preacher || "",
-        messageTitle:
-            serviceRecord.messageTitle || "",
-        worshipLeader:
-            serviceRecord.worshipLeader || ""
-    }
-);
+            ? "Sunday Service"
+            : "Midweek Service",
 
-} 
+        `Updated ${
+            type === "sunday"
+                ? "Sunday"
+                : "Midweek"
+        } Service record for ${dateValue}`,
+
+        editingId,
+
+        {
+            date:
+                dateValue,
+
+            preacher:
+                serviceRecord.preacher ||
+                "",
+
+            messageTitle:
+                serviceRecord.messageTitle ||
+                "",
+
+            worshipLeader:
+                serviceRecord.worshipLeader ||
+                ""
+        }
+    );
+
+}
 
 
 else {
 
-    const savedToSupabase =
-        await saveServiceToSupabase(
-            type,
-            serviceRecord
-        );
+    const savedServiceId =
+    await saveServiceToSupabase(
+        type,
+        serviceRecord
+    );
 
-    if (!savedToSupabase) {
 
-        alert(
-            "❌ Service record was not saved to Supabase."
-        );
+if (!savedServiceId) {
 
-        return;
-    }
+    alert(
+        "❌ Service record was not saved to Supabase."
+    );
 
-    targetArray.push(serviceRecord);
+    return;
+}
+
+
+// =====================================
+// ATTACH REAL SUPABASE ID
+// =====================================
+
+serviceRecord.id =
+    savedServiceId;
+
+
+targetArray.push(
+    serviceRecord
+);
 
     // =====================================
 // AUDIT - ADD SERVICE RECORD
@@ -3038,37 +3108,197 @@ function loadServiceRecord(type, date) {
         return;
     }
 
+
     const targetArray =
         type === "sunday"
             ? sundayServices
             : midweekServices;
 
-    const record = targetArray.find(item => item.date === date);
-    
-    if (!record) return;
 
-    const prefix = type === "sunday" ? "sun_" : "mid_";
+    const record =
+        targetArray.find(
+            item =>
+                item.date === date
+        );
 
-    const dateEl = document.getElementById(prefix + "serviceDate");
-    if (dateEl) dateEl.value = record.date || "";
 
-    const setVal = (fieldName, value) => {
-        const el = document.getElementById(prefix + fieldName);
-        if (el) el.value = value || "";
-    };
+    if (!record) {
 
-    setVal("worshipLeader", record.worshipLeader);
-    setVal("backingVocals", record.backingVocals);
-    setVal("keys", record.keys);
-    setVal("guitar", record.guitar);
-    setVal("bass", record.bass);
-    setVal("drums", record.drums);
-    setVal("pptOperator", record.pptOperator);
-    setVal("soundEngineer", record.soundEngineer);
-    setVal("liveStream", record.liveStream);
-    setVal("preacher", record.preacher);
-    setVal("messageTitle", record.messageTitle);
-    setVal("songsLineup", record.songsLineup);
+        alert(
+            "Service record was not found."
+        );
+
+        return;
+    }
+
+
+    // =====================================
+    // SET EDIT MODE
+    // =====================================
+
+    if (type === "sunday") {
+
+        editingSundayServiceId =
+            record.id || null;
+
+    } else {
+
+        editingMidweekServiceId =
+            record.id || null;
+
+    }
+
+
+    // =====================================
+    // LOAD VALUES INTO FORM
+    // =====================================
+
+    const prefix =
+        type === "sunday"
+            ? "sun_"
+            : "mid_";
+
+
+    const dateEl =
+        document.getElementById(
+            prefix + "serviceDate"
+        );
+
+
+    if (dateEl) {
+
+        dateEl.value =
+            record.date || "";
+
+    }
+
+
+    const setVal =
+        (fieldName, value) => {
+
+            const el =
+                document.getElementById(
+                    prefix +
+                    fieldName
+                );
+
+
+            if (el) {
+
+                el.value =
+                    value || "";
+
+            }
+
+        };
+
+
+    setVal(
+        "worshipLeader",
+        record.worshipLeader
+    );
+
+    setVal(
+        "backingVocals",
+        record.backingVocals
+    );
+
+    setVal(
+        "keys",
+        record.keys
+    );
+
+    setVal(
+        "guitar",
+        record.guitar
+    );
+
+    setVal(
+        "bass",
+        record.bass
+    );
+
+    setVal(
+        "drums",
+        record.drums
+    );
+
+    setVal(
+        "pptOperator",
+        record.pptOperator
+    );
+
+    setVal(
+        "soundEngineer",
+        record.soundEngineer
+    );
+
+    setVal(
+        "liveStream",
+        record.liveStream
+    );
+
+    setVal(
+        "preacher",
+        record.preacher
+    );
+
+    setVal(
+        "messageTitle",
+        record.messageTitle
+    );
+
+    setVal(
+        "songsLineup",
+        record.songsLineup
+    );
+
+
+    // =====================================
+    // CHANGE SAVE BUTTON TEXT
+    // =====================================
+
+    const panelId =
+        type === "sunday"
+            ? "serviceSundayPanel"
+            : "serviceMidweekPanel";
+
+
+    const saveButton =
+        document.querySelector(
+            `#${panelId} button[onclick="saveServiceData('${type}')"]`
+        );
+
+
+    if (saveButton) {
+
+        saveButton.textContent =
+            type === "sunday"
+                ? "💾 Update Sunday Roster"
+                : "💾 Update Midweek Roster";
+
+    }
+
+
+    // =====================================
+    // SCROLL TO FORM
+    // =====================================
+
+    const panel =
+        document.getElementById(
+            panelId
+        );
+
+
+    if (panel) {
+
+        panel.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+
+    }
+
 }
 
 function renderServiceHistory(type) {
@@ -3454,26 +3684,60 @@ async function saveServiceToSupabase(type, serviceRecord) {
 
         const serviceId = Date.now();
 
-        const { data, error } = await churchSupabase
-            .from("service_records")
-            .insert([{
-                id: serviceId,
-                service_type: type,
-                date: serviceRecord.date,
-                worship_leader: serviceRecord.worshipLeader || "",
-                backing_vocals: serviceRecord.backingVocals || "",
-                keys: serviceRecord.keys || "",
-                guitar: serviceRecord.guitar || "",
-                bass: serviceRecord.bass || "",
-                drums: serviceRecord.drums || "",
-                ppt_operator: serviceRecord.pptOperator || "",
-                sound_engineer: serviceRecord.soundEngineer || "",
-                live_stream: serviceRecord.liveStream || "",
-                preacher: serviceRecord.preacher || "",
-                message_title: serviceRecord.messageTitle || "",
-                songs_lineup: serviceRecord.songsLineup || ""
-            }])
-            .select();
+
+        const { data, error } =
+            await churchSupabase
+                .from("service_records")
+                .insert([
+                    {
+                        id: serviceId,
+
+                        service_type:
+                            type,
+
+                        date:
+                            serviceRecord.date,
+
+                        worship_leader:
+                            serviceRecord.worshipLeader || "",
+
+                        backing_vocals:
+                            serviceRecord.backingVocals || "",
+
+                        keys:
+                            serviceRecord.keys || "",
+
+                        guitar:
+                            serviceRecord.guitar || "",
+
+                        bass:
+                            serviceRecord.bass || "",
+
+                        drums:
+                            serviceRecord.drums || "",
+
+                        ppt_operator:
+                            serviceRecord.pptOperator || "",
+
+                        sound_engineer:
+                            serviceRecord.soundEngineer || "",
+
+                        live_stream:
+                            serviceRecord.liveStream || "",
+
+                        preacher:
+                            serviceRecord.preacher || "",
+
+                        message_title:
+                            serviceRecord.messageTitle || "",
+
+                        songs_lineup:
+                            serviceRecord.songsLineup || ""
+                    }
+                ])
+                .select()
+                .single();
+
 
         if (error) {
 
@@ -3482,15 +3746,30 @@ async function saveServiceToSupabase(type, serviceRecord) {
                 error
             );
 
-            return false;
+            return null;
         }
+
+
+        if (!data || !data.id) {
+
+            console.error(
+                "❌ Supabase saved the service but no ID was returned."
+            );
+
+            return null;
+        }
+
 
         console.log(
             "✅ Service saved to Supabase:",
             data
         );
 
-        return true;
+
+        // IMPORTANT:
+        // Return the real saved ID
+        return data.id;
+
 
     } catch (error) {
 
@@ -3499,38 +3778,109 @@ async function saveServiceToSupabase(type, serviceRecord) {
             error
         );
 
-        return false;
+        return null;
     }
-}
 
+}
 // =====================================
 // SERVICE - SUPABASE UPDATE
 // =====================================
 
-async function updateServiceToSupabase(type, serviceRecord) {
+async function updateServiceToSupabase(
+    type,
+    serviceRecord
+) {
 
     try {
 
-        const { data, error } = await churchSupabase
-            .from("service_records")
-            .update({
-                date: serviceRecord.date,
-                worship_leader: serviceRecord.worshipLeader || "",
-                backing_vocals: serviceRecord.backingVocals || "",
-                keys: serviceRecord.keys || "",
-                guitar: serviceRecord.guitar || "",
-                bass: serviceRecord.bass || "",
-                drums: serviceRecord.drums || "",
-                ppt_operator: serviceRecord.pptOperator || "",
-                sound_engineer: serviceRecord.soundEngineer || "",
-                live_stream: serviceRecord.liveStream || "",
-                preacher: serviceRecord.preacher || "",
-                message_title: serviceRecord.messageTitle || "",
-                songs_lineup: serviceRecord.songsLineup || ""
-            })
-            .eq("service_type", type)
-            .eq("date", serviceRecord.date)
-            .select();
+        if (!serviceRecord.id) {
+
+            console.error(
+                "❌ Missing service ID for update."
+            );
+
+            return false;
+
+        }
+
+
+        const {
+            data,
+            error
+        } =
+            await churchSupabase
+
+                .from(
+                    "service_records"
+                )
+
+                .update({
+
+                    date:
+                        serviceRecord.date,
+
+                    worship_leader:
+                        serviceRecord.worshipLeader ||
+                        "",
+
+                    backing_vocals:
+                        serviceRecord.backingVocals ||
+                        "",
+
+                    keys:
+                        serviceRecord.keys ||
+                        "",
+
+                    guitar:
+                        serviceRecord.guitar ||
+                        "",
+
+                    bass:
+                        serviceRecord.bass ||
+                        "",
+
+                    drums:
+                        serviceRecord.drums ||
+                        "",
+
+                    ppt_operator:
+                        serviceRecord.pptOperator ||
+                        "",
+
+                    sound_engineer:
+                        serviceRecord.soundEngineer ||
+                        "",
+
+                    live_stream:
+                        serviceRecord.liveStream ||
+                        "",
+
+                    preacher:
+                        serviceRecord.preacher ||
+                        "",
+
+                    message_title:
+                        serviceRecord.messageTitle ||
+                        "",
+
+                    songs_lineup:
+                        serviceRecord.songsLineup ||
+                        ""
+
+                })
+
+                .eq(
+                    "id",
+                    serviceRecord.id
+                )
+
+                .eq(
+                    "service_type",
+                    type
+                )
+
+                .select();
+
 
         if (error) {
 
@@ -3540,14 +3890,32 @@ async function updateServiceToSupabase(type, serviceRecord) {
             );
 
             return false;
+
         }
+
+
+        if (
+            !Array.isArray(data) ||
+            data.length === 0
+        ) {
+
+            console.error(
+                "❌ No service record was updated."
+            );
+
+            return false;
+
+        }
+
 
         console.log(
             "✅ Service updated in Supabase:",
             data
         );
 
+
         return true;
+
 
     } catch (error) {
 
@@ -3556,8 +3924,11 @@ async function updateServiceToSupabase(type, serviceRecord) {
             error
         );
 
+
         return false;
+
     }
+
 }
 
 // =====================================
@@ -3688,17 +4059,96 @@ await writeAuditLog(
 }
 
 function resetServiceForm(type) {
-    const prefix = type === "sunday" ? "sun_" : "mid_";
-    const dateEl = document.getElementById(prefix + "serviceDate");
-    if (dateEl) dateEl.value = "";
 
-    const fields = ["worshipLeader", "backingVocals", "keys", "guitar", "bass", "drums", "pptOperator", "soundEngineer", "liveStream", "preacher", "messageTitle", "songsLineup"];
+    const prefix =
+        type === "sunday"
+            ? "sun_"
+            : "mid_";
+
+
+    const dateEl =
+        document.getElementById(
+            prefix + "serviceDate"
+        );
+
+
+    if (dateEl) {
+        dateEl.value = "";
+    }
+
+
+    const fields = [
+        "worshipLeader",
+        "backingVocals",
+        "keys",
+        "guitar",
+        "bass",
+        "drums",
+        "pptOperator",
+        "soundEngineer",
+        "liveStream",
+        "preacher",
+        "messageTitle",
+        "songsLineup"
+    ];
+
+
     fields.forEach(field => {
-        const el = document.getElementById(prefix + field);
-        if (el) el.value = "";
-    });
-}
 
+        const el =
+            document.getElementById(
+                prefix + field
+            );
+
+
+        if (el) {
+            el.value = "";
+        }
+
+    });
+
+
+    // =====================================
+    // EXIT EDIT MODE
+    // =====================================
+
+    if (type === "sunday") {
+
+        editingSundayServiceId = null;
+
+    } else {
+
+        editingMidweekServiceId = null;
+
+    }
+
+
+    // =====================================
+    // RESTORE SAVE BUTTON
+    // =====================================
+
+    const panelId =
+        type === "sunday"
+            ? "serviceSundayPanel"
+            : "serviceMidweekPanel";
+
+
+    const saveButton =
+        document.querySelector(
+            `#${panelId} button[onclick="saveServiceData('${type}')"]`
+        );
+
+
+    if (saveButton) {
+
+        saveButton.textContent =
+            type === "sunday"
+                ? "💾 Save Sunday Roster"
+                : "💾 Save Midweek Roster";
+
+    }
+
+}
 /* =========================================
    NEW: GENERATOR DROPDOWN & AUTO-POPULATE FUNCTIONS
 ========================================= */
@@ -10294,7 +10744,7 @@ function clearSongForm() {
 /* =========================================
    MEMBERS ENGINE
 ========================================= */
-let members = [];
+
 
 const memberModal = document.getElementById("memberModal");
 const addMemberBtn = document.getElementById("addMemberBtn");
@@ -10318,11 +10768,6 @@ if (cancelMember) cancelMember.addEventListener("click", () => { if (memberModal
 if (saveMemberBtn) saveMemberBtn.addEventListener("click", saveMember);
 
 
-// =====================================================
-// MINISTRIES DATABASE
-// =====================================================
-
-let ministries = [];
 
 
 // =====================================================
@@ -12598,39 +13043,6 @@ function clearMemberForm() {
     if (mBirthday) mBirthday.value = "";
 }
 
-// =====================================
-// SERVICE PLANNER FORM PERMISSIONS
-//
-// Admin      = Editable
-// Attendance = View Only
-// Viewer     = No access to page
-// =====================================
-
-const servicePlannerFields =
-    document.querySelectorAll(
-        "#service-planner input, " +
-        "#service-planner textarea, " +
-        "#service-planner select"
-    );
-
-
-servicePlannerFields.forEach(
-    field => {
-
-        if (isAdminUser()) {
-
-            field.disabled =
-                false;
-
-        } else {
-
-            field.disabled =
-                true;
-
-        }
-
-    }
-);
 
 // =====================================================
 // ATTENDANCE - OPEN ADD MEMBER MODAL
@@ -17080,11 +17492,6 @@ if (!canManageAttendance()) {
     });
 }
 
-// =====================================================
-// CHURCHHQ SETTINGS
-// COMPLETE SUPABASE BACKUP
-// VERSION 6.0
-// =====================================================
 
 // =====================================================
 // CHURCHHQ SETTINGS
@@ -17287,7 +17694,7 @@ async function exportChurchData() {
                 "ChurchHQ",
 
             version:
-                "7.0",
+                "7.1",
 
             source:
                 "Supabase",
@@ -17456,7 +17863,7 @@ async function exportChurchData() {
                 {
 
                     version:
-                        "7.0",
+                        "7.1",
 
                     members:
                         backupData.data
@@ -18806,7 +19213,7 @@ if (
                 {
 
                     version:
-                        "7.0",
+                        "7.1",
 
                     clearedTables:
                         tables,
@@ -22957,6 +23364,39 @@ function applyRoleBasedUI() {
 
 
     // =====================================
+    // SERVICE PLANNER FORM PERMISSIONS
+    //
+    // Admin      = Editable
+    // Attendance = View Only
+    // Viewer     = No access
+    // =====================================
+
+    const servicePlannerFields =
+        document.querySelectorAll(
+            "#service-planner input, " +
+            "#service-planner textarea, " +
+            "#service-planner select"
+        );
+
+
+    servicePlannerFields.forEach(field => {
+
+        if (isAdminUser()) {
+
+            field.disabled = false;
+            field.readOnly = false;
+
+        } else {
+
+            field.disabled = true;
+            field.readOnly = true;
+
+        }
+
+    });
+
+
+    // =====================================
     // ATTENDANCE MANAGEMENT CONTROLS
     // Admin + Attendance
     // =====================================
@@ -22982,6 +23422,7 @@ function applyRoleBasedUI() {
         }
 
     });
+
 
 
     // =====================================
