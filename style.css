@@ -18425,3 +18425,160 @@ body.dark .church-system-dialog-input-wrap span {
         width: 100%;
     }
 }
+/* =====================================================
+   CHURCHHQ TABLE SYSTEM - FINAL ALIGNMENT FIX
+   Keeps real table cells intact and places flex on wrappers.
+===================================================== */
+
+.page table {
+    width: 100%;
+    max-width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+    table-layout: auto;
+}
+
+.page table thead {
+    display: table-header-group;
+}
+
+.page table tbody {
+    display: table-row-group;
+}
+
+.page table tr {
+    display: table-row;
+}
+
+.page table th,
+.page table td {
+    display: table-cell;
+    float: none;
+    position: static;
+    height: auto;
+    vertical-align: middle;
+    box-sizing: border-box;
+}
+
+.page table th {
+    white-space: nowrap;
+}
+
+.page table td {
+    overflow-wrap: anywhere;
+    word-break: normal;
+}
+
+.page table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.table-actions-cell {
+    width: 1%;
+    min-width: 118px;
+    text-align: center !important;
+    vertical-align: middle !important;
+    white-space: nowrap;
+}
+
+.table-actions {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    max-width: 100%;
+    white-space: nowrap;
+}
+
+.table-actions.table-actions-wrap {
+    flex-wrap: wrap;
+    white-space: normal;
+}
+
+.table-actions > button,
+.table-actions > a {
+    flex: 0 0 auto;
+    margin: 0 !important;
+    vertical-align: middle;
+}
+
+.service-records-card > div,
+#songs div[style*="overflow-x: auto"],
+#members .table-container,
+#attendance .table-container,
+#reports .table-container,
+#settings .audit-table-container,
+.program-table-wrapper {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto !important;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+}
+
+/* Protect desktop tables from accidental flex/block cell rules. */
+@media (min-width: 769px) {
+    .page table thead {
+        display: table-header-group !important;
+    }
+
+    .page table tbody {
+        display: table-row-group !important;
+    }
+
+    .page table tr {
+        display: table-row !important;
+    }
+
+    .page table th,
+    .page table td {
+        display: table-cell !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .page table {
+        font-size: 12px;
+    }
+
+    .page table th,
+    .page table td {
+        padding: 9px 8px !important;
+        line-height: 1.45;
+    }
+
+    .page table th {
+        white-space: normal;
+    }
+
+    .table-actions-cell {
+        min-width: 108px;
+    }
+
+    .table-actions {
+        gap: 6px;
+        flex-wrap: wrap;
+        white-space: normal;
+    }
+
+    .table-actions .secondary-btn,
+    .table-actions .primary-btn {
+        min-height: 32px;
+    }
+}
+
+@media (max-width: 480px) {
+    .page table {
+        font-size: 11px;
+    }
+
+    .page table th,
+    .page table td {
+        padding: 8px 6px !important;
+    }
+
+    .table-actions-cell {
+        min-width: 96px;
+    }
+}

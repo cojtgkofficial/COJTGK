@@ -1,0 +1,44 @@
+COJTGK TABLE CSS FIX - VERSION 3
+================================
+
+Base version
+------------
+COJTGK-CUSTOM-MODALS-v2
+
+Root cause
+----------
+Four dynamically generated Actions <td> elements used display:flex directly.
+That removes the cells from normal table-cell layout and causes headers, body
+columns, borders and row heights to become misaligned.
+
+Fixes applied
+-------------
+- Restored every affected <td> as a real table cell.
+- Added an inner .table-actions flex wrapper for action buttons.
+- Fixed Sunday Service record Actions cells.
+- Fixed Midweek Service record Actions cells.
+- Fixed Song Library Actions cells.
+- Fixed Sunday Service lineup Actions cells.
+- Standardized Program Planner action wrappers.
+- Added consistent vertical alignment, border behavior and text wrapping.
+- Kept Actions columns compact without squeezing message/content columns.
+- Added horizontal overflow protection to major table containers.
+- Added desktop safeguards against accidental flex/block table-cell rules.
+- Added smaller padding, wrapping and action-button behavior for tablets and
+  phones.
+- Preserved dark mode and the existing ChurchHQ visual theme.
+
+Preserved
+---------
+- Supabase configuration and all database functions.
+- Login, roles, audit logs and custom modal dialogs.
+- Existing table data, HTML IDs and button actions.
+- Images and all 66 Bible JSON files.
+
+Verification
+------------
+- No <td> with direct display:flex remains in the project renderers.
+- app.js passes JavaScript syntax checking.
+- Static HTML IDs remain unique.
+- All 66 Bible JSON files remain valid and unchanged.
+- All non-code assets remain unchanged from the modal v2 base.

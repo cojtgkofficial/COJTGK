@@ -3652,13 +3652,8 @@ function renderServiceHistory(type) {
                     </td>
 
 
-                    <td
-                        style="
-                            padding:10px;
-                            display:flex;
-                            gap:8px;
-                        "
-                    >
+                    <td class="table-actions-cell" style="padding:10px;">
+                        <div class="table-actions">
 
                         <button
                             type="button"
@@ -3695,6 +3690,7 @@ function renderServiceHistory(type) {
                             ❌ Delete
                         </button>
 
+                        </div>
                     </td>
 
                 `;
@@ -3733,13 +3729,8 @@ function renderServiceHistory(type) {
                     </td>
 
 
-                    <td
-                        style="
-                            padding:10px;
-                            display:flex;
-                            gap:8px;
-                        "
-                    >
+                    <td class="table-actions-cell" style="padding:10px;">
+                        <div class="table-actions">
 
                         <button
                             type="button"
@@ -3776,6 +3767,7 @@ function renderServiceHistory(type) {
                             ❌ Delete
                         </button>
 
+                        </div>
                     </td>
 
                 `;
@@ -9263,15 +9255,9 @@ function renderProgramHistory() {
                 </td>
 
 
-                <td>
+                <td class="table-actions-cell">
 
-                    <div
-                        style="
-                            display:flex;
-                            gap:6px;
-                            flex-wrap:wrap;
-                        "
-                    >
+                    <div class="table-actions table-actions-wrap">
 
                         ${actionsHTML}
 
@@ -10390,7 +10376,8 @@ function renderFullSongTable(songsArray) {
             <td style="padding: 10px; color: #64748b;">${song.artist || '-'}</td>
             <td style="padding: 10px;"><span style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 12px;">${song.key}</span></td>
             <td style="padding: 10px;"><span style="background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px; font-size: 12px;">${song.category}</span></td>
-            <td style="padding: 10px; text-align: center; display: flex; justify-content: center; gap: 8px;">
+            <td class="table-actions-cell" style="padding:10px; text-align:center;">
+                <div class="table-actions">
                 <button type="button" class="secondary-btn" style="padding: 3px 8px; font-size: 12px; cursor: pointer;" onclick="quickAddToServiceLineup(${song.id})" title="Add to Sunday Service">➕ Add</button>
                 <button type="button" class="secondary-btn" style="padding: 3px 8px; font-size: 12px; cursor: pointer;" onclick="viewSong(${song.id})">👀 View</button>
                 <button
@@ -10412,6 +10399,7 @@ function renderFullSongTable(songsArray) {
 >
     &times;
 </button>
+                </div>
             </td>
         `;
         tableBody.appendChild(tr);
@@ -10480,9 +10468,11 @@ function renderServiceSongLineup() {
             <td style="padding: 10px; font-weight: 600;">${song.title}</td>
             <td style="padding: 10px; color: #64748b;">${song.artist || '-'}</td>
             <td style="padding: 10px;"><span style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 12px;">${song.key}</span></td>
-            <td style="padding: 10px; text-align: center; display: flex; justify-content: center; gap: 6px;">
+            <td class="table-actions-cell" style="padding:10px; text-align:center;">
+                <div class="table-actions">
                 <button type="button" class="secondary-btn" style="padding: 3px 8px; font-size: 12px; cursor: pointer;" onclick="viewSong(${song.id})">👀 View</button>
                 <button type="button" class="secondary-btn" style="padding: 3px 8px; font-size: 12px; color:#ef4444; border-color:#fca5a5; cursor: pointer;" onclick="removeSongFromServiceLineup(${index})">❌ Delete</button>
+                </div>
             </td>
         `;
         lineupBody.appendChild(tr);
