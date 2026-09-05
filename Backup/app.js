@@ -25,6 +25,13 @@ let auditCurrentPage = 1;
 
 const auditPageSize = 10;
 
+// =====================================
+// GLOBAL MINISTRIES STATE
+// =====================================
+
+var ministries = [];
+var members = [];
+
 console.log("✅ ChurchHQ Supabase client created.");
 console.log(
     "Supabase .from():",
@@ -2652,6 +2659,8 @@ if (
     }
 
 }
+
+
 // =====================================
 // AUDIT - PAGE VIEW
 // =====================================
@@ -2683,6 +2692,9 @@ if (
 
         songs:
             "Song Library",
+
+        editor:
+            "Editor",
 
         members:
             "Members",
@@ -2881,6 +2893,8 @@ function switchServicePlannerTab(type) {
 ========================================= */
 let sundayServices = [];
 let midweekServices = [];
+let editingSundayServiceId = null;
+let editingMidweekServiceId = null;
 
 async function saveServiceData(type) {
 
@@ -2919,16 +2933,53 @@ async function saveServiceData(type) {
         songsLineup: getVal("songsLineup")
     };
 
-    let targetArray = type === "sunday" ? sundayServices : midweekServices;
-    const existingIndex = targetArray.findIndex(item => item.date === dateValue);
+let targetArray =
+    type === "sunday"
+        ? sundayServices
+        : midweekServices;
 
-if (existingIndex !== -1) {
 
-const updatedInSupabase =
-    await updateServiceToSupabase(
-        type,
-        serviceRecord
-    );
+const editingId =
+    type === "sunday"
+        ? editingSundayServiceId
+        : editingMidweekServiceId;
+
+
+// =====================================
+// UPDATE EXISTING SERVICE
+// =====================================
+
+if (editingId !== null) {
+
+    const existingIndex =
+        targetArray.findIndex(
+            item =>
+                String(item.id) ===
+                String(editingId)
+        );
+
+
+    if (existingIndex === -1) {
+
+        alert(
+            "❌ Existing service record was not found."
+        );
+
+        return;
+    }
+
+
+    serviceRecord.id =
+        editingId;
+
+
+    const updatedInSupabase =
+        await updateServiceToSupabase(
+            type,
+            serviceRecord
+        );
+
+
     if (!updatedInSupabase) {
 
         alert(
@@ -2938,55 +2989,79 @@ const updatedInSupabase =
         return;
     }
 
-    targetArray[existingIndex] = serviceRecord;
 
-// =====================================
-// AUDIT - EDIT SERVICE RECORD
-// =====================================
+    targetArray[existingIndex] = {
+        ...serviceRecord,
+        id: editingId
+    };
 
-await writeAuditLog(
-    "EDIT",
-    type === "sunday"
-        ? "Sunday Service"
-        : "Midweek Service",
-    `Updated ${
+
+    await writeAuditLog(
+        "EDIT",
+
         type === "sunday"
-            ? "Sunday"
-            : "Midweek"
-    } Service record for ${dateValue}`,
-    dateValue,
-    {
-        date: dateValue,
-        preacher:
-            serviceRecord.preacher || "",
-        messageTitle:
-            serviceRecord.messageTitle || "",
-        worshipLeader:
-            serviceRecord.worshipLeader || ""
-    }
-);
+            ? "Sunday Service"
+            : "Midweek Service",
 
-} 
+        `Updated ${
+            type === "sunday"
+                ? "Sunday"
+                : "Midweek"
+        } Service record for ${dateValue}`,
+
+        editingId,
+
+        {
+            date:
+                dateValue,
+
+            preacher:
+                serviceRecord.preacher ||
+                "",
+
+            messageTitle:
+                serviceRecord.messageTitle ||
+                "",
+
+            worshipLeader:
+                serviceRecord.worshipLeader ||
+                ""
+        }
+    );
+
+}
 
 
 else {
 
-    const savedToSupabase =
-        await saveServiceToSupabase(
-            type,
-            serviceRecord
-        );
+    const savedServiceId =
+    await saveServiceToSupabase(
+        type,
+        serviceRecord
+    );
 
-    if (!savedToSupabase) {
 
-        alert(
-            "❌ Service record was not saved to Supabase."
-        );
+if (!savedServiceId) {
 
-        return;
-    }
+    alert(
+        "❌ Service record was not saved to Supabase."
+    );
 
-    targetArray.push(serviceRecord);
+    return;
+}
+
+
+// =====================================
+// ATTACH REAL SUPABASE ID
+// =====================================
+
+serviceRecord.id =
+    savedServiceId;
+
+
+targetArray.push(
+    serviceRecord
+);
 
     // =====================================
 // AUDIT - ADD SERVICE RECORD
@@ -3038,37 +3113,197 @@ function loadServiceRecord(type, date) {
         return;
     }
 
+
     const targetArray =
         type === "sunday"
             ? sundayServices
             : midweekServices;
 
-    const record = targetArray.find(item => item.date === date);
-    
-    if (!record) return;
 
-    const prefix = type === "sunday" ? "sun_" : "mid_";
+    const record =
+        targetArray.find(
+            item =>
+                item.date === date
+        );
 
-    const dateEl = document.getElementById(prefix + "serviceDate");
-    if (dateEl) dateEl.value = record.date || "";
 
-    const setVal = (fieldName, value) => {
-        const el = document.getElementById(prefix + fieldName);
-        if (el) el.value = value || "";
-    };
+    if (!record) {
 
-    setVal("worshipLeader", record.worshipLeader);
-    setVal("backingVocals", record.backingVocals);
-    setVal("keys", record.keys);
-    setVal("guitar", record.guitar);
-    setVal("bass", record.bass);
-    setVal("drums", record.drums);
-    setVal("pptOperator", record.pptOperator);
-    setVal("soundEngineer", record.soundEngineer);
-    setVal("liveStream", record.liveStream);
-    setVal("preacher", record.preacher);
-    setVal("messageTitle", record.messageTitle);
-    setVal("songsLineup", record.songsLineup);
+        alert(
+            "Service record was not found."
+        );
+
+        return;
+    }
+
+
+    // =====================================
+    // SET EDIT MODE
+    // =====================================
+
+    if (type === "sunday") {
+
+        editingSundayServiceId =
+            record.id || null;
+
+    } else {
+
+        editingMidweekServiceId =
+            record.id || null;
+
+    }
+
+
+    // =====================================
+    // LOAD VALUES INTO FORM
+    // =====================================
+
+    const prefix =
+        type === "sunday"
+            ? "sun_"
+            : "mid_";
+
+
+    const dateEl =
+        document.getElementById(
+            prefix + "serviceDate"
+        );
+
+
+    if (dateEl) {
+
+        dateEl.value =
+            record.date || "";
+
+    }
+
+
+    const setVal =
+        (fieldName, value) => {
+
+            const el =
+                document.getElementById(
+                    prefix +
+                    fieldName
+                );
+
+
+            if (el) {
+
+                el.value =
+                    value || "";
+
+            }
+
+        };
+
+
+    setVal(
+        "worshipLeader",
+        record.worshipLeader
+    );
+
+    setVal(
+        "backingVocals",
+        record.backingVocals
+    );
+
+    setVal(
+        "keys",
+        record.keys
+    );
+
+    setVal(
+        "guitar",
+        record.guitar
+    );
+
+    setVal(
+        "bass",
+        record.bass
+    );
+
+    setVal(
+        "drums",
+        record.drums
+    );
+
+    setVal(
+        "pptOperator",
+        record.pptOperator
+    );
+
+    setVal(
+        "soundEngineer",
+        record.soundEngineer
+    );
+
+    setVal(
+        "liveStream",
+        record.liveStream
+    );
+
+    setVal(
+        "preacher",
+        record.preacher
+    );
+
+    setVal(
+        "messageTitle",
+        record.messageTitle
+    );
+
+    setVal(
+        "songsLineup",
+        record.songsLineup
+    );
+
+
+    // =====================================
+    // CHANGE SAVE BUTTON TEXT
+    // =====================================
+
+    const panelId =
+        type === "sunday"
+            ? "serviceSundayPanel"
+            : "serviceMidweekPanel";
+
+
+    const saveButton =
+        document.querySelector(
+            `#${panelId} button[onclick="saveServiceData('${type}')"]`
+        );
+
+
+    if (saveButton) {
+
+        saveButton.textContent =
+            type === "sunday"
+                ? "💾 Update Sunday Roster"
+                : "💾 Update Midweek Roster";
+
+    }
+
+
+    // =====================================
+    // SCROLL TO FORM
+    // =====================================
+
+    const panel =
+        document.getElementById(
+            panelId
+        );
+
+
+    if (panel) {
+
+        panel.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+
+    }
+
 }
 
 function renderServiceHistory(type) {
@@ -3454,26 +3689,60 @@ async function saveServiceToSupabase(type, serviceRecord) {
 
         const serviceId = Date.now();
 
-        const { data, error } = await churchSupabase
-            .from("service_records")
-            .insert([{
-                id: serviceId,
-                service_type: type,
-                date: serviceRecord.date,
-                worship_leader: serviceRecord.worshipLeader || "",
-                backing_vocals: serviceRecord.backingVocals || "",
-                keys: serviceRecord.keys || "",
-                guitar: serviceRecord.guitar || "",
-                bass: serviceRecord.bass || "",
-                drums: serviceRecord.drums || "",
-                ppt_operator: serviceRecord.pptOperator || "",
-                sound_engineer: serviceRecord.soundEngineer || "",
-                live_stream: serviceRecord.liveStream || "",
-                preacher: serviceRecord.preacher || "",
-                message_title: serviceRecord.messageTitle || "",
-                songs_lineup: serviceRecord.songsLineup || ""
-            }])
-            .select();
+
+        const { data, error } =
+            await churchSupabase
+                .from("service_records")
+                .insert([
+                    {
+                        id: serviceId,
+
+                        service_type:
+                            type,
+
+                        date:
+                            serviceRecord.date,
+
+                        worship_leader:
+                            serviceRecord.worshipLeader || "",
+
+                        backing_vocals:
+                            serviceRecord.backingVocals || "",
+
+                        keys:
+                            serviceRecord.keys || "",
+
+                        guitar:
+                            serviceRecord.guitar || "",
+
+                        bass:
+                            serviceRecord.bass || "",
+
+                        drums:
+                            serviceRecord.drums || "",
+
+                        ppt_operator:
+                            serviceRecord.pptOperator || "",
+
+                        sound_engineer:
+                            serviceRecord.soundEngineer || "",
+
+                        live_stream:
+                            serviceRecord.liveStream || "",
+
+                        preacher:
+                            serviceRecord.preacher || "",
+
+                        message_title:
+                            serviceRecord.messageTitle || "",
+
+                        songs_lineup:
+                            serviceRecord.songsLineup || ""
+                    }
+                ])
+                .select()
+                .single();
+
 
         if (error) {
 
@@ -3482,15 +3751,30 @@ async function saveServiceToSupabase(type, serviceRecord) {
                 error
             );
 
-            return false;
+            return null;
         }
+
+
+        if (!data || !data.id) {
+
+            console.error(
+                "❌ Supabase saved the service but no ID was returned."
+            );
+
+            return null;
+        }
+
 
         console.log(
             "✅ Service saved to Supabase:",
             data
         );
 
-        return true;
+
+        // IMPORTANT:
+        // Return the real saved ID
+        return data.id;
+
 
     } catch (error) {
 
@@ -3499,38 +3783,109 @@ async function saveServiceToSupabase(type, serviceRecord) {
             error
         );
 
-        return false;
+        return null;
     }
-}
 
+}
 // =====================================
 // SERVICE - SUPABASE UPDATE
 // =====================================
 
-async function updateServiceToSupabase(type, serviceRecord) {
+async function updateServiceToSupabase(
+    type,
+    serviceRecord
+) {
 
     try {
 
-        const { data, error } = await churchSupabase
-            .from("service_records")
-            .update({
-                date: serviceRecord.date,
-                worship_leader: serviceRecord.worshipLeader || "",
-                backing_vocals: serviceRecord.backingVocals || "",
-                keys: serviceRecord.keys || "",
-                guitar: serviceRecord.guitar || "",
-                bass: serviceRecord.bass || "",
-                drums: serviceRecord.drums || "",
-                ppt_operator: serviceRecord.pptOperator || "",
-                sound_engineer: serviceRecord.soundEngineer || "",
-                live_stream: serviceRecord.liveStream || "",
-                preacher: serviceRecord.preacher || "",
-                message_title: serviceRecord.messageTitle || "",
-                songs_lineup: serviceRecord.songsLineup || ""
-            })
-            .eq("service_type", type)
-            .eq("date", serviceRecord.date)
-            .select();
+        if (!serviceRecord.id) {
+
+            console.error(
+                "❌ Missing service ID for update."
+            );
+
+            return false;
+
+        }
+
+
+        const {
+            data,
+            error
+        } =
+            await churchSupabase
+
+                .from(
+                    "service_records"
+                )
+
+                .update({
+
+                    date:
+                        serviceRecord.date,
+
+                    worship_leader:
+                        serviceRecord.worshipLeader ||
+                        "",
+
+                    backing_vocals:
+                        serviceRecord.backingVocals ||
+                        "",
+
+                    keys:
+                        serviceRecord.keys ||
+                        "",
+
+                    guitar:
+                        serviceRecord.guitar ||
+                        "",
+
+                    bass:
+                        serviceRecord.bass ||
+                        "",
+
+                    drums:
+                        serviceRecord.drums ||
+                        "",
+
+                    ppt_operator:
+                        serviceRecord.pptOperator ||
+                        "",
+
+                    sound_engineer:
+                        serviceRecord.soundEngineer ||
+                        "",
+
+                    live_stream:
+                        serviceRecord.liveStream ||
+                        "",
+
+                    preacher:
+                        serviceRecord.preacher ||
+                        "",
+
+                    message_title:
+                        serviceRecord.messageTitle ||
+                        "",
+
+                    songs_lineup:
+                        serviceRecord.songsLineup ||
+                        ""
+
+                })
+
+                .eq(
+                    "id",
+                    serviceRecord.id
+                )
+
+                .eq(
+                    "service_type",
+                    type
+                )
+
+                .select();
+
 
         if (error) {
 
@@ -3540,14 +3895,32 @@ async function updateServiceToSupabase(type, serviceRecord) {
             );
 
             return false;
+
         }
+
+
+        if (
+            !Array.isArray(data) ||
+            data.length === 0
+        ) {
+
+            console.error(
+                "❌ No service record was updated."
+            );
+
+            return false;
+
+        }
+
 
         console.log(
             "✅ Service updated in Supabase:",
             data
         );
 
+
         return true;
+
 
     } catch (error) {
 
@@ -3556,8 +3929,11 @@ async function updateServiceToSupabase(type, serviceRecord) {
             error
         );
 
+
         return false;
+
     }
+
 }
 
 // =====================================
@@ -3688,17 +4064,96 @@ await writeAuditLog(
 }
 
 function resetServiceForm(type) {
-    const prefix = type === "sunday" ? "sun_" : "mid_";
-    const dateEl = document.getElementById(prefix + "serviceDate");
-    if (dateEl) dateEl.value = "";
 
-    const fields = ["worshipLeader", "backingVocals", "keys", "guitar", "bass", "drums", "pptOperator", "soundEngineer", "liveStream", "preacher", "messageTitle", "songsLineup"];
+    const prefix =
+        type === "sunday"
+            ? "sun_"
+            : "mid_";
+
+
+    const dateEl =
+        document.getElementById(
+            prefix + "serviceDate"
+        );
+
+
+    if (dateEl) {
+        dateEl.value = "";
+    }
+
+
+    const fields = [
+        "worshipLeader",
+        "backingVocals",
+        "keys",
+        "guitar",
+        "bass",
+        "drums",
+        "pptOperator",
+        "soundEngineer",
+        "liveStream",
+        "preacher",
+        "messageTitle",
+        "songsLineup"
+    ];
+
+
     fields.forEach(field => {
-        const el = document.getElementById(prefix + field);
-        if (el) el.value = "";
-    });
-}
 
+        const el =
+            document.getElementById(
+                prefix + field
+            );
+
+
+        if (el) {
+            el.value = "";
+        }
+
+    });
+
+
+    // =====================================
+    // EXIT EDIT MODE
+    // =====================================
+
+    if (type === "sunday") {
+
+        editingSundayServiceId = null;
+
+    } else {
+
+        editingMidweekServiceId = null;
+
+    }
+
+
+    // =====================================
+    // RESTORE SAVE BUTTON
+    // =====================================
+
+    const panelId =
+        type === "sunday"
+            ? "serviceSundayPanel"
+            : "serviceMidweekPanel";
+
+
+    const saveButton =
+        document.querySelector(
+            `#${panelId} button[onclick="saveServiceData('${type}')"]`
+        );
+
+
+    if (saveButton) {
+
+        saveButton.textContent =
+            type === "sunday"
+                ? "💾 Save Sunday Roster"
+                : "💾 Save Midweek Roster";
+
+    }
+
+}
 /* =========================================
    NEW: GENERATOR DROPDOWN & AUTO-POPULATE FUNCTIONS
 ========================================= */
@@ -10294,7 +10749,7 @@ function clearSongForm() {
 /* =========================================
    MEMBERS ENGINE
 ========================================= */
-let members = [];
+
 
 const memberModal = document.getElementById("memberModal");
 const addMemberBtn = document.getElementById("addMemberBtn");
@@ -10318,11 +10773,6 @@ if (cancelMember) cancelMember.addEventListener("click", () => { if (memberModal
 if (saveMemberBtn) saveMemberBtn.addEventListener("click", saveMember);
 
 
-// =====================================================
-// MINISTRIES DATABASE
-// =====================================================
-
-let ministries = [];
 
 
 // =====================================================
@@ -12598,39 +13048,6 @@ function clearMemberForm() {
     if (mBirthday) mBirthday.value = "";
 }
 
-// =====================================
-// SERVICE PLANNER FORM PERMISSIONS
-//
-// Admin      = Editable
-// Attendance = View Only
-// Viewer     = No access to page
-// =====================================
-
-const servicePlannerFields =
-    document.querySelectorAll(
-        "#service-planner input, " +
-        "#service-planner textarea, " +
-        "#service-planner select"
-    );
-
-
-servicePlannerFields.forEach(
-    field => {
-
-        if (isAdminUser()) {
-
-            field.disabled =
-                false;
-
-        } else {
-
-            field.disabled =
-                true;
-
-        }
-
-    }
-);
 
 // =====================================================
 // ATTENDANCE - OPEN ADD MEMBER MODAL
@@ -17080,11 +17497,6 @@ if (!canManageAttendance()) {
     });
 }
 
-// =====================================================
-// CHURCHHQ SETTINGS
-// COMPLETE SUPABASE BACKUP
-// VERSION 6.0
-// =====================================================
 
 // =====================================================
 // CHURCHHQ SETTINGS
@@ -17123,7 +17535,8 @@ async function exportChurchData() {
             leadersResult,
             ministriesResult,
             programPlansResult,
-            programItemsResult
+            programItemsResult,
+            editorTagsResult
 
         ] = await Promise.all([
 
@@ -17177,6 +17590,10 @@ async function exportChurchData() {
 
             churchSupabase
                 .from("program_items")
+                .select("*"),
+
+            churchSupabase
+                .from("editor_tags")
                 .select("*")
 
         ]);
@@ -17236,8 +17653,12 @@ async function exportChurchData() {
             [
                 "program_items",
                 programItemsResult
-            ]
+            ],
 
+            [
+                "editor_tags",
+                editorTagsResult
+            ]
         ];
 
 
@@ -17287,7 +17708,7 @@ async function exportChurchData() {
                 "ChurchHQ",
 
             version:
-                "7.0",
+                "7.1",
 
             source:
                 "Supabase",
@@ -17335,7 +17756,10 @@ async function exportChurchData() {
                     programPlansResult.data || [],
 
                 program_items:
-                    programItemsResult.data || []
+                    programItemsResult.data || [],
+
+                editor_tags:
+                    editorTagsResult.data || []
 
             }
 
@@ -17456,7 +17880,7 @@ async function exportChurchData() {
                 {
 
                     version:
-                        "7.0",
+                        "7.1",
 
                     members:
                         backupData.data
@@ -17506,9 +17930,13 @@ async function exportChurchData() {
                         backupData.data
                             .program_plans.length,
 
-                    programItems:
+                    program_items:
                         backupData.data
-                            .program_items.length
+                            .program_items.length,
+
+                    editor_tags:
+                        backupData.data
+                            .editor_tags.length
 
                 }
 
@@ -17814,6 +18242,14 @@ async function importChurchData(event) {
                             rawBackup.program_items
                         )
                             ? rawBackup.program_items
+                            : [],
+
+
+                    editor_tags:
+                        Array.isArray(
+                            rawBackup.editor_tags
+                        )
+                            ? rawBackup.editor_tags
                             : []
 
                 };
@@ -17997,14 +18433,24 @@ async function importChurchData(event) {
                 // Must come AFTER program_plans because
                 // program_items.program_id points to program_plans.id
                 // =====================================================
-
+                
                 await restoreTable(
                     "program_items",
                     backup.program_items
                 );
 
 
-                // 8. Attendance
+                // =====================================
+                // EDITOR TAGS
+                // =====================================
+
+                await restoreTable(
+                    "editor_tags",
+                    backup.editor_tags
+                );
+
+
+                // Attendance
 
                 await restoreTable(
                     "attendance_records",
@@ -18094,6 +18540,9 @@ async function importChurchData(event) {
 
                             programItems:
                                 backup.program_items.length,
+
+                            editorTags:
+                                backup.editor_tags.length,
 
                             attendance:
                                 backup.attendance_records.length,
@@ -18269,8 +18718,10 @@ async function importChurchData(event) {
                             backup.program_plans.length,
 
                         program_items:
-                            backup.program_items.length
+                            backup.program_items.length,
 
+                        editor_tags:
+                            backup.editor_tags.length
                     }
                 );
 
@@ -18419,10 +18870,10 @@ async function clearAllChurchData() {
             "• Ministries\n\n" +
 
             "THE FOLLOWING WILL NOT BE DELETED:\n\n" +
-
             "• Login Accounts\n" +
             "• User Roles\n" +
-            "• Audit Logs\n\n" +
+            "• Audit Logs\n" +
+            "• Editor Tags\n\n" +
 
             "Make sure you downloaded a backup first.\n\n" +
 
@@ -18806,7 +19257,7 @@ if (
                 {
 
                     version:
-                        "7.0",
+                        "7.1",
 
                     clearedTables:
                         tables,
@@ -20438,6 +20889,7 @@ function editAnnouncementItem(id) {
                 );
                 return;
             }
+
 
             // =====================================
 // AUDIT - EDIT ANNOUNCEMENT
@@ -22957,6 +23409,39 @@ function applyRoleBasedUI() {
 
 
     // =====================================
+    // SERVICE PLANNER FORM PERMISSIONS
+    //
+    // Admin      = Editable
+    // Attendance = View Only
+    // Viewer     = No access
+    // =====================================
+
+    const servicePlannerFields =
+        document.querySelectorAll(
+            "#service-planner input, " +
+            "#service-planner textarea, " +
+            "#service-planner select"
+        );
+
+
+    servicePlannerFields.forEach(field => {
+
+        if (isAdminUser()) {
+
+            field.disabled = false;
+            field.readOnly = false;
+
+        } else {
+
+            field.disabled = true;
+            field.readOnly = true;
+
+        }
+
+    });
+
+
+    // =====================================
     // ATTENDANCE MANAGEMENT CONTROLS
     // Admin + Attendance
     // =====================================
@@ -22982,6 +23467,7 @@ function applyRoleBasedUI() {
         }
 
     });
+
 
 
     // =====================================
@@ -23231,3 +23717,2263 @@ currentUserRole = null;
 
 }
 
+
+// =====================================================
+// CHURCHHQ EDITOR ENGINE - PHASE 1
+// =====================================================
+
+let currentChurchEditorTab = "lyrics";
+
+
+// =====================================================
+// SWITCH EDITOR TAB
+// =====================================================
+
+function switchChurchEditorTab(type) {
+
+    currentChurchEditorTab = type;
+
+
+    const panels = {
+        lyrics:
+            document.getElementById(
+                "editorPanelLyrics"
+            ),
+
+        sermon:
+            document.getElementById(
+                "editorPanelSermon"
+            ),
+
+        bible:
+            document.getElementById(
+                "editorPanelBible"
+            )
+    };
+
+
+    const tabs = {
+        lyrics:
+            document.getElementById(
+                "editorTabLyrics"
+            ),
+
+        sermon:
+            document.getElementById(
+                "editorTabSermon"
+            ),
+
+        bible:
+            document.getElementById(
+                "editorTabBible"
+            )
+    };
+
+
+    Object.keys(panels).forEach(key => {
+
+        if (panels[key]) {
+
+            panels[key].classList.toggle(
+                "hidden",
+                key !== type
+            );
+
+        }
+
+
+        if (tabs[key]) {
+
+            tabs[key].classList.toggle(
+                "active",
+                key === type
+            );
+
+        }
+
+    });
+
+}
+
+
+// =====================================================
+// INSERT TAG AT CURRENT CURSOR POSITION
+// =====================================================
+
+function insertEditorTag(
+    textareaId,
+    tag
+) {
+
+    const textarea =
+        document.getElementById(
+            textareaId
+        );
+
+
+    if (!textarea) {
+        return;
+    }
+
+
+    textarea.focus();
+
+
+    const start =
+        textarea.selectionStart ?? 0;
+
+    const end =
+        textarea.selectionEnd ?? start;
+
+
+    const currentText =
+        textarea.value || "";
+
+
+    // Text inserted at the exact cursor position
+    const tagText =
+        `[${tag}]`;
+
+
+    textarea.value =
+        currentText.substring(
+            0,
+            start
+        ) +
+
+        tagText +
+
+        currentText.substring(
+            end
+        );
+
+
+    const newCursorPosition =
+        start +
+        tagText.length;
+
+
+    textarea.setSelectionRange(
+        newCursorPosition,
+        newCursorPosition
+    );
+
+
+    // Trigger input event for future autosave
+    textarea.dispatchEvent(
+        new Event(
+            "input",
+            {
+                bubbles: true
+            }
+        )
+    );
+
+}
+
+
+// =====================================================
+// INTERNAL REFERENCE PLACEHOLDER
+//
+// Google/Bible real browser integration comes next.
+// Text in editors is NOT deleted when this opens.
+// =====================================================
+
+// =====================================================
+// EDITOR INTERNAL GOOGLE / BIBLE VIEWER
+// =====================================================
+
+// Ilalagay natin dito ang Bible website mo later.
+const EDITOR_BIBLE_URL =
+    "https://www.biblegateway.com/passage/?search=Genesis%201&version=KJV";
+
+function openEditorReference(
+    panelKey,
+    type
+) {
+
+    const editor =
+        document.getElementById(
+            panelKey + "Editor"
+        );
+
+    const reference =
+        document.getElementById(
+            panelKey + "Reference"
+        );
+
+    const title =
+        document.getElementById(
+            panelKey + "ReferenceTitle"
+        );
+
+    const content =
+        document.getElementById(
+            panelKey + "ReferenceContent"
+        );
+
+
+    if (
+        !editor ||
+        !reference ||
+        !content
+    ) {
+        return;
+    }
+
+
+    // =====================================
+    // HIDE TEXT EDITOR
+    // Text itself is NOT cleared.
+    // =====================================
+
+    editor.classList.add(
+        "hidden"
+    );
+
+
+    // =====================================
+    // SHOW INTERNAL VIEWER
+    // =====================================
+
+    reference.classList.remove(
+        "hidden"
+    );
+
+
+    // =====================================
+    // GOOGLE
+    // =====================================
+
+    if (type === "google") {
+
+        if (title) {
+
+            title.textContent =
+                "Google Search";
+
+        }
+
+
+        // Huwag ulitin ang UI kung Google
+        // viewer na ang naka-open.
+        if (
+            content.dataset.referenceType ===
+            "google" &&
+            content.innerHTML.trim()
+        ) {
+            return;
+        }
+
+
+        content.dataset.referenceType =
+            "google";
+
+
+
+content.innerHTML = `
+
+    <div class="editor-google-view">
+
+        <div class="editor-google-mode-header">
+
+            <span
+                id="${panelKey}GoogleModeLabel"
+                class="editor-google-mode-label"
+            >
+                🔎 Google Search
+            </span>
+
+
+            <button
+                type="button"
+                class="editor-google-back-btn"
+                onclick="backToEditorGoogleResults('${panelKey}')"
+                title="Return to Google search results"
+            >
+                ← Back to Results
+            </button>
+
+        </div>
+
+
+        <div class="editor-google-searchbar">
+
+            <input
+                type="text"
+                id="${panelKey}GoogleInput"
+                placeholder="Enter song title, artist, lyrics or chords..."
+                autocomplete="off"
+            >
+
+            <button
+                type="button"
+                onclick="searchEditorGoogle('${panelKey}')"
+            >
+                Search
+            </button>
+
+        </div>
+
+
+        <div class="editor-google-quick-search">
+
+            <button
+                type="button"
+                onclick="searchEditorGoogle('${panelKey}', 'lyrics')"
+            >
+                🎵 Lyrics
+            </button>
+
+
+            <button
+                type="button"
+                onclick="searchEditorGoogle('${panelKey}', 'chords')"
+            >
+                🎸 Chords
+            </button>
+
+        </div>
+
+
+        <div class="editor-browser-frame-wrap">
+
+            <div
+                id="${panelKey}GoogleStart"
+                class="editor-browser-start"
+            >
+
+                <div class="editor-browser-logo">
+                    G
+                </div>
+
+                <h3>
+                    Song Reference Search
+                </h3>
+
+                <p>
+                    Search lyrics, chords,
+                    worship songs and other references.
+                </p>
+
+            </div>
+
+
+            <iframe
+                id="${panelKey}GoogleFrame"
+                class="editor-browser-frame hidden"
+                title="Google Search"
+                referrerpolicy="no-referrer"
+            ></iframe>
+
+        </div>
+
+    </div>
+
+`;
+
+        
+
+
+        const searchInput =
+            document.getElementById(
+                panelKey +
+                "GoogleInput"
+            );
+
+
+        if (searchInput) {
+
+            searchInput.addEventListener(
+                "keydown",
+                event => {
+
+                    if (
+                        event.key ===
+                        "Enter"
+                    ) {
+
+                        event.preventDefault();
+
+                        searchEditorGoogle(
+                            panelKey
+                        );
+
+                    }
+
+                }
+            );
+
+
+            setTimeout(
+                () => {
+                    searchInput.focus();
+                },
+                50
+            );
+
+        }
+
+
+        return;
+    }
+
+
+// =====================================
+// ULTIMATE GUITAR
+// =====================================
+
+if (type === "ultimate") {
+
+    if (title) {
+        title.textContent =
+            "Ultimate Guitar";
+    }
+
+
+    // Preserve session kapag Hide lang
+    if (
+        content.dataset.referenceType ===
+        "ultimate" &&
+        content.querySelector("iframe")
+    ) {
+        return;
+    }
+
+
+    content.dataset.referenceType =
+        "ultimate";
+
+
+    content.innerHTML = `
+
+        <iframe
+            class="editor-browser-frame"
+            src="https://ultimate-guitar.com"
+            title="Ultimate Guitar"
+            frameborder="0"
+            allowfullscreen
+        ></iframe>
+
+    `;
+
+
+    return;
+}
+
+    // =====================================
+    // BIBLE
+    // =====================================
+
+
+
+    if (type === "bible") {
+
+        if (title) {
+
+            title.textContent =
+                "Bible";
+
+        }
+
+
+        if (
+            !EDITOR_BIBLE_URL
+        ) {
+
+            content.dataset.referenceType =
+                "bible";
+
+
+            content.innerHTML = `
+
+                <div class="editor-browser-placeholder">
+
+                    <div
+                        style="
+                            font-size:42px;
+                            margin-bottom:12px;
+                        "
+                    >
+                        📖
+                    </div>
+
+                    <h3>
+                        Bible Viewer
+                    </h3>
+
+                    <p>
+                        Bible website is ready to be connected.
+                    </p>
+
+                    <p
+                        style="
+                            margin-top:8px;
+                            font-size:12px;
+                        "
+                    >
+                        Send me the Bible website link
+                        and we will place it here.
+                    </p>
+
+                </div>
+
+            `;
+
+
+            return;
+        }
+
+
+        // Preserve existing Bible iframe/session
+        if (
+            content.dataset.referenceType ===
+            "bible" &&
+            content.querySelector(
+                "iframe"
+            )
+        ) {
+            return;
+        }
+
+
+        content.dataset.referenceType =
+            "bible";
+
+
+        content.innerHTML = `
+
+            <iframe
+                class="editor-browser-frame"
+                src="${EDITOR_BIBLE_URL}"
+                title="Bible"
+                referrerpolicy="no-referrer"
+            ></iframe>
+
+        `;
+
+    }
+
+}
+
+// =====================================================
+// GOOGLE SEARCH - LYRICS / CHORDS MODE
+// =====================================================
+
+const editorGoogleSearchState = {};
+
+
+function searchEditorGoogle(
+    panelKey,
+    mode = ""
+) {
+
+    const input =
+        document.getElementById(
+            panelKey + "GoogleInput"
+        );
+
+    const frame =
+        document.getElementById(
+            panelKey + "GoogleFrame"
+        );
+
+    const startScreen =
+        document.getElementById(
+            panelKey + "GoogleStart"
+        );
+
+
+    if (
+        !input ||
+        !frame
+    ) {
+        return;
+    }
+
+
+    let query =
+        String(
+            input.value || ""
+        ).trim();
+
+
+    if (!query) {
+
+        input.focus();
+
+        return;
+
+    }
+
+
+    // =====================================
+    // AUTOMATIC SEARCH TYPE
+    // =====================================
+
+    if (mode === "lyrics") {
+
+        if (
+            !query
+                .toLowerCase()
+                .includes("lyrics")
+        ) {
+
+            query += " lyrics";
+
+        }
+
+    }
+
+
+    if (mode === "chords") {
+
+        if (
+            !query
+                .toLowerCase()
+                .includes("chords")
+        ) {
+
+            query += " chords";
+
+        }
+
+    }
+
+
+    // =====================================
+    // GOOGLE SEARCH URL
+    // =====================================
+
+    const searchUrl =
+        "https://www.google.com/search?igu=1&q=" +
+        encodeURIComponent(query);
+
+
+    // Save current search
+    editorGoogleSearchState[panelKey] = {
+
+        query:
+            input.value.trim(),
+
+        searchUrl,
+
+        mode
+
+    };
+
+
+    if (startScreen) {
+
+        startScreen.classList.add(
+            "hidden"
+        );
+
+    }
+
+
+    frame.classList.remove(
+        "hidden"
+    );
+
+
+    frame.src =
+        searchUrl;
+
+
+    updateEditorGoogleModeLabel(
+        panelKey,
+        mode
+    );
+
+}
+
+// =====================================================
+// BACK TO GOOGLE RESULTS
+// =====================================================
+
+function backToEditorGoogleResults(
+    panelKey
+) {
+
+    const frame =
+        document.getElementById(
+            panelKey + "GoogleFrame"
+        );
+
+
+    const state =
+        editorGoogleSearchState[
+            panelKey
+        ];
+
+
+    if (
+        !frame ||
+        !state ||
+        !state.searchUrl
+    ) {
+
+        return;
+
+    }
+
+
+    frame.src =
+        state.searchUrl;
+
+}
+
+// =====================================================
+// GOOGLE SEARCH MODE LABEL
+// =====================================================
+
+function updateEditorGoogleModeLabel(
+    panelKey,
+    mode
+) {
+
+    const label =
+        document.getElementById(
+            panelKey +
+            "GoogleModeLabel"
+        );
+
+
+    if (!label) {
+        return;
+    }
+
+
+    if (mode === "lyrics") {
+
+        label.textContent =
+            "🎵 Lyrics Search";
+
+        return;
+
+    }
+
+
+    if (mode === "chords") {
+
+        label.textContent =
+            "🎸 Chords Search";
+
+        return;
+
+    }
+
+
+    label.textContent =
+        "🔎 Google Search";
+
+}
+
+// =====================================================
+// HIDE INTERNAL VIEWER
+//
+// Browser session remains loaded.
+// Editor text remains untouched.
+// =====================================================
+
+function hideEditorReference(
+    panelKey
+) {
+
+    const editor =
+        document.getElementById(
+            panelKey + "Editor"
+        );
+
+    const reference =
+        document.getElementById(
+            panelKey + "Reference"
+        );
+
+
+    if (reference) {
+
+        reference.classList.add(
+            "hidden"
+        );
+
+    }
+
+
+    if (editor) {
+
+        editor.classList.remove(
+            "hidden"
+        );
+
+    }
+
+}
+
+
+// =====================================================
+// CLOSE INTERNAL VIEWER
+//
+// Browser session is destroyed.
+// Editor text remains untouched.
+// =====================================================
+
+function closeEditorReference(
+    panelKey
+) {
+
+    const editor =
+        document.getElementById(
+            panelKey + "Editor"
+        );
+
+    const reference =
+        document.getElementById(
+            panelKey + "Reference"
+        );
+
+    const content =
+        document.getElementById(
+            panelKey + "ReferenceContent"
+        );
+
+
+    if (reference) {
+
+        reference.classList.add(
+            "hidden"
+        );
+
+    }
+
+
+    if (editor) {
+
+        editor.classList.remove(
+            "hidden"
+        );
+
+    }
+
+
+    if (content) {
+
+        // Removes iframe/browser session
+        content.innerHTML =
+            "";
+
+        delete content.dataset
+            .referenceType;
+
+    }
+
+}
+
+
+// =====================================================
+// CHURCHHQ EDITOR ENGINE
+// PHASE 2 - DYNAMIC TAGS
+// =====================================================
+
+
+// =====================================
+// DEFAULT TAG COLLECTIONS
+// =====================================
+
+const churchEditorDefaultTags = {
+
+    lyrics: [
+        "V1",
+        "V2",
+        "V3",
+        "V4",
+        "V5",
+        "PC",
+        "C1",
+        "C2",
+        "C3",
+        "C4",
+        "I",
+        "A",
+        "B",
+        "O",
+        "T",
+        "1",
+        "2"
+    ],
+
+    sermon: [
+        "INTRO",
+        "P1",
+        "P2",
+        "P3",
+        "ILL",
+        "APP",
+        "CONCLUSION"
+    ],
+
+    bible: [
+        "V1",
+        "V2",
+        "V3",
+        "V4",
+        "REF",
+        "READER"
+    ]
+
+};
+
+
+// =====================================
+// CURRENT TAG DATA
+// =====================================
+
+let churchEditorTags = {
+    lyrics: [],
+    sermon: [],
+    bible: []
+};
+
+
+let currentEditorTagManagerType =
+    "lyrics";
+
+
+// =====================================
+// LOAD TAGS
+// =====================================
+
+async function loadChurchEditorTags() {
+
+    try {
+
+        const { data, error } =
+            await churchSupabase
+                .from("editor_tags")
+                .select(
+                    "id, tag_type, tag_name, sort_order"
+                )
+                .order(
+                    "sort_order",
+                    { ascending: true }
+                );
+
+
+        if (error) {
+
+            console.error(
+                "❌ Failed to load editor tags:",
+                error
+            );
+
+            loadDefaultEditorTagsLocally();
+
+            return;
+        }
+
+
+        // =====================================
+        // EMPTY TABLE
+        // =====================================
+
+        if (!data || data.length === 0) {
+
+            console.log(
+                "ℹ️ No editor tags found in Supabase."
+            );
+
+
+            // Load defaults into UI first
+            loadDefaultEditorTagsLocally();
+
+
+            // Admin can create initial Supabase records
+            if (isAdminUser()) {
+
+                await seedDefaultEditorTagsToSupabase();
+
+            }
+
+            return;
+        }
+
+
+        // =====================================
+        // RESET CURRENT DATA
+        // =====================================
+
+        churchEditorTags = {
+            lyrics: [],
+            sermon: [],
+            bible: []
+        };
+
+
+        // =====================================
+        // BUILD TAG ARRAYS
+        // =====================================
+
+        data.forEach(row => {
+
+            if (
+                churchEditorTags[row.tag_type]
+            ) {
+
+                churchEditorTags[
+                    row.tag_type
+                ].push(
+                    row.tag_name
+                );
+
+            }
+
+        });
+
+
+        renderAllChurchEditorTagToolbars();
+
+
+        console.log(
+            "✅ Editor tags loaded from Supabase:",
+            churchEditorTags
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "❌ Editor tag load error:",
+            error
+        );
+
+        loadDefaultEditorTagsLocally();
+
+    }
+
+}
+
+function loadDefaultEditorTagsLocally() {
+
+    churchEditorTags = {
+
+        lyrics: [
+            ...churchEditorDefaultTags.lyrics
+        ],
+
+        sermon: [
+            ...churchEditorDefaultTags.sermon
+        ],
+
+        bible: [
+            ...churchEditorDefaultTags.bible
+        ]
+
+    };
+
+
+    renderAllChurchEditorTagToolbars();
+
+}
+
+async function seedDefaultEditorTagsToSupabase() {
+
+    if (!isAdminUser()) {
+        return false;
+    }
+
+
+    const rows = [];
+
+
+    Object.keys(
+        churchEditorDefaultTags
+    ).forEach(type => {
+
+        churchEditorDefaultTags[type]
+            .forEach(
+                (tag, index) => {
+
+                    rows.push({
+                        tag_type: type,
+                        tag_name: tag,
+                        sort_order: index
+                    });
+
+                }
+            );
+
+    });
+
+
+    try {
+
+        const { error } =
+            await churchSupabase
+                .from("editor_tags")
+                .insert(rows);
+
+
+        if (error) {
+
+            console.error(
+                "❌ Failed to seed editor tags:",
+                error
+            );
+
+            return false;
+        }
+
+
+        console.log(
+            "✅ Default editor tags saved to Supabase."
+        );
+
+
+        await loadChurchEditorTags();
+
+        return true;
+
+
+    } catch (error) {
+
+        console.error(
+            "❌ Editor tag seed error:",
+            error
+        );
+
+        return false;
+
+    }
+
+}
+
+// =====================================
+// SAVE TAGS
+// =====================================
+
+async function saveChurchEditorTags() {
+
+    if (!isAdminUser()) {
+
+        console.warn(
+            "🚫 Admin permission required to save editor tags."
+        );
+
+        return false;
+
+    }
+
+
+    const rows = [];
+
+
+    Object.keys(
+        churchEditorTags
+    ).forEach(type => {
+
+        churchEditorTags[type]
+            .forEach(
+                (tag, index) => {
+
+                    rows.push({
+                        tag_type: type,
+                        tag_name: tag,
+                        sort_order: index
+                    });
+
+                }
+            );
+
+    });
+
+
+    try {
+
+        // =====================================
+        // DELETE OLD TAGS
+        // =====================================
+
+        const { error: deleteError } =
+            await churchSupabase
+                .from("editor_tags")
+                .delete()
+                .neq("id", 0);
+
+
+        if (deleteError) {
+
+            console.error(
+                "❌ Failed to clear editor tags:",
+                deleteError
+            );
+
+            return false;
+        }
+
+
+        // =====================================
+        // INSERT NEW TAG ORDER
+        // =====================================
+
+        if (rows.length > 0) {
+
+            const { error: insertError } =
+                await churchSupabase
+                    .from("editor_tags")
+                    .insert(rows);
+
+
+            if (insertError) {
+
+                console.error(
+                    "❌ Failed to save editor tags:",
+                    insertError
+                );
+
+                return false;
+            }
+
+        }
+
+
+        console.log(
+            "✅ Editor tags saved to Supabase."
+        );
+
+        return true;
+
+
+    } catch (error) {
+
+        console.error(
+            "❌ Editor tag save error:",
+            error
+        );
+
+        return false;
+
+    }
+
+}
+
+// =====================================
+// RENDER ALL TOOLBARS
+// =====================================
+
+function renderAllChurchEditorTagToolbars() {
+
+    document
+        .querySelectorAll(
+            "[data-editor-tags]"
+        )
+        .forEach(toolbar => {
+
+            renderChurchEditorTagToolbar(
+                toolbar
+            );
+
+        });
+
+}
+
+
+// =====================================
+// RENDER ONE TOOLBAR
+// =====================================
+
+function renderChurchEditorTagToolbar(
+    toolbar
+) {
+
+    if (!toolbar) {
+        return;
+    }
+
+
+    const type =
+        toolbar.dataset.editorTags;
+
+
+    const targetTextareaId =
+        toolbar.dataset.target;
+
+
+    if (
+        !type ||
+        !targetTextareaId
+    ) {
+        return;
+    }
+
+
+    const tags =
+        Array.isArray(
+            churchEditorTags[type]
+        )
+            ? churchEditorTags[type]
+            : [];
+
+
+    toolbar.innerHTML =
+        "";
+
+
+    // =====================================
+    // TAG BUTTONS
+    // =====================================
+
+    tags.forEach(tag => {
+
+        const button =
+            document.createElement(
+                "button"
+            );
+
+
+        button.type =
+            "button";
+
+
+        button.textContent =
+            tag;
+
+
+        button.title =
+            `Insert [${tag}]`;
+
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                insertEditorTag(
+                    targetTextareaId,
+                    tag
+                );
+
+            }
+        );
+
+
+        toolbar.appendChild(
+            button
+        );
+
+    });
+
+
+    // =====================================
+    // MANAGE BUTTON
+    // =====================================
+
+    const manageButton =
+        document.createElement(
+            "button"
+        );
+
+
+    manageButton.type =
+        "button";
+
+
+    manageButton.className =
+        "editor-tag-manage-btn";
+
+    manageButton.setAttribute(
+        "data-admin-only",
+        "true"
+    );
+
+    manageButton.textContent =
+        "⚙ Manage";
+
+
+    manageButton.addEventListener(
+        "click",
+        () => {
+
+            openEditorTagManager(
+                type
+            );
+
+        }
+    );
+
+
+if (!isAdminUser()) {
+
+    manageButton.style.display =
+        "none";
+
+    manageButton.disabled =
+        true;
+
+}
+
+    toolbar.appendChild(
+        manageButton
+    );
+
+}
+
+
+// =====================================
+// OPEN TAG MANAGER
+// =====================================
+
+function openEditorTagManager(
+    type
+) {
+    if (!isAdminUser()) {
+
+    console.warn(
+        "🚫 Admin permission required to manage editor tags."
+    );
+
+    return;
+
+}
+
+    if (
+        !churchEditorTags[type]
+    ) {
+        return;
+    }
+
+
+    currentEditorTagManagerType =
+        type;
+
+
+    const modal =
+        document.getElementById(
+            "editorTagManagerModal"
+        );
+
+
+    const title =
+        document.getElementById(
+            "editorTagManagerTitle"
+        );
+
+
+    const input =
+        document.getElementById(
+            "newEditorTagInput"
+        );
+
+
+    const names = {
+
+        lyrics:
+            "Lyrics & Chords Tags",
+
+        sermon:
+            "Sermon Editor Tags",
+
+        bible:
+            "Bible Reading Tags"
+
+    };
+
+
+    if (title) {
+
+        title.textContent =
+            names[type] ||
+            "Manage Editor Tags";
+
+    }
+
+
+    if (input) {
+
+        input.value =
+            "";
+
+    }
+
+
+    renderEditorTagManagerList();
+
+
+    if (modal) {
+
+        modal.classList.remove(
+            "hidden"
+        );
+
+    }
+
+
+    setTimeout(
+        () => {
+
+            if (input) {
+                input.focus();
+            }
+
+        },
+        50
+    );
+
+}
+
+
+// =====================================
+// CLOSE TAG MANAGER
+// =====================================
+
+function closeEditorTagManager() {
+
+    const modal =
+        document.getElementById(
+            "editorTagManagerModal"
+        );
+
+
+    if (modal) {
+
+        modal.classList.add(
+            "hidden"
+        );
+
+    }
+
+}
+
+
+// =====================================
+// ADD TAG
+// =====================================
+
+async function addEditorTag() {
+
+    if (!isAdminUser()) {
+
+        alert(
+            "Only Admin can manage editor tags."
+        );
+
+        return;
+    }
+
+
+    const input =
+        document.getElementById(
+            "newEditorTagInput"
+        );
+
+
+    if (!input) {
+        return;
+    }
+
+
+    let value =
+        String(
+            input.value || ""
+        )
+            .trim()
+            .replace(/^\[/, "")
+            .replace(/\]$/, "")
+            .trim();
+
+
+    if (!value) {
+
+        alert(
+            "Please enter a tag name."
+        );
+
+        input.focus();
+
+        return;
+    }
+
+
+    const type =
+        currentEditorTagManagerType;
+
+
+    const duplicate =
+        churchEditorTags[type]
+            .some(tag =>
+                String(tag)
+                    .toLowerCase() ===
+                value.toLowerCase()
+            );
+
+
+    if (duplicate) {
+
+        alert(
+            "That tag already exists."
+        );
+
+        return;
+    }
+
+
+    // Backup current state
+    const oldTags = [
+        ...churchEditorTags[type]
+    ];
+
+
+    churchEditorTags[type].push(
+        value
+    );
+
+
+    renderAllChurchEditorTagToolbars();
+    renderEditorTagManagerList();
+
+
+    const saved =
+        await saveChurchEditorTags();
+
+
+    if (!saved) {
+
+        // Restore if Supabase save failed
+        churchEditorTags[type] =
+            oldTags;
+
+        renderAllChurchEditorTagToolbars();
+        renderEditorTagManagerList();
+
+        alert(
+            "Failed to save the new tag."
+        );
+
+        return;
+    }
+
+
+    input.value = "";
+    input.focus();
+
+}
+
+
+// =====================================
+// RENDER MANAGER LIST
+// =====================================
+
+function renderEditorTagManagerList() {
+
+    const container =
+        document.getElementById(
+            "editorTagManagerList"
+        );
+
+
+    if (!container) {
+        return;
+    }
+
+
+    const type =
+        currentEditorTagManagerType;
+
+
+    const tags =
+        churchEditorTags[type] || [];
+
+
+    container.innerHTML =
+        "";
+
+
+    if (tags.length === 0) {
+
+        container.innerHTML = `
+            <div class="editor-tag-manager-empty">
+                No tags yet.
+                Use "+ Add Tag" above.
+            </div>
+        `;
+
+        return;
+    }
+
+
+    tags.forEach(
+        (tag, index) => {
+
+            const row =
+                document.createElement(
+                    "div"
+                );
+
+
+            row.className =
+                "editor-tag-manager-row";
+
+
+            const nameArea =
+                document.createElement(
+                    "div"
+                );
+
+
+            nameArea.className =
+                "editor-tag-manager-name";
+
+
+            const preview =
+                document.createElement(
+                    "span"
+                );
+
+
+            preview.className =
+                "editor-tag-preview";
+
+
+            preview.textContent =
+                `[${tag}]`;
+
+
+            const label =
+                document.createElement(
+                    "span"
+                );
+
+
+            label.textContent =
+                tag;
+
+
+            nameArea.appendChild(
+                preview
+            );
+
+
+            nameArea.appendChild(
+                label
+            );
+
+
+            // =====================================
+            // ACTIONS
+            // =====================================
+
+            const actions =
+                document.createElement(
+                    "div"
+                );
+
+
+            actions.className =
+                "editor-tag-manager-actions";
+
+
+            // MOVE UP
+
+            const upButton =
+                document.createElement(
+                    "button"
+                );
+
+
+            upButton.type =
+                "button";
+
+            upButton.textContent =
+                "↑";
+
+            upButton.title =
+                "Move Up";
+
+            upButton.disabled =
+                index === 0;
+
+
+            upButton.addEventListener(
+                "click",
+                () => {
+
+                    moveEditorTag(
+                        type,
+                        index,
+                        -1
+                    );
+
+                }
+            );
+
+
+            // MOVE DOWN
+
+            const downButton =
+                document.createElement(
+                    "button"
+                );
+
+
+            downButton.type =
+                "button";
+
+            downButton.textContent =
+                "↓";
+
+            downButton.title =
+                "Move Down";
+
+            downButton.disabled =
+                index ===
+                tags.length - 1;
+
+
+            downButton.addEventListener(
+                "click",
+                () => {
+
+                    moveEditorTag(
+                        type,
+                        index,
+                        1
+                    );
+
+                }
+            );
+
+
+            // EDIT
+
+            const editButton =
+                document.createElement(
+                    "button"
+                );
+
+
+            editButton.type =
+                "button";
+
+            editButton.textContent =
+                "✏";
+
+            editButton.title =
+                "Rename";
+
+
+            editButton.addEventListener(
+                "click",
+                () => {
+
+                    editEditorTag(
+                        type,
+                        index
+                    );
+
+                }
+            );
+
+
+            // DELETE
+
+            const deleteButton =
+                document.createElement(
+                    "button"
+                );
+
+
+            deleteButton.type =
+                "button";
+
+            deleteButton.textContent =
+                "×";
+
+            deleteButton.title =
+                "Delete";
+
+            deleteButton.className =
+                "editor-tag-delete-btn";
+
+
+            deleteButton.addEventListener(
+                "click",
+                () => {
+
+                    deleteEditorTag(
+                        type,
+                        index
+                    );
+
+                }
+            );
+
+
+            actions.append(
+                upButton,
+                downButton,
+                editButton,
+                deleteButton
+            );
+
+
+            row.append(
+                nameArea,
+                actions
+            );
+
+
+            container.appendChild(
+                row
+            );
+
+        }
+    );
+
+}
+
+
+// =====================================
+// EDIT / RENAME TAG
+// =====================================
+
+async function editEditorTag(
+    type,
+    index
+) {
+
+    if (!isAdminUser()) {
+
+        alert(
+            "Only Admin can manage editor tags."
+        );
+
+        return;
+    }
+
+
+    const current =
+        churchEditorTags[type][index];
+
+
+    let newValue =
+        prompt(
+            "Rename tag:",
+            current
+        );
+
+
+    if (newValue === null) {
+        return;
+    }
+
+
+    newValue =
+        String(newValue)
+            .trim()
+            .replace(/^\[/, "")
+            .replace(/\]$/, "")
+            .trim();
+
+
+    if (!newValue) {
+
+        alert(
+            "Tag name cannot be empty."
+        );
+
+        return;
+    }
+
+
+    const duplicate =
+        churchEditorTags[type]
+            .some(
+                (tag, tagIndex) =>
+                    tagIndex !== index &&
+                    String(tag)
+                        .toLowerCase() ===
+                    newValue.toLowerCase()
+            );
+
+
+    if (duplicate) {
+
+        alert(
+            "That tag already exists."
+        );
+
+        return;
+    }
+
+
+    const oldValue =
+        churchEditorTags[type][index];
+
+
+    churchEditorTags[type][index] =
+        newValue;
+
+
+    renderAllChurchEditorTagToolbars();
+    renderEditorTagManagerList();
+
+
+    const saved =
+        await saveChurchEditorTags();
+
+
+    if (!saved) {
+
+        churchEditorTags[type][index] =
+            oldValue;
+
+        renderAllChurchEditorTagToolbars();
+        renderEditorTagManagerList();
+
+        alert(
+            "Failed to rename the tag."
+        );
+
+    }
+
+}
+
+// =====================================
+// DELETE TAG
+// =====================================
+
+async function deleteEditorTag(
+    type,
+    index
+) {
+
+    if (!isAdminUser()) {
+
+        alert(
+            "Only Admin can manage editor tags."
+        );
+
+        return;
+    }
+
+
+    const tag =
+        churchEditorTags[type][index];
+
+
+    const confirmed =
+        confirm(
+            `Delete tag [${tag}]?`
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    const oldTags = [
+        ...churchEditorTags[type]
+    ];
+
+
+    churchEditorTags[type]
+        .splice(
+            index,
+            1
+        );
+
+
+    renderAllChurchEditorTagToolbars();
+    renderEditorTagManagerList();
+
+
+    const saved =
+        await saveChurchEditorTags();
+
+
+    if (!saved) {
+
+        churchEditorTags[type] =
+            oldTags;
+
+        renderAllChurchEditorTagToolbars();
+        renderEditorTagManagerList();
+
+        alert(
+            "Failed to delete the tag."
+        );
+
+    }
+
+}
+
+// =====================================
+// MOVE TAG
+// =====================================
+
+async function moveEditorTag(
+    type,
+    index,
+    direction
+) {
+
+    if (!isAdminUser()) {
+        return;
+    }
+
+
+    const tags =
+        churchEditorTags[type];
+
+
+    const newIndex =
+        index + direction;
+
+
+    if (
+        newIndex < 0 ||
+        newIndex >= tags.length
+    ) {
+        return;
+    }
+
+
+    const oldTags = [
+        ...tags
+    ];
+
+
+    const temp =
+        tags[index];
+
+    tags[index] =
+        tags[newIndex];
+
+    tags[newIndex] =
+        temp;
+
+
+    renderAllChurchEditorTagToolbars();
+    renderEditorTagManagerList();
+
+
+    const saved =
+        await saveChurchEditorTags();
+
+
+    if (!saved) {
+
+        churchEditorTags[type] =
+            oldTags;
+
+        renderAllChurchEditorTagToolbars();
+        renderEditorTagManagerList();
+
+    }
+
+}
+
+
+// =====================================
+// RESET CURRENT TAG TYPE
+// =====================================
+
+async function resetEditorTagsToDefault() {
+
+    if (!isAdminUser()) {
+
+        alert(
+            "Only Admin can manage editor tags."
+        );
+
+        return;
+    }
+
+
+    const type =
+        currentEditorTagManagerType;
+
+
+    const confirmed =
+        confirm(
+            "Reset this editor's tags to the default list?"
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    const oldTags = [
+        ...churchEditorTags[type]
+    ];
+
+
+    churchEditorTags[type] = [
+        ...churchEditorDefaultTags[type]
+    ];
+
+
+    renderAllChurchEditorTagToolbars();
+    renderEditorTagManagerList();
+
+
+    const saved =
+        await saveChurchEditorTags();
+
+
+    if (!saved) {
+
+        churchEditorTags[type] =
+            oldTags;
+
+        renderAllChurchEditorTagToolbars();
+        renderEditorTagManagerList();
+
+        alert(
+            "Failed to reset editor tags."
+        );
+
+    }
+
+}
+
+// =====================================
+// ENTER KEY = ADD TAG
+// =====================================
+
+const newEditorTagInput =
+    document.getElementById(
+        "newEditorTagInput"
+    );
+
+
+if (newEditorTagInput) {
+
+    newEditorTagInput.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key ===
+                "Enter"
+            ) {
+
+                event.preventDefault();
+
+                addEditorTag();
+
+            }
+
+        }
+    );
+
+}
+
+
+// =====================================
+// INITIALIZE EDITOR TAGS
+// =====================================
+
+loadChurchEditorTags();

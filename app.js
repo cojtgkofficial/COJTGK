@@ -4923,90 +4923,6 @@ async function saveTaskToSupabase(
 // PLANNER - SUPABASE UPDATE
 // =====================================
 
-async function saveTaskToSupabase(
-    task
-) {
-
-    try {
-
-        const {
-            data,
-            error
-        } =
-            await churchSupabase
-
-                .from(
-                    "planner_tasks"
-                )
-
-                .insert([{
-
-                    id:
-                        task.id,
-
-                    title:
-                        task.title,
-
-                    description:
-                        task.description || "",
-
-                    category:
-                        task.category || "",
-
-                    priority:
-                        task.priority || "",
-
-                    due_date:
-                        task.dueDate || null,
-
-                    status:
-                        task.status || "todo",
-
-                    assigned_member_id:
-                        task.assignedMemberId ||
-                        null,
-
-                    assigned_to:
-                        task.assignedTo || ""
-
-                }])
-
-                .select();
-
-
-        if (error) {
-
-            console.error(
-                "❌ Failed to save task to Supabase:",
-                error
-            );
-
-            return false;
-        }
-
-
-        console.log(
-            "✅ Planner task saved to Supabase:",
-            data
-        );
-
-
-        return true;
-
-
-    } catch (error) {
-
-        console.error(
-            "❌ Planner Supabase insert error:",
-            error
-        );
-
-        return false;
-
-    }
-
-}
-
 // =====================================
 // PLANNER - SUPABASE UPDATE
 // =====================================
@@ -5785,167 +5701,6 @@ function closeAnnualActivityModal() {
 // =====================================================
 // SAVE ANNUAL ACTIVITY
 // =====================================================
-
-function saveAnnualActivity() {
-
-    if (!requireAdmin()) {
-        return;
-    }
-
-
-    const titleInput =
-        document.getElementById(
-            "annualActivityTitle"
-        );
-
-    const dateInput =
-        document.getElementById(
-            "annualActivityDate"
-        );
-
-    const descriptionInput =
-        document.getElementById(
-            "annualActivityDescription"
-        );
-
-    const editIdInput =
-        document.getElementById(
-            "annualActivityEditId"
-        );
-
-
-    if (
-        !titleInput ||
-        !dateInput
-    ) {
-        return;
-    }
-
-
-    const title =
-        titleInput.value.trim();
-
-    const date =
-        dateInput.value;
-
-    const description =
-        descriptionInput
-            ? descriptionInput.value.trim()
-            : "";
-
-    const editId =
-        editIdInput
-            ? editIdInput.value
-            : "";
-
-
-    // =====================================
-    // VALIDATION
-    // =====================================
-
-    if (!title) {
-
-        alert(
-            "Please enter an activity name."
-        );
-
-        return;
-    }
-
-
-    if (!date) {
-
-        alert(
-            "Please select an activity date."
-        );
-
-        return;
-    }
-
-
-    // =====================================
-    // EDIT EXISTING
-    // =====================================
-
-    if (editId) {
-
-        const index =
-            annualActivities.findIndex(
-                activity =>
-                    String(activity.id) ===
-                    String(editId)
-            );
-
-
-        if (index !== -1) {
-
-            annualActivities[index] = {
-
-                ...annualActivities[index],
-
-                title,
-                date,
-                description
-
-            };
-
-        }
-
-    }
-
-
-    // =====================================
-    // ADD NEW
-    // =====================================
-
-    else {
-
-        const newActivity = {
-
-            id: Date.now(),
-
-            title,
-
-            date,
-
-            description
-
-        };
-
-
-        annualActivities.push(
-            newActivity
-        );
-
-    }
-
-
-    // =====================================
-    // SWITCH YEAR AUTOMATICALLY
-    // =====================================
-
-    const activityYear =
-        Number(
-            date.substring(0, 4)
-        );
-
-
-    selectedAnnualActivityYear =
-        activityYear;
-
-
-    loadAnnualActivityYearSelector();
-
-    renderAnnualActivities();
-
-
-    // =====================================
-    // CLOSE MODAL
-    // =====================================
-
-    closeAnnualActivityModal();
-
-}
 
 // =====================================================
 // ANNUAL ACTIVITIES - SUPABASE READ
@@ -17053,69 +16808,6 @@ function calculateMinistryDashboard(
 // ATTENDANCE - UI & LOCALSTORAGE DELETE WRAPPER
 // =====================================
 
-async function deleteAttendance(date, serviceType) {
-
-    if (!requireAdmin()) {
-        return;
-    }
-
-    if (!confirm(
-        `Are you sure you want to delete the attendance record for ${date}?`
-    )) {
-        return;
-    }
-
-    const actualServiceType = serviceType || "sunday";
-
-    const deletedFromSupabase =
-        await deleteAttendanceFromSupabase(
-            date,
-            actualServiceType
-        );
-
-    if (!deletedFromSupabase) {
-        alert(
-            "❌ Failed to delete the attendance record in Supabase."
-        );
-        return;
-    }
-
-    attendanceRecords = attendanceRecords.filter(record =>
-        !(
-            record.date === date &&
-            (record.serviceType || "sunday") === actualServiceType
-        )
-    );
-
-    localStorage.setItem(
-        "churchhq_attendance",
-        JSON.stringify(attendanceRecords)
-    );
-
-    // =====================================
-// AUTO REFRESH ALL ATTENDANCE UI
-// =====================================
-
-renderAttendanceHistory();
-
-loadAttendanceForDate();
-
-renderAttendanceSummary(
-    document.getElementById(
-        "attendanceSummarySearch"
-    )?.value || ""
-);
-
-renderTopAttendance();
-
-refreshDashboardStatus();
-
-
-    alert(
-        `✅ ${actualServiceType === "midweek" ? "Midweek" : "Sunday"} attendance from ${date} is successfully deleted.`
-    );
-}
-
 async function deleteAttendance(
     date,
     serviceType
@@ -23887,6 +23579,337 @@ function insertEditorTag(
 const EDITOR_BIBLE_URL =
     "https://www.biblegateway.com/passage/?search=Genesis%201&version=KJV";
 
+// =====================================================
+// LOCAL OFFLINE BIBLE
+// Files: Bible/Old Testaments/1. Genesis.json, etc.
+// =====================================================
+
+const LOCAL_BIBLE_BOOKS = [
+    [1, "Genesis", 50], [2, "Exodus", 40], [3, "Leviticus", 27],
+    [4, "Numbers", 36], [5, "Deuteronomy", 34], [6, "Joshua", 24],
+    [7, "Judges", 21], [8, "Ruth", 4], [9, "1 Samuel", 31],
+    [10, "2 Samuel", 24], [11, "1 Kings", 22], [12, "2 Kings", 25],
+    [13, "1 Chronicles", 29], [14, "2 Chronicles", 36], [15, "Ezra", 10],
+    [16, "Nehemiah", 13], [17, "Esther", 10], [18, "Job", 42],
+    [19, "Psalms", 150], [20, "Proverbs", 31], [21, "Ecclesiastes", 12],
+    [22, "Song of Solomon", 8], [23, "Isaiah", 66], [24, "Jeremiah", 52],
+    [25, "Lamentations", 5], [26, "Ezekiel", 48], [27, "Daniel", 12],
+    [28, "Hosea", 14], [29, "Joel", 3], [30, "Amos", 9],
+    [31, "Obadiah", 1], [32, "Jonah", 4], [33, "Micah", 7],
+    [34, "Nahum", 3], [35, "Habakkuk", 3], [36, "Zephaniah", 3],
+    [37, "Haggai", 2], [38, "Zechariah", 14], [39, "Malachi", 4],
+    [40, "Matthew", 28], [41, "Mark", 16], [42, "Luke", 24],
+    [43, "John", 21], [44, "Acts", 28], [45, "Romans", 16],
+    [46, "1 Corinthians", 16], [47, "2 Corinthians", 13], [48, "Galatians", 6],
+    [49, "Ephesians", 6], [50, "Philippians", 4], [51, "Colossians", 4],
+    [52, "1 Thessalonians", 5], [53, "2 Thessalonians", 3], [54, "1 Timothy", 6],
+    [55, "2 Timothy", 4], [56, "Titus", 3], [57, "Philemon", 1],
+    [58, "Hebrews", 13], [59, "James", 5], [60, "1 Peter", 5],
+    [61, "2 Peter", 3], [62, "1 John", 5], [63, "2 John", 1],
+    [64, "3 John", 1], [65, "Jude", 1], [66, "Revelation", 22]
+].map(([number, name, chapterCount]) => ({
+    number,
+    name,
+    chapterCount,
+    testament: number <= 39 ? "Old Testaments" : "New Testaments"
+}));
+
+const localBibleCache = new Map();
+
+function getLocalBibleFilePath(book) {
+    return `Bible/${book.testament}/${book.number}. ${book.name}.json`;
+}
+
+function getLocalBibleViewer(panelKey) {
+    const content = document.getElementById(panelKey + "ReferenceContent");
+    return content ? content.querySelector(".local-bible-viewer") : null;
+}
+
+function setLocalBibleStatus(panelKey, message, type = "info") {
+    const viewer = getLocalBibleViewer(panelKey);
+    if (!viewer) return;
+
+    const status = viewer.querySelector("[data-local-bible-status]");
+    if (!status) return;
+
+    status.className = `local-bible-status ${type}`;
+    status.textContent = message;
+    status.classList.remove("hidden");
+}
+
+function hideLocalBibleStatus(panelKey) {
+    const viewer = getLocalBibleViewer(panelKey);
+    const status = viewer?.querySelector("[data-local-bible-status]");
+    if (status) status.classList.add("hidden");
+}
+
+function initializeLocalBibleViewer(panelKey) {
+    const viewer = getLocalBibleViewer(panelKey);
+    if (!viewer) return;
+
+    const bookSelect = viewer.querySelector("[data-local-bible-book]");
+    const chapterSelect = viewer.querySelector("[data-local-bible-chapter]");
+
+    bookSelect.innerHTML = LOCAL_BIBLE_BOOKS.map(book => {
+        const divider = book.number === 40
+            ? '<option disabled>──────── New Testament ────────</option>'
+            : "";
+        return `${divider}<option value="${book.number}">${book.number}. ${book.name}</option>`;
+    }).join("");
+
+    bookSelect.value = "1";
+    populateLocalBibleChapters(panelKey);
+
+    bookSelect.addEventListener("change", () => {
+        populateLocalBibleChapters(panelKey);
+        loadLocalBibleChapter(panelKey);
+    });
+
+    chapterSelect.addEventListener("change", () => {
+        loadLocalBibleChapter(panelKey);
+    });
+
+    viewer.querySelector("[data-local-bible-previous]")?.addEventListener("click", () => {
+        moveLocalBibleChapter(panelKey, -1);
+    });
+
+    viewer.querySelector("[data-local-bible-next]")?.addEventListener("click", () => {
+        moveLocalBibleChapter(panelKey, 1);
+    });
+
+    viewer.querySelector("[data-local-bible-copy]")?.addEventListener("click", () => {
+        copyLocalBibleChapter(panelKey);
+    });
+
+    viewer.querySelector("[data-local-bible-insert]")?.addEventListener("click", () => {
+        insertLocalBibleChapter(panelKey);
+    });
+
+    loadLocalBibleChapter(panelKey);
+}
+
+function populateLocalBibleChapters(panelKey) {
+    const viewer = getLocalBibleViewer(panelKey);
+    if (!viewer) return;
+
+    const bookNumber = Number(viewer.querySelector("[data-local-bible-book]")?.value);
+    const chapterSelect = viewer.querySelector("[data-local-bible-chapter]");
+    const book = LOCAL_BIBLE_BOOKS.find(item => item.number === bookNumber);
+    if (!book || !chapterSelect) return;
+
+    chapterSelect.innerHTML = Array.from(
+        { length: book.chapterCount },
+        (_, index) => `<option value="${index + 1}">Chapter ${index + 1}</option>`
+    ).join("");
+}
+
+async function fetchLocalBibleBook(book) {
+    if (localBibleCache.has(book.number)) {
+        return localBibleCache.get(book.number);
+    }
+
+    const response = await fetch(getLocalBibleFilePath(book), { cache: "no-cache" });
+    if (!response.ok) {
+        throw new Error(`Hindi mabuksan ang ${book.name} JSON (HTTP ${response.status}).`);
+    }
+
+    const data = await response.json();
+    if (
+        !data ||
+        Number(data.bookNumber) !== book.number ||
+        typeof data.bookName !== "string" ||
+        !data.chapters ||
+        typeof data.chapters !== "object"
+    ) {
+        throw new Error(`Mali o hindi kumpleto ang JSON structure ng ${book.name}.`);
+    }
+
+    localBibleCache.set(book.number, data);
+    return data;
+}
+
+function findMissingVerseNumbers(verses) {
+    const verseNumbers = Object.keys(verses || {})
+        .map(Number)
+        .filter(Number.isInteger)
+        .sort((a, b) => a - b);
+
+    if (!verseNumbers.length) return [];
+
+    const missing = [];
+    for (let verse = 1; verse <= verseNumbers[verseNumbers.length - 1]; verse += 1) {
+        if (!Object.prototype.hasOwnProperty.call(verses, String(verse))) {
+            missing.push(verse);
+        }
+    }
+    return missing;
+}
+
+async function loadLocalBibleChapter(panelKey) {
+    const viewer = getLocalBibleViewer(panelKey);
+    if (!viewer) return;
+
+    const bookNumber = Number(viewer.querySelector("[data-local-bible-book]")?.value);
+    const chapterNumber = Number(viewer.querySelector("[data-local-bible-chapter]")?.value);
+    const verseContainer = viewer.querySelector("[data-local-bible-verses]");
+    const heading = viewer.querySelector("[data-local-bible-heading]");
+    const book = LOCAL_BIBLE_BOOKS.find(item => item.number === bookNumber);
+
+    if (!book || !chapterNumber || !verseContainer) return;
+
+    heading.textContent = `${book.name} ${chapterNumber}`;
+    verseContainer.innerHTML = '<div class="local-bible-loading">Binubuksan ang chapter…</div>';
+    setLocalBibleStatus(panelKey, "Binabasa ang local Bible file…", "info");
+
+    try {
+        const data = await fetchLocalBibleBook(book);
+        const verses = data.chapters[String(chapterNumber)];
+        heading.textContent = `${data.bookName || book.name} ${chapterNumber}`;
+
+        if (!verses || typeof verses !== "object" || !Object.keys(verses).length) {
+            verseContainer.innerHTML = "";
+            const unavailable = document.createElement("div");
+            unavailable.className = "local-bible-unavailable";
+            unavailable.innerHTML = `<strong>${book.name} ${chapterNumber} is unavailable.</strong><span>Walang kopya ng chapter na ito sa iyong JSON file.</span>`;
+            verseContainer.appendChild(unavailable);
+            setLocalBibleStatus(
+                panelKey,
+                `Missing source: ${book.name} Chapter ${chapterNumber}. Hindi ito isinama o pinalitan ng system.`,
+                "error"
+            );
+            updateLocalBibleNavigation(panelKey);
+            return;
+        }
+
+        verseContainer.innerHTML = "";
+        Object.entries(verses)
+            .sort(([a], [b]) => Number(a) - Number(b))
+            .forEach(([verseNumber, verseText]) => {
+                const row = document.createElement("p");
+                row.className = "local-bible-verse";
+                row.dataset.verse = verseNumber;
+
+                const number = document.createElement("sup");
+                number.textContent = verseNumber;
+
+                const text = document.createElement("span");
+                text.textContent = verseText;
+
+                row.append(number, text);
+                verseContainer.appendChild(row);
+            });
+
+        const missingVerses = findMissingVerseNumbers(verses);
+        if (missingVerses.length) {
+            setLocalBibleStatus(
+                panelKey,
+                `Unavailable verse${missingVerses.length > 1 ? "s" : ""}: ${missingVerses.map(v => `${chapterNumber}:${v}`).join(", ")}.`,
+                "warning"
+            );
+        } else {
+            hideLocalBibleStatus(panelKey);
+        }
+    } catch (error) {
+        console.error("❌ Local Bible load error:", error);
+        verseContainer.innerHTML = "";
+        const unavailable = document.createElement("div");
+        unavailable.className = "local-bible-unavailable";
+        unavailable.innerHTML = `<strong>Hindi mabuksan ang local Bible.</strong><span>${error.message}</span>`;
+        verseContainer.appendChild(unavailable);
+        setLocalBibleStatus(
+            panelKey,
+            "Siguraduhing kasama ang Bible folder at binubuksan ang system mula sa GitHub Pages o local server.",
+            "error"
+        );
+    }
+
+    updateLocalBibleNavigation(panelKey);
+}
+
+function updateLocalBibleNavigation(panelKey) {
+    const viewer = getLocalBibleViewer(panelKey);
+    if (!viewer) return;
+
+    const bookNumber = Number(viewer.querySelector("[data-local-bible-book]")?.value);
+    const chapterNumber = Number(viewer.querySelector("[data-local-bible-chapter]")?.value);
+    const book = LOCAL_BIBLE_BOOKS.find(item => item.number === bookNumber);
+    const previous = viewer.querySelector("[data-local-bible-previous]");
+    const next = viewer.querySelector("[data-local-bible-next]");
+
+    if (previous) previous.disabled = bookNumber === 1 && chapterNumber === 1;
+    if (next) next.disabled = bookNumber === 66 && chapterNumber === book?.chapterCount;
+}
+
+function moveLocalBibleChapter(panelKey, direction) {
+    const viewer = getLocalBibleViewer(panelKey);
+    if (!viewer) return;
+
+    const bookSelect = viewer.querySelector("[data-local-bible-book]");
+    const chapterSelect = viewer.querySelector("[data-local-bible-chapter]");
+    let bookIndex = LOCAL_BIBLE_BOOKS.findIndex(book => book.number === Number(bookSelect.value));
+    let chapter = Number(chapterSelect.value) + direction;
+
+    if (chapter < 1 && bookIndex > 0) {
+        bookIndex -= 1;
+        chapter = LOCAL_BIBLE_BOOKS[bookIndex].chapterCount;
+        bookSelect.value = String(LOCAL_BIBLE_BOOKS[bookIndex].number);
+        populateLocalBibleChapters(panelKey);
+    } else if (chapter > LOCAL_BIBLE_BOOKS[bookIndex].chapterCount && bookIndex < LOCAL_BIBLE_BOOKS.length - 1) {
+        bookIndex += 1;
+        chapter = 1;
+        bookSelect.value = String(LOCAL_BIBLE_BOOKS[bookIndex].number);
+        populateLocalBibleChapters(panelKey);
+    }
+
+    chapterSelect.value = String(chapter);
+    loadLocalBibleChapter(panelKey);
+}
+
+function getDisplayedLocalBibleText(panelKey) {
+    const viewer = getLocalBibleViewer(panelKey);
+    if (!viewer) return "";
+
+    const heading = viewer.querySelector("[data-local-bible-heading]")?.textContent.trim();
+    const verses = [...viewer.querySelectorAll(".local-bible-verse")].map(row => {
+        const number = row.querySelector("sup")?.textContent.trim();
+        const text = row.querySelector("span")?.textContent.trim();
+        return `${number} ${text}`;
+    });
+
+    return verses.length ? `${heading}\n\n${verses.join("\n")}` : "";
+}
+
+async function copyLocalBibleChapter(panelKey) {
+    const text = getDisplayedLocalBibleText(panelKey);
+    if (!text) {
+        setLocalBibleStatus(panelKey, "Walang available na verse na maaaring kopyahin.", "warning");
+        return;
+    }
+
+    try {
+        await navigator.clipboard.writeText(text);
+        setLocalBibleStatus(panelKey, "Nakopya na ang chapter sa clipboard.", "success");
+    } catch (error) {
+        setLocalBibleStatus(panelKey, "Hindi pinayagan ng browser ang automatic copy.", "error");
+    }
+}
+
+function insertLocalBibleChapter(panelKey) {
+    const text = getDisplayedLocalBibleText(panelKey);
+    const editor = document.getElementById(panelKey + "Editor");
+    const textarea = editor?.querySelector("textarea");
+
+    if (!text || !textarea) {
+        setLocalBibleStatus(panelKey, "Walang available na verse na mailalagay sa editor.", "warning");
+        return;
+    }
+
+    const separator = textarea.value.trim() ? "\n\n" : "";
+    textarea.value += separator + text;
+    textarea.dispatchEvent(new Event("input", { bubbles: true }));
+    hideEditorReference(panelKey);
+}
+
 function openEditorReference(
     panelKey,
     type
@@ -24225,13 +24248,11 @@ if (type === "ultimate") {
         }
 
 
-        // Preserve existing Bible iframe/session
+        // Preserve existing BibleGateway and local Bible session
         if (
             content.dataset.referenceType ===
             "bible" &&
-            content.querySelector(
-                "iframe"
-            )
+            content.querySelector(".editor-bible-split-view")
         ) {
             return;
         }
@@ -24242,15 +24263,61 @@ if (type === "ultimate") {
 
 
         content.innerHTML = `
+            <div class="editor-bible-split-view">
+                <section class="editor-bible-pane editor-bible-online-pane">
+                    <div class="editor-bible-pane-header">
+                        <div>
+                            <span class="editor-bible-pane-label">ONLINE</span>
+                            <strong>BibleGateway</strong>
+                        </div>
+                    </div>
 
-            <iframe
-                class="editor-browser-frame"
-                src="${EDITOR_BIBLE_URL}"
-                title="Bible"
-                referrerpolicy="no-referrer"
-            ></iframe>
+                    <iframe
+                        class="editor-browser-frame editor-biblegateway-frame"
+                        src="${EDITOR_BIBLE_URL}"
+                        title="BibleGateway"
+                        referrerpolicy="no-referrer"
+                    ></iframe>
+                </section>
 
+                <section class="editor-bible-pane local-bible-viewer">
+                    <div class="editor-bible-pane-header">
+                        <div>
+                            <span class="editor-bible-pane-label">LOCAL JSON</span>
+                            <strong>My Bible</strong>
+                        </div>
+                    </div>
+
+                    <div class="local-bible-controls">
+                        <label>
+                            <span>Book</span>
+                            <select data-local-bible-book aria-label="Bible book"></select>
+                        </label>
+
+                        <label>
+                            <span>Chapter</span>
+                            <select data-local-bible-chapter aria-label="Bible chapter"></select>
+                        </label>
+                    </div>
+
+                    <div class="local-bible-navigation">
+                        <button type="button" data-local-bible-previous>← Previous</button>
+                        <h3 data-local-bible-heading>Bible</h3>
+                        <button type="button" data-local-bible-next>Next →</button>
+                    </div>
+
+                    <div class="local-bible-status hidden" data-local-bible-status></div>
+                    <div class="local-bible-verses" data-local-bible-verses></div>
+
+                    <div class="local-bible-actions">
+                        <button type="button" data-local-bible-copy>Copy Chapter</button>
+                        <button type="button" class="primary" data-local-bible-insert>Insert to Editor</button>
+                    </div>
+                </section>
+            </div>
         `;
+
+        initializeLocalBibleViewer(panelKey);
 
     }
 

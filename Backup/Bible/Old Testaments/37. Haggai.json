@@ -1,0 +1,48 @@
+{
+  "bookNumber": 37,
+  "bookName": "Hagai",
+  "chapters": {
+    "1": {
+      "1": "( Iniutos ni Yahweh na Gawin ang Templo ) Ikalawang taon noon ng pamamahala ni Haring Dario sa Persia. Nang unang araw ng ikaanim na buwan, tinawag ni Yahweh si Propeta Ageo. Ipinasabi niya kay Zorobabel na gobernador ng Juda at anak ni Sealtiel at sa punong saserdoteng si Josue na anak naman ni Josadac,",
+      "2": "'\"Ganito ang sinabi ni Yahweh: Ipinamamalita ng bansang ito na hindi pa panahon upang muling itayo ang templo.' \"",
+      "3": "Sinabi nga ni Yahweh sa mga Israelita sa pamamagitan ni Propeta Ageo,",
+      "4": "'\"Magaganda't maaayos ang inyong mga tahanan ngunit pinababayaan ninyong wasak ang aking bahay.\"",
+      "5": "Isipin ninyo ang inyong kalagayan.",
+      "6": "Marami ang inyong inihahasik ngunit kakaunti ang inaani. Kumakain nga kayo ngunit hindi nabubusog. Umiinom kayo ngunit hindi nasisiyahan. Kumikita nga ang mga manggagawa ngunit ang kita nila'y parang nahuhulog sa buslong butas. May damit nga kayo ngunit hindi makaalis ng ginaw.",
+      "7": "Isipin ninyo ang nangyayari sa inyo.",
+      "8": "Kumuha kayo ng kahoy sa bundok. Gawin ninyo uli ang templo at doon ko ihahayag ang aking kaningningan. Sa gayon, ako'y masisiyahan.",
+      "9": "Naghahangad kayo ng maraming ani ngunit kakaunti ang inyong nakakamtan at nang iuwi ninyo yaon ay isinambulat ko. Bakit ito nangyayari sa inyo? Sapagkat may sariling tahanan kayo samantalang wasak ang aking templo.",
+      "10": "Iyan ang dahilan kung bakit hindi kayo napapatakan kahit hamog, kaya hindi kayo makabuhay ng inyong pananim.",
+      "11": "\"Iyan nga ang dahilan kung bakit ko kayo pinaranas ng tagtuyot.' \"",
+      "12": "Kaya, si Zorobabel, si Josue at ang mga Israelitang nakabalik mula sa pagkatapon ay sumunod sa sinabi ni Yahweh sa pamamagitan ni Propeta Ageo. Nagkaroon sila ng takot kay Yahweh.",
+      "13": "\"Ganito ang ipinasabi niya: 'Ipinangangako kong hindi ko kayo pababayaan.'\"",
+      "14": "Inantig nga ni Yahweh ang damdamin ni Zorobabel, ni Josue at ng lahat ng Israelita. Kaya, nagtulung-tulong sila sa paggawa ng templo.",
+      "15": "Sinimulan nila ito noong ika-24 ng ikaanim na buwan."
+    },
+    "2": {
+      "1": "( Ang Kagandahan ng Templo ) Noong ika-21 ng ikapitong buwan ng taon ding iyon, kinausap ni Yahweh si Propeta Ageo:",
+      "2": "'\"Ganito ang sabihin mo kay Zorobabel na gobernador ng Juda, kay Josue at sa mga Israelita:\"",
+      "3": "'Sino sa inyo ang nakakita sa kagandahan ng templong ito noong una? At ano ang hitsura nito ngayon? Hindi ba mas mabuti pang wala?",
+      "4": "Ngunit huwag kayong mawalan ng pag-asa. Lakasan ninyo ang inyong loob at gawin ninyo ang aking templo pagkat ako'y sumasainyo.",
+      "5": "Tulad ng pangako ko sa inyo nang ilabas ko kayo sa Egipto, papatnubayan kayo ng aking Espiritu. Kaya, huwag kayong matakot.",
+      "6": "Hindi magtatagal at minsan ko pang yayanigin ang kalangitan at ang buong daigdig, ang lupa at ang dagat.",
+      "7": "Yayanigin ko ang mga bansa upang maghandog sila para sa templo,",
+      "8": "pagkat ang ginto at pilak ay akin.",
+      "9": "\"Ang templong ito'y magiging maganda kaysa noong una at pasasaganain ko sa lahat ng bagay ang lupaing ito.'' Ito nga ang sinabi ni Yahweh. \"",
+      "10": "Nang ika-24 ng ikasiyam na buwan ng taon ding iyon, kinausap uli ni Yahweh si Propeta Ageo.",
+      "11": "\"Sinabi niya, 'Sabihin mo sa mga saserdote na pagpasiyahan ang bagay na ito:\"",
+      "12": "\"'Kung ang isang tao'y may dalang karneng sagrado na nakabalot sa kanyang damit at masaling ang dulo nito sa tinapay, ulam, inumin, langis, o anumang pagkain, magiging sagrado rin ba ang mga ito?'' Ang sagot sa kanya ng mga saserdote ay hindi.\"",
+      "13": "\"Itinanong pa ni Ageo, 'Magiging marumi rin ba ang alinmang handog na mahipo ng isang taong marumi ayon sa Kautusan dahil sa paghipo sa patay?' 'Oo,' sagot ng mga saserdote. \"",
+      "14": "\"Sinabi ni Ageo, 'Ganyan din ang kalagayan ngayon ng mga Israelita sa harapan ni Yahweh; nahahawa sa karumihan nila ang anumang handog nila.\"",
+      "15": "Dili-dilihin ninyo ang mga pangyayari mula noong una hanggang ngayon. Ano ang inyong kalagayan bago ninyo sinimulan ang templong ito?",
+      "16": "Hindi ba't yaong bunton ng butil na inaasahan ninyong dalawampung takal ay nakukunan lamang ng sampu? At ang katas ng ubas na inaakala ninyong limampung takal, hindi ba lumalabas lamang na dalawampu?",
+      "17": "Ang mga pananim ninyo'y sinira ko sa pamamagitan ng malakas na hangin, ng amag at ng ulan, ng yelo, ngunit hindi pa rin ninyo naisip na manumbalik sa akin.",
+      "18": "Dili-dilihin ninyo ang nangyayari sa inyo mula noon hanggang ngayong ika-24 ng ikasiyam na buwan, ang unang araw ng paggawa ninyo sa aking templo,",
+      "19": "\"wala kayong isa mang butil ng pagkain. Walang bunga isa man ang inyong mga ubas, igos, granada at olibo. Ngunit mula ngayon, pagpapalain ko na kayo.' \"",
+      "20": "Noong ika-24 din ng buwang iyon, sinabi ni Yahweh kay Ageo,",
+      "21": "'\"Sabihin mo kay Gobernador Zorobabel ng Juda na hindi na magtatagal at yayanigin ko ang langit at ang lupa.\"",
+      "22": "Ibabagsak ko ang mga kaharian, ang mga hari at wawakasan ang kanilang kapangyarihan. Wawasakin ko ang kanilang mga karwahe at lilipulin ang mga kawal at ang kanilang mga kabayo. Sila-sila ay magpapatayan.",
+      "23": "\"At sa araw na yaon, kukunin kita, Zorobabel na aking lingkod. Isusuot kitang parang singsing na pantatak; hindi kita ihihiwalay sa akin pagkat ikaw ay aking hinirang.'\""
+    }
+  }
+}

@@ -1,0 +1,54 @@
+COJTGK CONSERVATIVE DUPLICATE CLEANUP REPORT
+============================================
+
+Source archive
+--------------
+COJTGK.zip
+SHA-256: a4ca138eb3c118ad65e05e66a9449467af1e95aac13bbbced4d976eebdf1a0a5
+
+Cleanup performed
+-----------------
+1. Removed one redundant Supabase JavaScript library import from index.html.
+   One Supabase v2 import remains immediately before app.js.
+
+2. Removed three duplicate JavaScript function declarations from app.js:
+   - The second byte-identical saveTaskToSupabase declaration was removed.
+   - The older local-only saveAnnualActivity declaration was removed; the
+     active async Supabase/audit version remains.
+   - The older deleteAttendance declaration was removed; the active enhanced
+     Supabase/audit version remains.
+
+3. Removed 18 exact duplicate CSS rules from the same CSS scope. In every case,
+   the later equivalent rule was retained to preserve cascade behavior.
+
+Safety rules followed
+---------------------
+- Repeated CSS selectors with different declarations were retained because
+  they may be intentional cascade overrides.
+- Functions with different names or purposes were not consolidated.
+- Supabase URLs, keys, table names, fields, login logic, roles, and policies
+  were not changed.
+- HTML element IDs and navigation targets were not renamed.
+- Bible text and all JSON files were not edited.
+- Images and all other non-code assets were not edited.
+
+Verification
+------------
+- app.js passes JavaScript syntax checking.
+- No duplicate named function declarations remain.
+- No duplicate HTML IDs exist.
+- Exactly one Supabase library import remains.
+- All 66 configured Bible JSON file paths exist.
+- All 66 Bible files remain valid JSON.
+- Hash comparison confirms every original non-code file is unchanged.
+- ZIP integrity test passed.
+
+Known source-data gaps intentionally preserved
+----------------------------------------------
+- Job chapter 41
+- Psalms chapter 93
+- Acts chapters 21 and 22
+- Acts 2:1
+
+The existing Bible viewer error handling continues to report these unavailable
+parts without inventing replacement text.

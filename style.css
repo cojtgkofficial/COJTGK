@@ -202,9 +202,7 @@ body.dark .stat-card h3 {
     margin-bottom:5px;
 }
 
-body.dark .stat-card h2 {
-    color: #60a5fa;
-}
+
 
 .dashboard-lower{
     display:grid;
@@ -2675,9 +2673,7 @@ body.dark *:focus-visible {
    BRAND / LOGO
 ================================ */
 
-.login-brand {
-    text-align: center;
-}
+
 
 
 .login-logo-wrap {
@@ -4572,9 +4568,7 @@ body.dark .task-overdue-badge {
    LOGIN SOCIAL MEDIA
 ===================================================== */
 
-.login-socials {
-    margin-top: 4px;
-}
+
 
 .login-social-title {
     display: block;
@@ -5998,12 +5992,7 @@ body {
 
 /* Bets Edition */
 
-.sidebar-header span {
 
-    color:
-        var(--church-beige) !important;
-
-}
 
 
 /* =========================================================
@@ -6501,20 +6490,10 @@ textarea:focus {
 
 @media (max-width: 768px) {
 
-    .app-container .sidebar {
-
-        background:
-            var(--church-blue) !important;
-
-    }
+    
 
 
-    .sidebar-header {
-
-        background:
-            var(--church-blue-dark) !important;
-
-    }
+    
 
 
     .sidebar nav {
@@ -9847,15 +9826,7 @@ body.dark .nav-item.active {
 }
 
 
-.sidebar .nav-item:hover {
 
-    background:
-        rgba(255,255,255,.10) !important;
-
-    color:
-        #ffffff !important;
-
-}
 
 
 .sidebar .nav-item.active {
@@ -12491,19 +12462,7 @@ button[onclick^="openEditSongModal("]:active {
 }
 
 
-#settings #auditSearch:focus,
-#settings #auditRoleFilter:focus,
-#settings #auditModuleFilter:focus,
-#settings #auditDateFilter:focus {
 
-    border-color:
-        var(--church-blue) !important;
-
-    box-shadow:
-        0 0 0 3px
-        rgba(22,79,148,.10);
-
-}
 
 
 /* =========================================================
@@ -12552,13 +12511,7 @@ button[onclick^="openEditSongModal("]:active {
 
 /* HEADER */
 
-#settings .audit-table thead,
-#settings .audit-table thead tr {
 
-    background:
-        var(--church-blue) !important;
-
-}
 
 
 #settings .audit-table th {
@@ -12615,32 +12568,17 @@ button[onclick^="openEditSongModal("]:active {
 
 /* ALTERNATING ROW */
 
-#settings .audit-table tbody tr:nth-child(even) {
 
-    background:
-        var(--church-cream);
-
-}
 
 
 /* HOVER */
 
-#settings .audit-table tbody tr:hover {
 
-    background:
-        var(--church-beige-light);
-
-}
 
 
 /* LAST ROW */
 
-#settings .audit-table tbody tr:last-child td {
 
-    border-bottom:
-        none;
-
-}
 
 
 /* =========================================================
@@ -12748,15 +12686,7 @@ button[onclick^="openEditSongModal("]:active {
 }
 
 
-#settings .audit-pagination button:disabled {
 
-    opacity:
-        .45;
-
-    cursor:
-        not-allowed;
-
-}
 
 
 #settings .audit-pagination .active {
@@ -12886,40 +12816,13 @@ body.dark #settings .audit-table-container {
 }
 
 
-body.dark #settings .audit-filters {
-
-    background:
-        #111820;
-
-    border-color:
-        #34414C;
-
-}
 
 
-body.dark #settings #auditSearch,
-body.dark #settings #auditRoleFilter,
-body.dark #settings #auditModuleFilter,
-body.dark #settings #auditDateFilter {
-
-    background:
-        #111820;
-
-    color:
-        #ffffff;
-
-    border-color:
-        #46525E;
-
-}
 
 
-body.dark #settings .audit-table {
 
-    background:
-        #19232D;
 
-}
+
 
 
 body.dark #settings .audit-table td {
@@ -12933,20 +12836,10 @@ body.dark #settings .audit-table td {
 }
 
 
-body.dark #settings .audit-table tbody tr:nth-child(even) {
-
-    background:
-        #16202A;
-
-}
 
 
-body.dark #settings .audit-table tbody tr:hover {
 
-    background:
-        #22303C;
 
-}
 
 /* =========================================================
    CHURCHHQ AUDIT LOG
@@ -17972,4 +17865,312 @@ body.dark .editor-google-quick-search button {
     font-weight: 800 !important;
 
     letter-spacing: .3px;
+}
+/* =====================================================
+   EDITOR - BIBLEGATEWAY + LOCAL JSON BIBLE
+===================================================== */
+
+.editor-bible-split-view {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 12px;
+    padding: 12px;
+    min-height: 540px;
+    background: #f1f5f9;
+}
+
+.editor-bible-pane {
+    min-width: 0;
+    min-height: 515px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #ffffff;
+    border: 1px solid #dbe3ec;
+    border-radius: 11px;
+}
+
+.editor-bible-pane-header {
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    padding: 9px 12px;
+    border-bottom: 1px solid #e2e8f0;
+    background: #ffffff;
+}
+
+.editor-bible-pane-header > div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.editor-bible-pane-header strong {
+    color: #172033;
+    font-size: 14px;
+}
+
+.editor-bible-pane-label {
+    color: #64748b;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .09em;
+}
+
+.editor-biblegateway-frame {
+    flex: 1;
+    min-height: 465px;
+}
+
+.local-bible-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(110px, .65fr);
+    gap: 9px;
+    padding: 11px 12px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.local-bible-controls label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.local-bible-controls label > span {
+    color: #64748b;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.local-bible-controls select {
+    width: 100%;
+    height: 37px;
+    padding: 6px 9px;
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+    outline: none;
+    background: #ffffff;
+    color: #172033;
+    font: inherit;
+    font-size: 12px;
+}
+
+.local-bible-controls select:focus {
+    border-color: #1f5a9d;
+    box-shadow: 0 0 0 3px rgba(31, 90, 157, .12);
+}
+
+.local-bible-navigation {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+.local-bible-navigation h3 {
+    margin: 0;
+    overflow: hidden;
+    color: #0f172a;
+    font-size: 14px;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.local-bible-navigation button,
+.local-bible-actions button {
+    min-height: 34px;
+    padding: 6px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #334155;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.local-bible-navigation button:hover:not(:disabled),
+.local-bible-actions button:hover {
+    border-color: #1f5a9d;
+    color: #1f5a9d;
+}
+
+.local-bible-navigation button:disabled {
+    opacity: .42;
+    cursor: not-allowed;
+}
+
+.local-bible-status {
+    margin: 9px 10px 0;
+    padding: 8px 10px;
+    border: 1px solid #bfdbfe;
+    border-radius: 7px;
+    background: #eff6ff;
+    color: #1e40af;
+    font-size: 11px;
+    line-height: 1.45;
+}
+
+.local-bible-status.warning {
+    border-color: #fde68a;
+    background: #fffbeb;
+    color: #92400e;
+}
+
+.local-bible-status.error {
+    border-color: #fecaca;
+    background: #fef2f2;
+    color: #991b1b;
+}
+
+.local-bible-status.success {
+    border-color: #bbf7d0;
+    background: #f0fdf4;
+    color: #166534;
+}
+
+.local-bible-verses {
+    flex: 1;
+    min-height: 250px;
+    max-height: 405px;
+    overflow-y: auto;
+    padding: 15px 17px 22px;
+    color: #1e293b;
+    scrollbar-width: thin;
+}
+
+.local-bible-verse {
+    margin: 0 0 10px;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.local-bible-verse sup {
+    margin-right: 7px;
+    color: #1f5a9d;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.local-bible-loading,
+.local-bible-unavailable {
+    min-height: 210px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 25px;
+    color: #64748b;
+    text-align: center;
+}
+
+.local-bible-unavailable strong {
+    color: #991b1b;
+    font-size: 15px;
+}
+
+.local-bible-unavailable span {
+    max-width: 320px;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.local-bible-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 9px 10px;
+    border-top: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+.local-bible-actions button.primary {
+    border-color: #1f5a9d;
+    background: #1f5a9d;
+    color: #ffffff;
+}
+
+.local-bible-actions button.primary:hover {
+    background: #194b83;
+    color: #ffffff;
+}
+
+body.dark .editor-bible-split-view {
+    background: #0f172a;
+}
+
+body.dark .editor-bible-pane,
+body.dark .editor-bible-pane-header,
+body.dark .local-bible-controls,
+body.dark .local-bible-controls select,
+body.dark .local-bible-verses {
+    background: #111827;
+    border-color: #334155;
+    color: #e5e7eb;
+}
+
+body.dark .editor-bible-pane-header strong,
+body.dark .local-bible-navigation h3 {
+    color: #f8fafc;
+}
+
+body.dark .local-bible-navigation,
+body.dark .local-bible-actions {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+body.dark .local-bible-navigation button,
+body.dark .local-bible-actions button:not(.primary) {
+    background: #111827;
+    border-color: #475569;
+    color: #e2e8f0;
+}
+
+body.dark .local-bible-verse {
+    color: #e5e7eb;
+}
+
+@media (max-width: 1050px) {
+    .editor-bible-split-view {
+        grid-template-columns: 1fr;
+    }
+
+    .editor-bible-pane,
+    .editor-biblegateway-frame {
+        min-height: 500px;
+    }
+}
+
+@media (max-width: 600px) {
+    .editor-bible-split-view {
+        padding: 7px;
+        gap: 8px;
+    }
+
+    .local-bible-controls {
+        grid-template-columns: 1fr;
+    }
+
+    .local-bible-navigation {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .local-bible-navigation h3 {
+        grid-column: 1 / -1;
+        grid-row: 1;
+    }
+
+    .local-bible-actions {
+        flex-direction: column;
+    }
+
+    .local-bible-actions button {
+        width: 100%;
+    }
 }

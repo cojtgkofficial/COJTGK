@@ -264,6 +264,11 @@
                 <span>Song Library</span>
             </div>
 
+            <div class="nav-item" onclick="showPage('editor')">
+                <i data-lucide="square-pen"></i>
+                <span>Editor</span>
+            </div>
+
             <div
     class="nav-item"
     data-viewer-hidden="true"
@@ -1550,6 +1555,712 @@
                 </div>
             </div>
         </section>
+
+        <!-- =====================================================
+     CHURCHHQ EDITOR
+===================================================== -->
+
+<section id="editor" class="page hidden">
+
+    <div class="editor-page-header">
+
+        <div>
+            <div class="editor-title-row">
+                <i data-lucide="square-pen"></i>
+
+                <h1 class="page-title">
+                    ChurchHQ Editor
+                </h1>
+            </div>
+
+            <p class="page-subtitle">
+                Prepare lyrics, chords, sermons, and Bible readings.
+            </p>
+        </div>
+
+    </div>
+
+
+    <!-- =========================================
+         EDITOR TABS
+    ========================================== -->
+
+    <div class="editor-tabs">
+
+        <button
+            type="button"
+            id="editorTabLyrics"
+            class="editor-tab active"
+            onclick="switchChurchEditorTab('lyrics')"
+        >
+            🎵 Lyrics & Chords
+        </button>
+
+
+        <button
+            type="button"
+            id="editorTabSermon"
+            class="editor-tab"
+            onclick="switchChurchEditorTab('sermon')"
+        >
+            📝 Sermon Editor
+        </button>
+
+
+        <button
+            type="button"
+            id="editorTabBible"
+            class="editor-tab"
+            onclick="switchChurchEditorTab('bible')"
+        >
+            📖 Bible Reading Editor
+        </button>
+
+    </div>
+
+
+    <!-- =================================================
+         1. LYRICS & CHORDS
+    ================================================== -->
+
+    <div
+        id="editorPanelLyrics"
+        class="church-editor-tab-panel"
+    >
+
+        <div class="church-editor-grid">
+
+
+            <!-- LEFT - LYRICS -->
+
+            <div class="church-editor-card">
+
+                <div class="church-editor-card-header">
+
+                    <div>
+                        <span class="editor-card-label">
+                            SONG EDITOR
+                        </span>
+
+                        <h2>
+                            LYRICS
+                        </h2>
+                    </div>
+
+
+                    <div class="editor-reference-actions">
+
+
+                    </div>
+
+                </div>
+
+
+                <div
+    class="editor-tag-toolbar"
+    data-editor-tags="lyrics"
+    data-target="lyricsText"
+></div>
+
+
+                <div
+                    id="lyricsLeftEditor"
+                    class="editor-workspace"
+                >
+
+                    <textarea
+                        id="lyricsText"
+                        class="church-editor-textarea"
+                        placeholder="Type or paste lyrics here..."
+                    ></textarea>
+
+                </div>
+
+
+                <div
+                    id="lyricsLeftReference"
+                    class="editor-reference-view hidden"
+                >
+
+                    <div class="editor-reference-header">
+
+                        <strong id="lyricsLeftReferenceTitle">
+                            Reference
+                        </strong>
+
+
+                        <div>
+                            <button
+                                type="button"
+                                onclick="hideEditorReference('lyricsLeft')"
+                            >
+                                Hide
+                            </button>
+
+                            <button
+                                type="button"
+                                onclick="closeEditorReference('lyricsLeft')"
+                            >
+                                ×
+                            </button>
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="lyricsLeftReferenceContent"
+                        class="editor-reference-content"
+                    ></div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- RIGHT - CHORDS -->
+
+            <div class="church-editor-card">
+
+                <div class="church-editor-card-header">
+
+                    <div>
+                        <span class="editor-card-label">
+                            SONG EDITOR
+                        </span>
+
+                        <h2>
+                            CHORDS
+                        </h2>
+                    </div>
+
+
+                    <div class="editor-reference-actions">
+
+
+                    </div>
+
+                </div>
+
+
+                <div
+    class="editor-tag-toolbar"
+    data-editor-tags="lyrics"
+    data-target="chordsText"
+></div>
+
+
+                <div
+                    id="lyricsRightEditor"
+                    class="editor-workspace"
+                >
+
+                    <textarea
+                        id="chordsText"
+                        class="church-editor-textarea"
+                        placeholder="Type or paste chords here..."
+                    ></textarea>
+
+                </div>
+
+
+                <div
+                    id="lyricsRightReference"
+                    class="editor-reference-view hidden"
+                >
+
+                    <div class="editor-reference-header">
+
+                        <strong id="lyricsRightReferenceTitle">
+                            Reference
+                        </strong>
+
+                        <div>
+                            <button onclick="hideEditorReference('lyricsRight')">
+                                Hide
+                            </button>
+
+                            <button onclick="closeEditorReference('lyricsRight')">
+                                ×
+                            </button>
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="lyricsRightReferenceContent"
+                        class="editor-reference-content"
+                    ></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =================================================
+         2. SERMON EDITOR
+    ================================================== -->
+
+    <div
+        id="editorPanelSermon"
+        class="church-editor-tab-panel hidden"
+    >
+
+        <div class="church-editor-grid">
+
+
+            <!-- SERMON SOURCE -->
+
+            <div class="church-editor-card">
+
+                <div class="church-editor-card-header">
+
+                    <div>
+                        <span class="editor-card-label">
+                            SERMON
+                        </span>
+
+                        <h2>
+                           SERMON / SOURCE
+                        </h2>
+                    </div>
+
+
+                    <div class="editor-reference-actions">
+
+                        <button
+                            class="editor-reference-btn bible"
+                            onclick="openEditorReference('sermonLeft','bible')"
+                        >
+                            📖
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+ <div
+    class="editor-tag-toolbar"
+    data-editor-tags="sermon"
+    data-target="sermonSourceText"
+></div>
+
+
+                <div
+                    id="sermonLeftEditor"
+                    class="editor-workspace"
+                >
+                    <textarea
+                        id="sermonSourceText"
+                        class="church-editor-textarea"
+                        placeholder="Type sermon notes, references, or source material..."
+                    ></textarea>
+                </div>
+
+
+                <div
+                    id="sermonLeftReference"
+                    class="editor-reference-view hidden"
+                >
+
+                    <div class="editor-reference-header">
+
+                        <strong id="sermonLeftReferenceTitle">
+                            Reference
+                        </strong>
+
+                        <div>
+                            <button onclick="hideEditorReference('sermonLeft')">
+                                Hide
+                            </button>
+
+                            <button onclick="closeEditorReference('sermonLeft')">
+                                ×
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <div
+                        id="sermonLeftReferenceContent"
+                        class="editor-reference-content"
+                    ></div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- SERMON EDITED -->
+
+            <div class="church-editor-card">
+
+                <div class="church-editor-card-header">
+
+                    <div>
+                        <span class="editor-card-label">
+                            SERMON
+                        </span>
+
+                        <h2>
+                            SERMON FREESHOW FORMAT
+                        </h2>
+                    </div>
+
+
+                    <div class="editor-reference-actions">
+
+                        <button
+                            class="editor-reference-btn bible"
+                            onclick="openEditorReference('sermonRight','bible')"
+                        >
+                            📖
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+ <div
+    class="editor-tag-toolbar"
+    data-editor-tags="sermon"
+    data-target="sermonEditedText"
+></div>
+
+
+                <div
+                    id="sermonRightEditor"
+                    class="editor-workspace"
+                >
+
+                    <textarea
+                        id="sermonEditedText"
+                        class="church-editor-textarea"
+                        placeholder="Prepare the final sermon here..."
+                    ></textarea>
+
+                </div>
+
+
+                <div
+                    id="sermonRightReference"
+                    class="editor-reference-view hidden"
+                >
+
+                    <div class="editor-reference-header">
+
+                        <strong id="sermonRightReferenceTitle">
+                            Reference
+                        </strong>
+
+                        <div>
+                            <button onclick="hideEditorReference('sermonRight')">
+                                Hide
+                            </button>
+
+                            <button onclick="closeEditorReference('sermonRight')">
+                                ×
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <div
+                        id="sermonRightReferenceContent"
+                        class="editor-reference-content"
+                    ></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =================================================
+         3. BIBLE READING EDITOR
+    ================================================== -->
+
+    <div
+        id="editorPanelBible"
+        class="church-editor-tab-panel hidden"
+    >
+
+        <div class="church-editor-grid">
+
+
+            <!-- BIBLE SOURCE -->
+
+            <div class="church-editor-card">
+
+                <div class="church-editor-card-header">
+
+                    <div>
+                        <span class="editor-card-label">
+                            BIBLE READING
+                        </span>
+
+                        <h2>
+                            BIBLE READING FREESHOW FORMAT
+                        </h2>
+                    </div>
+
+
+                    <div class="editor-reference-actions">
+
+                        <button
+                            class="editor-reference-btn bible"
+                            onclick="openEditorReference('bibleLeft','bible')"
+                        >
+                            📖
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+ <div
+    class="editor-tag-toolbar"
+    data-editor-tags="bible"
+    data-target="bibleSourceText"
+></div>
+
+
+                <div
+                    id="bibleLeftEditor"
+                    class="editor-workspace"
+                >
+
+                    <textarea
+                        id="bibleSourceText"
+                        class="church-editor-textarea"
+                        placeholder="Paste or type the Bible reading here..."
+                    ></textarea>
+
+                </div>
+
+
+                <div
+                    id="bibleLeftReference"
+                    class="editor-reference-view hidden"
+                >
+
+                    <div class="editor-reference-header">
+
+                        <strong id="bibleLeftReferenceTitle">
+                            Reference
+                        </strong>
+
+                        <div>
+                            <button onclick="hideEditorReference('bibleLeft')">
+                                Hide
+                            </button>
+
+                            <button onclick="closeEditorReference('bibleLeft')">
+                                ×
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <div
+                        id="bibleLeftReferenceContent"
+                        class="editor-reference-content"
+                    ></div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- FREESHOW FORMAT -->
+
+            <div class="church-editor-card">
+
+                <div class="church-editor-card-header">
+
+                    <div>
+                        <span class="editor-card-label">
+                            BIBLE READING
+                        </span>
+
+                        <h2>
+                            BIBLE READING FREESHOW FORMAT
+                        </h2>
+                    </div>
+
+
+                    <div class="editor-reference-actions">
+
+                        <button
+                            class="editor-reference-btn bible"
+                            onclick="openEditorReference('bibleRight','bible')"
+                        >
+                            📖
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+<div
+    class="editor-tag-toolbar"
+    data-editor-tags="bible"
+    data-target="bibleFormattedText"
+></div>
+
+
+                <div
+                    id="bibleRightEditor"
+                    class="editor-workspace"
+                >
+
+                    <textarea
+                        id="bibleFormattedText"
+                        class="church-editor-textarea"
+                        placeholder="Prepare the Bible text for FreeShow here..."
+                    ></textarea>
+
+                </div>
+
+
+                <div
+                    id="bibleRightReference"
+                    class="editor-reference-view hidden"
+                >
+
+                    <div class="editor-reference-header">
+
+                        <strong id="bibleRightReferenceTitle">
+                            Reference
+                        </strong>
+
+                        <div>
+                            <button onclick="hideEditorReference('bibleRight')">
+                                Hide
+                            </button>
+
+                            <button onclick="closeEditorReference('bibleRight')">
+                                ×
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <div
+                        id="bibleRightReferenceContent"
+                        class="editor-reference-content"
+                    ></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+<!-- =====================================================
+     EDITOR TAG MANAGER MODAL
+===================================================== -->
+
+<div
+    id="editorTagManagerModal"
+    class="modal hidden"
+>
+
+    <div class="modal-content editor-tag-manager-modal">
+
+        <div class="modal-header">
+
+            <div>
+                <h2 id="editorTagManagerTitle">
+                    Manage Editor Tags
+                </h2>
+
+                <p class="editor-tag-manager-subtitle">
+                    Add, rename, delete, or reorder your insert buttons.
+                </p>
+            </div>
+
+            <button
+                type="button"
+                class="close-btn"
+                onclick="closeEditorTagManager()"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div class="editor-tag-add-row">
+
+            <input
+                type="text"
+                id="newEditorTagInput"
+                placeholder="Example: V6, BRIDGE, P4, REF..."
+                maxlength="30"
+            >
+
+            <button
+                type="button"
+                class="primary-btn"
+                onclick="addEditorTag()"
+            >
+                + Add Tag
+            </button>
+
+        </div>
+
+
+        <div
+            id="editorTagManagerList"
+            class="editor-tag-manager-list"
+        ></div>
+
+
+        <div class="modal-footer">
+
+            <button
+                type="button"
+                class="secondary-btn"
+                onclick="resetEditorTagsToDefault()"
+            >
+                Reset Default
+            </button>
+
+            <button
+                type="button"
+                class="primary-btn"
+                onclick="closeEditorTagManager()"
+            >
+                Done
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+</section>
 
         <!---------------------------------------------------------------------- MEMBERS ------------------------------------------------------------------>
         <section id="members" class="page hidden">
