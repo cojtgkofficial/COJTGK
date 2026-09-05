@@ -1,0 +1,37 @@
+COJTGK CUSTOM SYSTEM DIALOG UPDATE
+==================================
+
+Base version
+------------
+COJTGK-CLEANED-v1
+
+Changes
+-------
+- Replaced 137 native browser alert calls with ChurchHQ message modals.
+- Replaced 16 native browser confirm calls with awaited ChurchHQ confirmation
+  modals so destructive actions still stop until the user chooses an answer.
+- Replaced 4 native browser prompt calls with awaited ChurchHQ input modals.
+- Added a single reusable dialog engine with a queue to prevent overlapping
+  messages.
+- Added information, success, warning, and error appearances.
+- Added keyboard support: Enter confirms and Escape cancels.
+- Added backdrop and close-button cancellation where allowed.
+- Added mobile bottom-sheet layout and dark-mode styling.
+- Preserved the final confirmation phrase required by Clear All Church Data.
+- The successful Clear All Data dialog is awaited before page reload.
+
+Preserved
+---------
+- Supabase configuration, schema references, authentication, roles and audit
+  behavior.
+- Existing HTML IDs, navigation, forms, editors and Bible reader.
+- All images and all 66 Bible JSON files.
+- Existing custom feature modals.
+
+Verification
+------------
+- No native alert(), confirm() or prompt() calls remain in project JavaScript.
+- app.js passes JavaScript syntax checking.
+- Every awaited confirmation and prompt is inside a valid async context.
+- All Bible JSON files remain valid and unchanged.
+- All non-code assets are unchanged from COJTGK-CLEANED-v1.

@@ -32,6 +32,226 @@ const auditPageSize = 10;
 var ministries = [];
 var members = [];
 
+// =====================================================
+// CHURCHHQ SYSTEM DIALOGS
+// Replaces native browser alert, confirm and prompt.
+// =====================================================
+
+const churchDialogQueue = [];
+let churchDialogIsOpen = false;
+
+function getChurchDialogTone(message, requestedTone = "") {
+    if (requestedTone) return requestedTone;
+
+    const text = String(message || "").toLowerCase();
+
+    if (/❌|error|failed|invalid|not found|hindi|wala/.test(text)) {
+        return "error";
+    }
+
+    if (/⚠️|🚨|warning|delete|remove|clear|reset|cannot be undone|permanent/.test(text)) {
+        return "warning";
+    }
+
+    if (/✅|success|saved|updated|copied|created|complete/.test(text)) {
+        return "success";
+    }
+
+    return "info";
+}
+
+function ensureChurchDialogElement() {
+    let overlay = document.getElementById("churchSystemDialog");
+    if (overlay) return overlay;
+
+    overlay = document.createElement("div");
+    overlay.id = "churchSystemDialog";
+    overlay.className = "church-system-dialog hidden";
+    overlay.setAttribute("role", "presentation");
+
+    overlay.innerHTML = `
+        <div
+            class="church-system-dialog-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="churchSystemDialogTitle"
+            aria-describedby="churchSystemDialogMessage"
+        >
+            <button
+                type="button"
+                class="church-system-dialog-close"
+                data-church-dialog-close
+                aria-label="Close dialog"
+            >×</button>
+
+            <div class="church-system-dialog-icon" data-church-dialog-icon></div>
+            <h2 id="churchSystemDialogTitle" data-church-dialog-title>Notice</h2>
+            <div id="churchSystemDialogMessage" class="church-system-dialog-message" data-church-dialog-message></div>
+
+            <label class="church-system-dialog-input-wrap hidden" data-church-dialog-input-wrap>
+                <span>Your response</span>
+                <input type="text" data-church-dialog-input autocomplete="off">
+            </label>
+
+            <div class="church-system-dialog-actions">
+                <button type="button" class="church-system-dialog-cancel hidden" data-church-dialog-cancel>Cancel</button>
+                <button type="button" class="church-system-dialog-confirm" data-church-dialog-confirm>OK</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+    return overlay;
+}
+
+function processChurchDialogQueue() {
+    if (churchDialogIsOpen || !churchDialogQueue.length) return;
+
+    churchDialogIsOpen = true;
+    const request = churchDialogQueue.shift();
+    const overlay = ensureChurchDialogElement();
+    const card = overlay.querySelector(".church-system-dialog-card");
+    const icon = overlay.querySelector("[data-church-dialog-icon]");
+    const title = overlay.querySelector("[data-church-dialog-title]");
+    const message = overlay.querySelector("[data-church-dialog-message]");
+    const inputWrap = overlay.querySelector("[data-church-dialog-input-wrap]");
+    const input = overlay.querySelector("[data-church-dialog-input]");
+    const cancelButton = overlay.querySelector("[data-church-dialog-cancel]");
+    const confirmButton = overlay.querySelector("[data-church-dialog-confirm]");
+    const closeButton = overlay.querySelector("[data-church-dialog-close]");
+
+    const tone = getChurchDialogTone(request.message, request.tone);
+    const icons = {
+        info: "i",
+        success: "✓",
+        warning: "!",
+        error: "×"
+    };
+
+    overlay.dataset.tone = tone;
+    icon.textContent = icons[tone] || icons.info;
+    title.textContent = request.title || (
+        request.type === "confirm"
+            ? "Please Confirm"
+            : request.type === "prompt"
+                ? "Input Required"
+                : tone === "success"
+                    ? "Success"
+                    : tone === "error"
+                        ? "Something Went Wrong"
+                        : tone === "warning"
+                            ? "Important Notice"
+                            : "ChurchHQ Notice"
+    );
+    message.textContent = String(request.message || "");
+
+    const needsInput = request.type === "prompt";
+    const canCancel = request.type === "confirm" || needsInput;
+
+    inputWrap.classList.toggle("hidden", !needsInput);
+    cancelButton.classList.toggle("hidden", !canCancel);
+    closeButton.classList.toggle("hidden", request.locked === true);
+    confirmButton.textContent = request.confirmText || (request.type === "confirm" ? "Yes, Continue" : "OK");
+    cancelButton.textContent = request.cancelText || "Cancel";
+    input.value = needsInput ? String(request.defaultValue || "") : "";
+
+    let settled = false;
+
+    function finish(value) {
+        if (settled) return;
+        settled = true;
+
+        document.removeEventListener("keydown", handleKeydown);
+        overlay.classList.add("hidden");
+        document.body.classList.remove("church-dialog-open");
+        churchDialogIsOpen = false;
+        request.resolve(value);
+        window.setTimeout(processChurchDialogQueue, 0);
+    }
+
+    function cancel() {
+        finish(needsInput ? null : false);
+    }
+
+    function acceptDialog() {
+        finish(needsInput ? input.value : true);
+    }
+
+    function handleKeydown(event) {
+        if (event.key === "Escape" && request.locked !== true) {
+            event.preventDefault();
+            cancel();
+        }
+
+        if (event.key === "Enter" && (needsInput || document.activeElement === confirmButton)) {
+            event.preventDefault();
+            acceptDialog();
+        }
+    }
+
+    confirmButton.onclick = acceptDialog;
+    cancelButton.onclick = cancel;
+    closeButton.onclick = cancel;
+    overlay.onclick = event => {
+        if (event.target === overlay && request.locked !== true) cancel();
+    };
+    card.onclick = event => event.stopPropagation();
+
+    document.addEventListener("keydown", handleKeydown);
+    overlay.classList.remove("hidden");
+    document.body.classList.add("church-dialog-open");
+
+    window.requestAnimationFrame(() => {
+        if (needsInput) {
+            input.focus();
+            input.select();
+        } else {
+            confirmButton.focus();
+        }
+    });
+}
+
+function openChurchDialog(options) {
+    return new Promise(resolve => {
+        churchDialogQueue.push({ ...options, resolve });
+        processChurchDialogQueue();
+    });
+}
+
+function churchAlert(message, options = {}) {
+    return openChurchDialog({
+        type: "alert",
+        message,
+        title: options.title || "",
+        tone: options.tone || "",
+        confirmText: options.confirmText || "OK"
+    });
+}
+
+function churchConfirm(message, options = {}) {
+    return openChurchDialog({
+        type: "confirm",
+        message,
+        title: options.title || "",
+        tone: options.tone || "warning",
+        confirmText: options.confirmText || "Yes, Continue",
+        cancelText: options.cancelText || "Cancel",
+        locked: options.locked === true
+    });
+}
+
+function churchPrompt(message, defaultValue = "", options = {}) {
+    return openChurchDialog({
+        type: "prompt",
+        message,
+        defaultValue,
+        title: options.title || "Input Required",
+        tone: options.tone || "info",
+        confirmText: options.confirmText || "Save",
+        cancelText: options.cancelText || "Cancel"
+    });
+}
+
 console.log("✅ ChurchHQ Supabase client created.");
 console.log(
     "Supabase .from():",
@@ -981,7 +1201,7 @@ const imagePath =
 
     if (!memberId) {
 
-        alert(
+        churchAlert(
             "Please select a member."
         );
 
@@ -991,7 +1211,7 @@ const imagePath =
 
     if (!position) {
 
-        alert(
+        churchAlert(
             "Please enter a leadership position."
         );
 
@@ -1008,7 +1228,7 @@ const imagePath =
 
     if (!selectedMember) {
 
-        alert(
+        churchAlert(
             "Selected member was not found."
         );
 
@@ -1032,7 +1252,7 @@ const imagePath =
 
         if (index === -1) {
 
-            alert(
+            churchAlert(
                 "❌ Leader record was not found."
             );
 
@@ -1073,7 +1293,7 @@ const imagePath =
 
         if (!updatedLeader) {
 
-            alert(
+            churchAlert(
                 "❌ Failed to update leader in Supabase."
             );
 
@@ -1176,7 +1396,7 @@ await writeAuditLog(
 
         if (!savedLeader) {
 
-            alert(
+            churchAlert(
                 "❌ Failed to save leader to Supabase."
             );
 
@@ -1914,7 +2134,7 @@ async function deleteLeader(id) {
 
     if (!leader) {
 
-        alert(
+        churchAlert(
             "Leader record was not found."
         );
 
@@ -1922,7 +2142,7 @@ async function deleteLeader(id) {
     }
 
     const confirmed =
-        confirm(
+        await churchConfirm(
             `Are you sure you want to remove ${leader.memberName || "this leader"} from ${leader.position || "this position"}?`
         );
 
@@ -1935,7 +2155,7 @@ async function deleteLeader(id) {
 
     if (!deleted) {
 
-        alert(
+        churchAlert(
             "❌ Failed to delete leader from Supabase."
         );
 
@@ -1984,7 +2204,7 @@ await writeAuditLog(
 
     renderLeaders();
 
-    alert(
+    churchAlert(
         "✅ Leader removed successfully."
     );
 
@@ -2551,7 +2771,7 @@ const viewerRestrictedPages = [
         );
 
 
-        alert(
+        churchAlert(
             "You do not have permission to access this page."
         );
 
@@ -2908,7 +3128,7 @@ async function saveServiceData(type) {
     const dateValue = dateEl ? dateEl.value.trim() : "";
 
     if (!dateValue) {
-        alert("Select Service Date before saving!");
+        churchAlert("Select Service Date before saving!");
         return;
     }
 
@@ -2961,7 +3181,7 @@ if (editingId !== null) {
 
     if (existingIndex === -1) {
 
-        alert(
+        churchAlert(
             "❌ Existing service record was not found."
         );
 
@@ -2982,7 +3202,7 @@ if (editingId !== null) {
 
     if (!updatedInSupabase) {
 
-        alert(
+        churchAlert(
             "❌ Service record was not updated in Supabase."
         );
 
@@ -3043,7 +3263,7 @@ else {
 
 if (!savedServiceId) {
 
-    alert(
+    churchAlert(
         "❌ Service record was not saved to Supabase."
     );
 
@@ -3100,7 +3320,7 @@ await writeAuditLog(
         midweekServices = targetArray;
     }
 
-    alert(`✅ ${type === "sunday" ? "Sunday" : "Midweek"} Service roster for the date (${dateValue}) has been successfully saved!`);
+    churchAlert(`✅ ${type === "sunday" ? "Sunday" : "Midweek"} Service roster for the date (${dateValue}) has been successfully saved!`);
     renderServiceHistory(type);
     updateServiceDateDropdowns();
 
@@ -3129,7 +3349,7 @@ function loadServiceRecord(type, date) {
 
     if (!record) {
 
-        alert(
+        churchAlert(
             "Service record was not found."
         );
 
@@ -3995,7 +4215,7 @@ async function deleteServiceRecord(type, date) {
         return;
     }
 
-    if (!confirm(`Are you sure you want to delete the record for ${date}?`)) {
+    if (!await churchConfirm(`Are you sure you want to delete the record for ${date}?`)) {
         return;
     }
 
@@ -4004,7 +4224,7 @@ async function deleteServiceRecord(type, date) {
 
     if (!deletedFromSupabase) {
 
-        alert(
+        churchAlert(
             "❌ Failed to delete the record in Supabase.."
         );
 
@@ -4058,7 +4278,7 @@ await writeAuditLog(
 
     refreshDashboardStatus();
 
-    alert(
+    churchAlert(
         `✅ ${type === "sunday" ? "Sunday" : "Midweek"} Service on ${date} was successfully deleted.`
     );
 }
@@ -4417,7 +4637,7 @@ async function saveTask() {
 
     if (title === "") {
 
-        alert(
+        churchAlert(
             "Please enter task title."
         );
 
@@ -4480,7 +4700,7 @@ if (
 
         if (!updatedInSupabase) {
 
-            alert(
+            churchAlert(
                 "❌ Task was not updated in Supabase."
             );
 
@@ -4574,7 +4794,7 @@ else {
 
     if (!savedToSupabase) {
 
-        alert(
+        churchAlert(
             "❌ Task was not saved to Supabase."
         );
 
@@ -5894,7 +6114,7 @@ async function saveAnnualActivity() {
 
     if (!title) {
 
-        alert(
+        churchAlert(
             "Please enter an activity name."
         );
 
@@ -5904,7 +6124,7 @@ async function saveAnnualActivity() {
 
     if (!date) {
 
-        alert(
+        churchAlert(
             "Please select an activity date."
         );
 
@@ -5929,7 +6149,7 @@ async function saveAnnualActivity() {
 
     if (index === -1) {
 
-        alert(
+        churchAlert(
             "Activity was not found."
         );
 
@@ -5959,7 +6179,7 @@ async function saveAnnualActivity() {
 
     if (!updatedActivity) {
 
-        alert(
+        churchAlert(
             "❌ Failed to update activity."
         );
 
@@ -6020,7 +6240,7 @@ await writeAuditLog(
     closeAnnualActivityModal();
 
 
-    alert(
+    churchAlert(
         "✅ Activity updated successfully."
     );
 
@@ -6055,7 +6275,7 @@ await writeAuditLog(
 
     if (!savedActivity) {
 
-        alert(
+        churchAlert(
             "❌ Failed to save activity to Supabase."
         );
 
@@ -6124,7 +6344,7 @@ await writeAuditLog(
     closeAnnualActivityModal();
 
 
-    alert(
+    churchAlert(
         "✅ Annual activity saved successfully."
     );
 
@@ -6254,7 +6474,7 @@ function editAnnualActivity(id) {
 
     if (!activity) {
 
-        alert(
+        churchAlert(
             "Activity was not found."
         );
 
@@ -6324,7 +6544,7 @@ async function deleteAnnualActivity(id) {
 
 
     const confirmed =
-        confirm(
+        await churchConfirm(
             `Delete "${activity.title}"?`
         );
 
@@ -6343,7 +6563,7 @@ async function deleteAnnualActivity(id) {
     if (!deleted) {
 
 
-        alert(
+        churchAlert(
             "❌ Failed to delete activity."
         );
 
@@ -6385,7 +6605,7 @@ await writeAuditLog(
     refreshDashboardStatus();
 
 
-    alert(
+    churchAlert(
         "✅ Activity deleted successfully."
     );
 
@@ -6808,7 +7028,7 @@ async function deleteTask(id) {
 
 
     if (
-        !confirm(
+        !await churchConfirm(
             "Are you sure you want to delete this task?"
         )
     ) {
@@ -6828,7 +7048,7 @@ async function deleteTask(id) {
 
     if (!deletedFromSupabase) {
 
-        alert(
+        churchAlert(
             "❌ Task was not deleted from Supabase."
         );
 
@@ -8073,7 +8293,7 @@ async function saveProgramPlan() {
 
     if (!programDate) {
 
-        alert(
+        churchAlert(
             "Please select a program date."
         );
 
@@ -8087,7 +8307,7 @@ async function saveProgramPlan() {
         !eventName
     ) {
 
-        alert(
+        churchAlert(
             "Please enter the special event name."
         );
 
@@ -8100,7 +8320,7 @@ async function saveProgramPlan() {
         programItems.length === 0
     ) {
 
-        alert(
+        churchAlert(
             "Please add at least one program item."
         );
 
@@ -8142,7 +8362,7 @@ async function saveProgramPlan() {
         cleanedItems.length === 0
     ) {
 
-        alert(
+        churchAlert(
             "Please enter at least one valid program item."
         );
 
@@ -8206,7 +8426,7 @@ async function saveProgramPlan() {
                 );
 
 
-                alert(
+                churchAlert(
                     "❌ Program was not updated."
                 );
 
@@ -8239,7 +8459,7 @@ async function saveProgramPlan() {
                     deleteItemsError
                 );
 
-                alert(
+                churchAlert(
                     "❌ Failed to update program items."
                 );
 
@@ -8293,7 +8513,7 @@ async function saveProgramPlan() {
                     insertItemsError
                 );
 
-                alert(
+                churchAlert(
                     "❌ Updated program items were not saved."
                 );
 
@@ -8330,7 +8550,7 @@ await writeAuditLog(
     }
 );
 
-            alert(
+            churchAlert(
                 "✅ Program updated successfully."
             );
 
@@ -8383,7 +8603,7 @@ await writeAuditLog(
                     planError
                 );
 
-                alert(
+                churchAlert(
                     "❌ Program plan was not saved."
                 );
 
@@ -8450,7 +8670,7 @@ await writeAuditLog(
                     );
 
 
-                alert(
+                churchAlert(
                     "❌ Program items were not saved."
                 );
 
@@ -8487,7 +8707,7 @@ await writeAuditLog(
     }
 );
 
-            alert(
+            churchAlert(
                 "✅ Program saved successfully."
             );
 
@@ -8550,7 +8770,7 @@ await writeAuditLog(
         );
 
 
-        alert(
+        churchAlert(
             "❌ Failed to save program."
         );
 
@@ -9330,7 +9550,7 @@ function editProgramPlan(programId) {
 
     if (!plan) {
 
-        alert(
+        churchAlert(
             "Program record was not found."
         );
 
@@ -9603,7 +9823,7 @@ async function deleteProgramPlan(programId) {
 
     if (!plan) {
 
-        alert(
+        churchAlert(
             "Program record was not found."
         );
 
@@ -9647,7 +9867,7 @@ async function deleteProgramPlan(programId) {
     // =====================================
 
     const confirmed =
-        confirm(
+        await churchConfirm(
             `Delete "${programName}"?\n\n` +
             `Date: ${plan.program_date || "-"}\n\n` +
             `All program items and assignments ` +
@@ -9713,7 +9933,7 @@ await writeAuditLog(
     }
 );
 
-            alert(
+            churchAlert(
                 "❌ Program was not deleted."
             );
 
@@ -9788,7 +10008,7 @@ await writeAuditLog(
         );
 
 
-        alert(
+        churchAlert(
             "✅ Program deleted successfully."
         );
 
@@ -9808,7 +10028,7 @@ await writeAuditLog(
         );
 
 
-        alert(
+        churchAlert(
             "❌ Failed to delete program."
         );
 
@@ -9898,7 +10118,7 @@ async function saveSong() {
 
     if (title === "") {
 
-        alert(
+        churchAlert(
             "Please enter a song title."
         );
 
@@ -9924,7 +10144,7 @@ async function saveSong() {
 
         if (!existingSong) {
 
-            alert(
+            churchAlert(
                 "❌ Song record not found."
             );
 
@@ -9959,7 +10179,7 @@ async function saveSong() {
 
         if (!updatedInSupabase) {
 
-            alert(
+            churchAlert(
                 "❌ Song was not updated in Supabase."
             );
 
@@ -10048,7 +10268,7 @@ async function saveSong() {
 
         if (!savedToSupabase) {
 
-            alert(
+            churchAlert(
                 "❌ Song was not saved to Supabase."
             );
 
@@ -10219,7 +10439,7 @@ function addSongToServiceLineup() {
     const songId = Number(dropdown.value);
 
     if (!songId) {
-        alert("Please select a song from the dropdown first.");
+        churchAlert("Please select a song from the dropdown first.");
         return;
     }
 
@@ -10236,7 +10456,7 @@ function quickAddToServiceLineup(songId) {
     if (songToAdd) {
         sundayServiceSongs.push(songToAdd);
         saveAndRenderServiceLineup();
-        alert(`✅ ${songToAdd.title}" has been added to the Sunday Service lineup`);
+        churchAlert(`✅ ${songToAdd.title}" has been added to the Sunday Service lineup`);
     }
 }
 
@@ -10423,7 +10643,7 @@ async function deleteSong(id) {
 
 
     if (
-        !confirm(
+        !await churchConfirm(
             "Are you sure you want to delete this song?"
         )
     ) {
@@ -10439,7 +10659,7 @@ async function deleteSong(id) {
 
     if (!deletedFromSupabase) {
 
-        alert(
+        churchAlert(
             "❌ Failed to delete song from Supabase."
         );
 
@@ -10660,12 +10880,12 @@ async function saveMember() {
     const birthday = document.getElementById("memberBirthday").value;
 
     if (name === "") {
-        alert("Please enter member name.");
+        churchAlert("Please enter member name.");
         return;
     }
 
     if (ministries.length === 0) {
-    alert("Please select at least one ministry.");
+    churchAlert("Please select at least one ministry.");
     return;
     }
 
@@ -10693,7 +10913,7 @@ async function saveMember() {
                 await updateMemberToSupabase(updatedMember);
 
             if (!updatedInSupabase) {
-                alert("❌ Member was not updated in Supabase.");
+                churchAlert("❌ Member was not updated in Supabase.");
                 return;
             }
 
@@ -10748,7 +10968,7 @@ if (saveBtn) {
 }
 
         if (!savedToSupabase) {
-            alert("❌ Member was not saved to Supabase.");
+            churchAlert("❌ Member was not saved to Supabase.");
             return;
         }
 
@@ -11874,7 +12094,7 @@ async function addCustomMinistry() {
 
 
     const ministryName =
-        prompt(
+        await churchPrompt(
             "Enter new ministry name:"
         );
 
@@ -11890,7 +12110,7 @@ async function addCustomMinistry() {
 
     if (!cleanName) {
 
-        alert(
+        churchAlert(
             "Please enter a ministry name."
         );
 
@@ -11914,7 +12134,7 @@ async function addCustomMinistry() {
 
     if (alreadyExists) {
 
-        alert(
+        churchAlert(
             "This ministry already exists."
         );
 
@@ -11954,7 +12174,7 @@ async function addCustomMinistry() {
         );
 
 
-        alert(
+        churchAlert(
             "❌ Failed to save ministry."
         );
 
@@ -12011,7 +12231,7 @@ async function addCustomMinistry() {
     );
 
 
-    alert(
+    churchAlert(
         "✅ Ministry added successfully."
     );
 
@@ -12205,7 +12425,7 @@ async function editMinistry(id) {
 
     if (!ministry) {
 
-        alert(
+        churchAlert(
             "Ministry was not found."
         );
 
@@ -12218,7 +12438,7 @@ async function editMinistry(id) {
 
 
     const newNameInput =
-        prompt(
+        await churchPrompt(
             "Edit ministry name:",
             oldName
         );
@@ -12235,7 +12455,7 @@ async function editMinistry(id) {
 
     if (!newName) {
 
-        alert(
+        churchAlert(
             "Ministry name cannot be empty."
         );
 
@@ -12270,7 +12490,7 @@ async function editMinistry(id) {
 
     if (duplicate) {
 
-        alert(
+        churchAlert(
             "This ministry already exists."
         );
 
@@ -12309,7 +12529,7 @@ async function editMinistry(id) {
                 ministryError
             );
 
-            alert(
+            churchAlert(
                 "❌ Failed to update ministry."
             );
 
@@ -12417,7 +12637,7 @@ async function editMinistry(id) {
 
             if (!updated) {
 
-                alert(
+                churchAlert(
                     `❌ Ministry was renamed, but failed to update member: ${member.name}`
                 );
 
@@ -12452,7 +12672,7 @@ async function editMinistry(id) {
         );
 
 
-        alert(
+        churchAlert(
             `✅ Ministry renamed successfully.\n\n${oldName} → ${newName}`
         );
 
@@ -12465,7 +12685,7 @@ async function editMinistry(id) {
         );
 
 
-        alert(
+        churchAlert(
             "❌ Failed to edit ministry."
         );
 
@@ -12494,7 +12714,7 @@ async function deleteMinistry(id) {
 
     if (!ministry) {
 
-        alert(
+        churchAlert(
             "Ministry was not found."
         );
 
@@ -12580,7 +12800,7 @@ async function deleteMinistry(id) {
             "\n\nPlease edit those members first and remove this ministry from their Ministry Group.";
 
 
-        alert(
+        churchAlert(
             message
         );
 
@@ -12594,7 +12814,7 @@ async function deleteMinistry(id) {
     // =====================================
 
     const confirmed =
-        confirm(
+        await churchConfirm(
             `Delete ministry "${ministryName}"?\n\n` +
             "This action cannot be undone."
         );
@@ -12636,7 +12856,7 @@ async function deleteMinistry(id) {
             );
 
 
-            alert(
+            churchAlert(
                 "❌ Failed to delete ministry."
             );
 
@@ -12671,7 +12891,7 @@ populateMemberMinistryFilter();
 
 populateMinistryDashboardSelect();
 
-alert(
+churchAlert(
     "✅ Ministry deleted successfully."
 );
 
@@ -12682,7 +12902,7 @@ alert(
         error
     );
 
-    alert(
+    churchAlert(
         "❌ Failed to delete ministry."
     );
 
@@ -12712,7 +12932,7 @@ async function deleteMember(id) {
 
 
     if (
-        !confirm(
+        !await churchConfirm(
             "Are you sure you want to delete this member?"
         )
     ) {
@@ -12728,7 +12948,7 @@ async function deleteMember(id) {
 
     if (!deletedFromSupabase) {
 
-        alert(
+        churchAlert(
             "❌ Member was not deleted from Supabase."
         );
 
@@ -13269,7 +13489,7 @@ function toggleCheckIn(memberId) {
 
     if (!canManageAttendance()) {
 
-        alert(
+        churchAlert(
             "You do not have permission to manage attendance."
         );
 
@@ -13286,7 +13506,7 @@ function markAllAttendance(status) {
 
     if (!canManageAttendance()) {
 
-    alert(
+    churchAlert(
         "You do not have permission to manage attendance."
     );
 
@@ -13305,7 +13525,7 @@ async function saveAttendance() {
 
     if (!canManageAttendance()) {
 
-    alert(
+    churchAlert(
         "You do not have permission to save attendance."
     );
 
@@ -13330,7 +13550,7 @@ async function saveAttendance() {
         : "sunday";
 
     if (!date) {
-        alert("Please select a date.");
+        churchAlert("Please select a date.");
         return;
     }
 
@@ -13366,7 +13586,7 @@ if (index !== -1) {
 
     if (!updatedInSupabase) {
 
-        alert(
+        churchAlert(
             "❌ Attendance was not updated in Supabase."
         );
 
@@ -13415,7 +13635,7 @@ if (index !== -1) {
 
     if (!savedToSupabase) {
 
-        alert(
+        churchAlert(
             "❌ Attendance was not saved to Supabase."
         );
 
@@ -13467,7 +13687,7 @@ if (index !== -1) {
 await loadAttendanceFromSupabase();
 
 
-alert(
+churchAlert(
     `Attendance for "${eventName}" (${date}) saved successfully! 🎉`
 );
 
@@ -16819,7 +17039,7 @@ async function deleteAttendance(
 
 
     if (
-        !confirm(
+        !await churchConfirm(
             `Are you sure you want to delete the attendance record for ${date}?`
         )
     ) {
@@ -16865,7 +17085,7 @@ async function deleteAttendance(
 
     if (!deletedFromSupabase) {
 
-        alert(
+        churchAlert(
             "❌ Failed to delete the attendance record in Supabase."
         );
 
@@ -17021,7 +17241,7 @@ async function deleteAttendanceFromSupabase(
     refreshDashboardStatus();
 
 
-    alert(
+    churchAlert(
         `✅ ${
             actualServiceType === "midweek"
                 ? "Midweek"
@@ -17138,7 +17358,7 @@ function loadAttendanceRecord(date, serviceType) {
 
 if (!canManageAttendance()) {
 
-    alert(
+    churchAlert(
         "You do not have permission to load attendance."
     );
 
@@ -17375,7 +17595,7 @@ async function exportChurchData() {
                     result.error
                 );
 
-                alert(
+                churchAlert(
                     `❌ Backup failed while reading ${tableName}.\n\n` +
                     (
                         result.error.message ||
@@ -17701,7 +17921,7 @@ async function exportChurchData() {
         );
 
 
-        alert(
+        churchAlert(
             "✅ ChurchHQ complete backup downloaded successfully!"
         );
 
@@ -17714,7 +17934,7 @@ async function exportChurchData() {
         );
 
 
-        alert(
+        churchAlert(
             "❌ Failed to create ChurchHQ backup.\n\n" +
             (
                 error &&
@@ -17787,7 +18007,7 @@ async function importChurchData(event) {
                         "object"
                 ) {
 
-                    alert(
+                    churchAlert(
                         "❌ Invalid ChurchHQ backup file."
                     );
 
@@ -17834,7 +18054,7 @@ async function importChurchData(event) {
 
                 if (!validBackup) {
 
-                    alert(
+                    churchAlert(
                         "❌ This is not a valid ChurchHQ backup file."
                     );
 
@@ -17952,7 +18172,7 @@ async function importChurchData(event) {
                 // =====================================================
 
                 const confirmed =
-                    confirm(
+                    await churchConfirm(
 
                         "⚠️ RESTORE CHURCHHQ BACKUP?\n\n" +
 
@@ -18418,7 +18638,7 @@ async function importChurchData(event) {
                 );
 
 
-                alert(
+                churchAlert(
                     "✅ ChurchHQ backup restored successfully!"
                 );
 
@@ -18431,7 +18651,7 @@ async function importChurchData(event) {
                 );
 
 
-                alert(
+                churchAlert(
                     "❌ Restore failed:\n\n" +
                     (
                         error &&
@@ -18462,7 +18682,7 @@ async function importChurchData(event) {
             );
 
 
-            alert(
+            churchAlert(
                 "❌ Unable to read the selected backup file."
             );
 
@@ -18539,7 +18759,7 @@ async function clearAllChurchData() {
     // =====================================
 
     const firstConfirm =
-        confirm(
+        await churchConfirm(
 
             "🚨 WARNING - CLEAR ALL CHURCH DATA\n\n" +
 
@@ -18589,7 +18809,7 @@ async function clearAllChurchData() {
     // =====================================
 
     const confirmationText =
-        prompt(
+        await churchPrompt(
 
             "⚠️ FINAL CONFIRMATION\n\n" +
 
@@ -18607,7 +18827,7 @@ async function clearAllChurchData() {
         "DELETE ALL DATA"
     ) {
 
-        alert(
+        churchAlert(
             "❌ System reset cancelled.\n\n" +
             "Confirmation text did not match."
         );
@@ -18979,7 +19199,7 @@ if (
         );
 
 
-        alert(
+        await churchAlert(
 
             "✅ ChurchHQ data has been cleared successfully.\n\n" +
 
@@ -19007,7 +19227,7 @@ if (
         );
 
 
-        alert(
+        churchAlert(
 
             "❌ System Reset failed.\n\n" +
 
@@ -20076,7 +20296,7 @@ async function addNewActivityItem() {
     let date = dateEl ? dateEl.value.trim() : "";
 
     if (!title || !date) {
-        alert("Punan ang pamagat at petsa.");
+        churchAlert("Punan ang pamagat at petsa.");
         return;
     }
 
@@ -20106,7 +20326,7 @@ const saved =
 
 if (!saved) {
 
-    alert(
+    churchAlert(
         "❌ Failed to save activity."
     );
 
@@ -20214,7 +20434,7 @@ function editActivityItem(id) {
             !newDate
         ) {
 
-            alert(
+            churchAlert(
                 "Pakipunan ang pamagat at petsa."
             );
 
@@ -20241,7 +20461,7 @@ function editActivityItem(id) {
 
         if (!updated) {
 
-            alert(
+            churchAlert(
                 "❌ Failed to update activity in Supabase."
             );
 
@@ -20339,7 +20559,7 @@ try {
 }
 
     if (
-        !confirm(
+        !await churchConfirm(
             "Are you sure you want to delete this?"
         )
     ) {
@@ -20355,7 +20575,7 @@ try {
 
     if (!deletedFromSupabase) {
 
-        alert(
+        churchAlert(
             "❌ Failed to delete the activity in Supabase."
         );
 
@@ -20431,7 +20651,7 @@ async function addNewAnnouncementItem() {
     let annTextEl = document.getElementById("newAnnText");
     let text = annTextEl ? annTextEl.value.trim() : "";
     if (!text) {
-        alert("Ilagay ang text ng announcement.");
+        churchAlert("Ilagay ang text ng announcement.");
         return;
     }
 
@@ -20454,7 +20674,7 @@ const saved =
 
 if (!saved) {
 
-    alert(
+    churchAlert(
         "❌ Failed to save announcement."
     );
 
@@ -20565,7 +20785,7 @@ function editAnnouncementItem(id) {
                     .trim();
 
             if (!newText) {
-                alert("Pakilagay ang text ng announcement.");
+                churchAlert("Pakilagay ang text ng announcement.");
                 return;
             }
 
@@ -20576,7 +20796,7 @@ function editAnnouncementItem(id) {
                 await updateAnnouncementToSupabase(ann);
 
             if (!updated) {
-                alert(
+                churchAlert(
                     "❌ Failed to update announcement from Supabase."
                 );
                 return;
@@ -20622,7 +20842,7 @@ async function deleteAnnouncementItem(id) {
     if (!requireAdmin()) {
     return;
 }
-    if (!confirm("Are you sure you want to delete this")) return;
+    if (!await churchConfirm("Are you sure you want to delete this")) return;
 
     let announcementToDelete = null;
 
@@ -20657,7 +20877,7 @@ try {
         await deleteAnnouncementFromSupabase(id);
 
     if (!deleted) {
-        alert(
+        churchAlert(
             "❌ Failed to delete the announcement in Supabase"
         );
         return;
@@ -21031,7 +21251,7 @@ function copyMidweekDetails() {
     const fullText = `TITLE:\n${title}\n\nDESCRIPTION:\n${desc}`;
 
     navigator.clipboard.writeText(fullText).then(() => {
-        alert("Na-copy na ang COJTGK Midweek Service Title at Description!");
+        churchAlert("Na-copy na ang COJTGK Midweek Service Title at Description!");
     }).catch(err => {
         console.error("Failed to copy:", err);
     });
@@ -21047,7 +21267,7 @@ function copyToClipboard(elementId) {
     const textToCopy = textElement.value || textElement.textContent;
 
     navigator.clipboard.writeText(textToCopy).then(() => {
-        alert("Na-kopya na sa clipboard!");
+        churchAlert("Na-kopya na sa clipboard!");
     }).catch(err => {
         console.error("Failed to copy:", err);
     });
@@ -21056,7 +21276,7 @@ function copyToClipboard(elementId) {
 function generateMidweekStreamContent() {
     const midSelect = document.getElementById('midGenDateSelect');
     if (!midSelect || midSelect.value === "") {
-        alert("Please choose a date first for the English Midweek Service.");
+        churchAlert("Please choose a date first for the English Midweek Service.");
         return;
     }
 
@@ -21064,7 +21284,7 @@ function generateMidweekStreamContent() {
     const serviceData = midweekServices[index];
 
     if (!serviceData) {
-        alert("No details found for this date. Save the service data first.");
+        churchAlert("No details found for this date. Save the service data first.");
         return;
     }
 
@@ -21510,7 +21730,7 @@ function openEditFileFolderModal(folderId) {
 
     if (!folder) {
 
-        alert(
+        churchAlert(
             "Folder not found."
         );
 
@@ -21565,7 +21785,7 @@ function openDriveFolder(link) {
 
     if (!link) {
 
-        alert(
+        churchAlert(
             "Google Drive link is not available yet."
         );
 
@@ -21757,7 +21977,7 @@ async function saveFileFolder() {
 
     if (!name) {
 
-        alert(
+        churchAlert(
             "Please enter a folder name."
         );
 
@@ -21796,7 +22016,7 @@ async function saveFileFolder() {
                     error
                 );
 
-                alert(
+                churchAlert(
                     "❌ Failed to update folder."
                 );
 
@@ -21804,7 +22024,7 @@ async function saveFileFolder() {
             }
 
 
-            alert(
+            churchAlert(
                 "✅ Folder updated successfully."
             );
 
@@ -21836,7 +22056,7 @@ async function saveFileFolder() {
                     error
                 );
 
-                alert(
+                churchAlert(
                     "❌ Failed to add folder."
                 );
 
@@ -21844,7 +22064,7 @@ async function saveFileFolder() {
             }
 
 
-            alert(
+            churchAlert(
                 "✅ Folder added successfully."
             );
 
@@ -21864,7 +22084,7 @@ async function saveFileFolder() {
             error
         );
 
-        alert(
+        churchAlert(
             "❌ Something went wrong."
         );
 
@@ -22673,7 +22893,7 @@ async function clearAuditLogs() {
 
 
     const confirmed =
-        confirm(
+        await churchConfirm(
             "Clear all audit logs?\n\n" +
             "This action cannot be undone."
         );
@@ -22700,7 +22920,7 @@ async function clearAuditLogs() {
                 error
             );
 
-            alert(
+            churchAlert(
                 "❌ Failed to clear audit logs."
             );
 
@@ -22716,7 +22936,7 @@ async function clearAuditLogs() {
         renderAuditLogs();
 
 
-        alert(
+        churchAlert(
             "✅ Audit logs cleared successfully."
         );
 
@@ -22733,7 +22953,7 @@ async function clearAuditLogs() {
             error
         );
 
-        alert(
+        churchAlert(
             "❌ Failed to clear audit logs."
         );
 
@@ -22941,7 +23161,7 @@ function requireAdmin(){
             "🚫 Admin permission required."
         );
 
-        alert(
+        churchAlert(
             "You do not have permission to perform this action."
         );
 
@@ -23051,7 +23271,7 @@ function requireMemberManager() {
 
     if (!canManageMembers()) {
 
-        alert(
+        churchAlert(
             "You do not have permission to manage members."
         );
 
@@ -25319,7 +25539,7 @@ async function addEditorTag() {
 
     if (!isAdminUser()) {
 
-        alert(
+        churchAlert(
             "Only Admin can manage editor tags."
         );
 
@@ -25350,7 +25570,7 @@ async function addEditorTag() {
 
     if (!value) {
 
-        alert(
+        churchAlert(
             "Please enter a tag name."
         );
 
@@ -25375,7 +25595,7 @@ async function addEditorTag() {
 
     if (duplicate) {
 
-        alert(
+        churchAlert(
             "That tag already exists."
         );
 
@@ -25411,7 +25631,7 @@ async function addEditorTag() {
         renderAllChurchEditorTagToolbars();
         renderEditorTagManagerList();
 
-        alert(
+        churchAlert(
             "Failed to save the new tag."
         );
 
@@ -25709,7 +25929,7 @@ async function editEditorTag(
 
     if (!isAdminUser()) {
 
-        alert(
+        churchAlert(
             "Only Admin can manage editor tags."
         );
 
@@ -25722,7 +25942,7 @@ async function editEditorTag(
 
 
     let newValue =
-        prompt(
+        await churchPrompt(
             "Rename tag:",
             current
         );
@@ -25743,7 +25963,7 @@ async function editEditorTag(
 
     if (!newValue) {
 
-        alert(
+        churchAlert(
             "Tag name cannot be empty."
         );
 
@@ -25764,7 +25984,7 @@ async function editEditorTag(
 
     if (duplicate) {
 
-        alert(
+        churchAlert(
             "That tag already exists."
         );
 
@@ -25796,7 +26016,7 @@ async function editEditorTag(
         renderAllChurchEditorTagToolbars();
         renderEditorTagManagerList();
 
-        alert(
+        churchAlert(
             "Failed to rename the tag."
         );
 
@@ -25815,7 +26035,7 @@ async function deleteEditorTag(
 
     if (!isAdminUser()) {
 
-        alert(
+        churchAlert(
             "Only Admin can manage editor tags."
         );
 
@@ -25828,7 +26048,7 @@ async function deleteEditorTag(
 
 
     const confirmed =
-        confirm(
+        await churchConfirm(
             `Delete tag [${tag}]?`
         );
 
@@ -25866,7 +26086,7 @@ async function deleteEditorTag(
         renderAllChurchEditorTagToolbars();
         renderEditorTagManagerList();
 
-        alert(
+        churchAlert(
             "Failed to delete the tag."
         );
 
@@ -25949,7 +26169,7 @@ async function resetEditorTagsToDefault() {
 
     if (!isAdminUser()) {
 
-        alert(
+        churchAlert(
             "Only Admin can manage editor tags."
         );
 
@@ -25962,7 +26182,7 @@ async function resetEditorTagsToDefault() {
 
 
     const confirmed =
-        confirm(
+        await churchConfirm(
             "Reset this editor's tags to the default list?"
         );
 
@@ -25998,7 +26218,7 @@ async function resetEditorTagsToDefault() {
         renderAllChurchEditorTagToolbars();
         renderEditorTagManagerList();
 
-        alert(
+        churchAlert(
             "Failed to reset editor tags."
         );
 
