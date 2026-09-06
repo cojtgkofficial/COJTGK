@@ -4,6 +4,432 @@
     box-sizing:border-box;
 }
 
+/* =========================================================
+   CHURCHHQ UNIFIED MODALS, RESPONSIVE TABLES & ROLE ACCESS
+   Final shared component layer — keep at the end of this file.
+========================================================= */
+
+:root {
+    --modal-radius: 18px;
+    --modal-shadow: 0 24px 70px rgba(15, 23, 42, 0.24);
+    --modal-border: #dbe4ef;
+    --modal-muted: #64748b;
+}
+
+html,
+body,
+#churchApp,
+.app-container,
+.main-content,
+.page {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    overflow-x: hidden !important;
+}
+
+.page > *,
+.card,
+.song-card,
+.settings-section,
+.form-row,
+.form-group {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* One modal shell for Add, Edit, View and management forms. */
+.modal {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 10000 !important;
+    width: 100% !important;
+    height: 100dvh !important;
+    padding: 24px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+    background: rgba(15, 23, 42, 0.58) !important;
+    backdrop-filter: blur(4px);
+    box-sizing: border-box !important;
+}
+
+.modal:not(.hidden) {
+    display: flex !important;
+}
+
+.modal.hidden {
+    display: none !important;
+}
+
+.modal-content,
+.leader-modal-content,
+.file-folder-modal-content {
+    position: relative;
+    display: flex !important;
+    flex-direction: column !important;
+    width: min(640px, 100%) !important;
+    max-width: 100% !important;
+    max-height: min(88dvh, 900px) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border: 1px solid var(--modal-border) !important;
+    border-radius: var(--modal-radius) !important;
+    background: #fff !important;
+    box-shadow: var(--modal-shadow) !important;
+    box-sizing: border-box !important;
+}
+
+.modal-content.modal-content-wide,
+.program-view-modal,
+.editor-tag-manager-modal,
+.leader-modal-content,
+.file-folder-modal-content {
+    width: min(920px, 100%) !important;
+}
+
+.modal-content > .modal-header,
+.leader-modal-content > .modal-header,
+.file-folder-modal-content > .modal-header {
+    position: relative !important;
+    top: auto !important;
+    z-index: 3 !important;
+    flex: 0 0 auto;
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    gap: 16px !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 20px 22px !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    background: #fff !important;
+    box-sizing: border-box !important;
+}
+
+.modal-header h2,
+.modal-header h3 {
+    margin: 0 !important;
+    color: #123f75;
+    font-size: 20px !important;
+    line-height: 1.3 !important;
+    overflow-wrap: anywhere;
+}
+
+.modal-subtitle {
+    margin: 5px 0 0;
+    color: var(--modal-muted);
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.modal-content > .modal-body,
+.modal-content > form,
+.modal-content > .leader-modal-body,
+.modal-content > .manage-modal-body,
+.leader-modal-content > .leader-modal-body,
+.file-folder-modal-content > .file-folder-modal-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 20px 22px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+/* Legacy modals place fields directly below the header. */
+.modal-content > .modal-header ~ .form-group,
+.modal-content > .modal-header ~ .form-row,
+.modal-content > .modal-header ~ fieldset,
+.modal-content > .modal-header ~ .song-controls-bar,
+.modal-content > .modal-header ~ pre {
+    margin-left: 22px;
+    margin-right: 22px;
+}
+
+.modal-content > .modal-header + .form-group,
+.modal-content > .modal-header + .form-row,
+.modal-content > .modal-header + input[type="hidden"] + .form-group,
+.modal-content > .modal-header + input[type="hidden"] + .form-row {
+    margin-top: 20px;
+}
+
+.modal-content > .modal-footer,
+.modal-content > .modal-actions,
+.leader-modal-content > .modal-footer,
+.leader-modal-content > .modal-actions,
+.file-folder-modal-content > .modal-footer,
+.file-folder-modal-content > .modal-actions {
+    position: relative !important;
+    bottom: auto !important;
+    z-index: 3;
+    flex: 0 0 auto;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 10px !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 16px 22px !important;
+    border-top: 1px solid #e5e7eb !important;
+    background: #f8fafc !important;
+    box-sizing: border-box !important;
+}
+
+.modal .close-btn,
+.modal .modal-close,
+.modal .modal-close-btn {
+    flex: 0 0 38px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    margin: -5px -7px 0 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    background: #eef2f7 !important;
+    color: #475569 !important;
+    font-size: 25px !important;
+    line-height: 1 !important;
+    cursor: pointer;
+}
+
+.modal .close-btn:hover,
+.modal .modal-close:hover,
+.modal .modal-close-btn:hover {
+    background: #fee2e2 !important;
+    color: #b91c1c !important;
+}
+
+body.modal-open,
+body.church-dialog-open {
+    overflow: hidden !important;
+}
+
+/* Role access */
+.role-access-card {
+    margin-bottom: 24px;
+    padding: 22px;
+    border: 1px solid #dbe4ef;
+    border-radius: 16px;
+    background: #fff;
+}
+
+.role-access-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+.role-access-header h3 { margin: 0 0 6px; color: #1d4f91; }
+.role-access-header p { margin: 0; color: #64748b; font-size: 14px; }
+.role-access-table-wrap,
+.role-matrix-wrap { width: 100%; max-width: 100%; overflow: hidden; }
+.role-access-summary-table,
+.role-matrix-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.role-access-summary-table th,
+.role-access-summary-table td,
+.role-matrix-table th,
+.role-matrix-table td { padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: left; vertical-align: middle; }
+.role-access-summary-table th,
+.role-matrix-table th { background: #1f5a9d; color: #fff; font-size: 13px; }
+.role-matrix-table th:not(:first-child),
+.role-matrix-table td:not(:first-child) { text-align: center; }
+.role-matrix-table input[type="checkbox"] { width: 18px; height: 18px; accent-color: #1f5a9d; }
+.permission-note { margin: 14px 0 0; padding: 12px; border-radius: 10px; background: #eaf3ff; color: #174b83; }
+.access-page-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.access-page-chip { padding: 3px 7px; border-radius: 999px; background: #e8f1fc; color: #1d4f91; font-size: 11px; }
+.member-type-badge { display: inline-flex; padding: 4px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+.member-type-badge.administrator { background: #fef3c7; color: #92400e; }
+.member-type-badge.user { background: #e0f2fe; color: #075985; }
+.empty-table-message { padding: 22px !important; text-align: center !important; color: #64748b; }
+
+@media (max-width: 768px) {
+    .main-content,
+    .page,
+    .card,
+    .song-card,
+    .settings-section {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow-x: hidden !important;
+    }
+
+    .modal {
+        padding: 0 !important;
+        align-items: flex-end !important;
+    }
+
+    .modal-content,
+    .modal-content.modal-content-wide,
+    .program-view-modal,
+    .editor-tag-manager-modal,
+    .leader-modal-content,
+    .file-folder-modal-content {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: 94dvh !important;
+        border-width: 1px 0 0 !important;
+        border-radius: 20px 20px 0 0 !important;
+    }
+
+    .modal-content > .modal-header,
+    .leader-modal-content > .modal-header,
+    .file-folder-modal-content > .modal-header {
+        padding: 16px !important;
+    }
+
+    .modal-content > .modal-body,
+    .modal-content > form,
+    .modal-content > .leader-modal-body,
+    .leader-modal-content > .leader-modal-body,
+    .file-folder-modal-content > .file-folder-modal-body {
+        padding: 16px !important;
+    }
+
+    .modal-content > .modal-footer,
+    .modal-content > .modal-actions,
+    .leader-modal-content > .modal-footer,
+    .leader-modal-content > .modal-actions,
+    .file-folder-modal-content > .modal-footer,
+    .file-folder-modal-content > .modal-actions {
+        flex-direction: column-reverse !important;
+        padding: 12px 16px calc(12px + env(safe-area-inset-bottom)) !important;
+    }
+
+    .modal-footer button,
+    .modal-actions button { width: 100% !important; min-height: 44px; }
+
+    .modal-content > .modal-header ~ .form-group,
+    .modal-content > .modal-header ~ .form-row,
+    .modal-content > .modal-header ~ fieldset,
+    .modal-content > .modal-header ~ .song-controls-bar,
+    .modal-content > .modal-header ~ pre {
+        margin-left: 16px;
+        margin-right: 16px;
+    }
+
+    .form-row,
+    .song-controls-bar,
+    .role-access-header {
+        grid-template-columns: minmax(0, 1fr) !important;
+        flex-direction: column !important;
+        width: 100% !important;
+    }
+
+    .role-access-header .primary-btn { width: 100%; }
+
+    /* All ordinary tables become readable cards; no horizontal swiping. */
+    .page table[data-responsive-table="true"] {
+        display: block !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        table-layout: auto !important;
+    }
+
+    .page table[data-responsive-table="true"] thead { display: none !important; }
+    .page table[data-responsive-table="true"] tbody { display: grid !important; gap: 12px; width: 100%; }
+    .page table[data-responsive-table="true"] tr {
+        display: block !important;
+        width: 100% !important;
+        overflow: hidden;
+        border: 1px solid #dbe4ef !important;
+        border-radius: 12px;
+        background: #fff;
+        box-shadow: 0 3px 12px rgba(15, 23, 42, 0.05);
+    }
+
+    .page table[data-responsive-table="true"] td {
+        display: grid !important;
+        grid-template-columns: minmax(88px, 34%) minmax(0, 1fr);
+        gap: 10px;
+        width: 100% !important;
+        min-width: 0 !important;
+        padding: 10px 12px !important;
+        border: 0 !important;
+        border-bottom: 1px solid #eef2f7 !important;
+        text-align: left !important;
+        white-space: normal !important;
+        overflow-wrap: anywhere;
+        box-sizing: border-box;
+    }
+
+    .page table[data-responsive-table="true"] td:last-child { border-bottom: 0 !important; }
+    .page table[data-responsive-table="true"] td::before {
+        content: attr(data-label);
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: .03em;
+        text-transform: uppercase;
+    }
+
+    .page table[data-responsive-table="true"] td[colspan] { display: block !important; text-align: center !important; }
+    .page table[data-responsive-table="true"] td[colspan]::before { content: none; }
+    .page table[data-responsive-table="true"] .table-actions-cell { min-width: 0 !important; }
+    .page table[data-responsive-table="true"] .table-actions { justify-content: flex-start !important; white-space: normal !important; }
+    .page table[data-responsive-table="true"] tr.mobile-row-clickable { cursor: pointer; }
+    .page table[data-responsive-table="true"] tr.mobile-row-clickable:active { background: #edf5ff; }
+    .mobile-view-action { display: none !important; }
+
+    .service-records-card > div,
+    #songs div[style*="overflow-x: auto"],
+    #members .table-container,
+    #attendance .table-container,
+    #reports .table-container,
+    #settings .audit-table-container,
+    .program-table-wrapper,
+    .table-wrapper,
+    .table-container {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+    }
+
+    /* The permission matrix uses one compact card per page. */
+    .role-matrix-table,
+    .role-matrix-table tbody { display: block; width: 100%; }
+    .role-matrix-table thead { display: none; }
+    .role-matrix-table tr { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; padding: 12px; margin-bottom: 10px; border: 1px solid #dbe4ef; border-radius: 12px; }
+    .role-matrix-table td { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 4px !important; border: 0; font-size: 11px; }
+    .role-matrix-table td:first-child { grid-column: 1 / -1; align-items: flex-start; font-size: 14px; font-weight: 800; color: #1d4f91; }
+    .role-matrix-table td:not(:first-child)::before { content: attr(data-label); color: #64748b; font-size: 10px; font-weight: 700; }
+}
+
+body.dark .modal-content,
+body.dark .leader-modal-content,
+body.dark .file-folder-modal-content,
+body.dark .modal-content > .modal-header,
+body.dark .leader-modal-content > .modal-header,
+body.dark .file-folder-modal-content > .modal-header,
+body.dark .role-access-card {
+    background: #172033 !important;
+    border-color: #334155 !important;
+    color: #e5e7eb;
+}
+
+body.dark .modal-content > .modal-footer,
+body.dark .modal-content > .modal-actions { background: #111827 !important; border-color: #334155 !important; }
+body.dark .modal-header h2,
+body.dark .modal-header h3,
+body.dark .role-access-header h3 { color: #bfdbfe !important; }
+body.dark .role-access-header p,
+body.dark .modal-subtitle { color: #94a3b8; }
+body.dark .page table[data-responsive-table="true"] tr { background: #172033; border-color: #334155 !important; }
+
 body{
     font-family:'Inter',sans-serif;
     background:#f3f4f6;
@@ -18581,4 +19007,81 @@ body.dark .church-system-dialog-input-wrap span {
     .table-actions-cell {
         min-width: 96px;
     }
+}
+
+/* Final cascade guard: these responsive component rules must remain last. */
+@media (max-width: 768px) {
+    html, body, #churchApp, .app-container, .main-content, .page,
+    .page > *, .card, .song-card, .settings-section {
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow-x: hidden !important;
+        box-sizing: border-box !important;
+    }
+
+    .modal { padding: 0 !important; align-items: flex-end !important; overflow: hidden !important; }
+    .modal.hidden { display: none !important; }
+    .modal-content, .modal-content.modal-content-wide, .program-view-modal,
+    .editor-tag-manager-modal, .leader-modal-content, .file-folder-modal-content {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: 94dvh !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow-x: hidden !important;
+        border-radius: 20px 20px 0 0 !important;
+    }
+
+    .service-records-card > div, #songs div[style*="overflow-x: auto"],
+    #members .table-container, #attendance .table-container,
+    #reports .table-container, #settings .audit-table-container,
+    .program-table-wrapper, .table-wrapper, .table-container,
+    .role-access-table-wrap, .role-matrix-wrap {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+    }
+
+    .page table[data-responsive-table="true"] {
+        display: block !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        table-layout: auto !important;
+    }
+    .page table[data-responsive-table="true"] thead { display: none !important; }
+    .page table[data-responsive-table="true"] tbody { display: grid !important; gap: 12px; width: 100%; }
+    .page table[data-responsive-table="true"] tr {
+        display: block !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+        border: 1px solid #dbe4ef !important;
+        border-radius: 12px !important;
+        background: #fff;
+    }
+    .page table[data-responsive-table="true"] td {
+        display: grid !important;
+        grid-template-columns: minmax(88px, 34%) minmax(0, 1fr) !important;
+        gap: 10px !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        padding: 10px 12px !important;
+        border: 0 !important;
+        border-bottom: 1px solid #eef2f7 !important;
+        text-align: left !important;
+        white-space: normal !important;
+        box-sizing: border-box !important;
+    }
+    .page table[data-responsive-table="true"] td::before {
+        content: attr(data-label);
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+    .page table[data-responsive-table="true"] td:last-child { border-bottom: 0 !important; }
+    .page table[data-responsive-table="true"] td[colspan] { display: block !important; text-align: center !important; }
+    .page table[data-responsive-table="true"] td[colspan]::before { content: none; }
+    .page table[data-responsive-table="true"] .table-actions-cell { min-width: 0 !important; }
+    .mobile-view-action { display: none !important; }
 }

@@ -3582,6 +3582,35 @@
 </div>
 
 
+<!-- =========================================
+     USER ACCESS & ROLE MATRIX
+========================================= -->
+<div class="settings-section role-access-card" data-admin-only="true">
+    <div class="role-access-header">
+        <div>
+            <h3>🔐 User Roles & Page Access</h3>
+            <p>Administrator has full access. User accounts start with View-only access and may be customized per page.</p>
+        </div>
+        <button type="button" class="primary-btn" id="addUserAccessBtn">＋ Add User Access</button>
+    </div>
+
+    <div class="role-access-table-wrap">
+        <table class="role-access-summary-table" id="roleAccessSummaryTable">
+            <thead>
+                <tr>
+                    <th>Name of User</th>
+                    <th>Member Type</th>
+                    <th>Accessible Pages</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="roleAccessSummaryBody">
+                <tr><td colspan="4" class="empty-table-message">Loading user access…</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
 <div class="settings-data-row">
 
     <!-- =====================================
@@ -3712,6 +3741,58 @@
 
 
 <!-- ================= MODALS SECTION ================= -->
+
+<!-- USER ACCESS MODAL -->
+<div id="userAccessModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-content modal-content-wide" role="dialog" aria-modal="true" aria-labelledby="userAccessModalTitle">
+        <div class="modal-header">
+            <div>
+                <h2 id="userAccessModalTitle">Add User Access</h2>
+                <p class="modal-subtitle">Choose the account type and permissions for every page.</p>
+            </div>
+            <button type="button" id="closeUserAccessModal" class="close-btn" aria-label="Close">&times;</button>
+        </div>
+
+        <div class="modal-body">
+            <input type="hidden" id="userAccessRecordId">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="userAccessUserId">User account</label>
+                    <select id="userAccessUserId"></select>
+                    <small>Accounts must already exist in Supabase Authentication.</small>
+                </div>
+                <div class="form-group">
+                    <label for="userAccessMemberType">Member type</label>
+                    <select id="userAccessMemberType">
+                        <option value="user">User</option>
+                        <option value="administrator">Administrator</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="role-matrix-wrap">
+                <table class="role-matrix-table" id="rolePermissionMatrix">
+                    <thead>
+                        <tr>
+                            <th>List of Pages</th>
+                            <th>View</th>
+                            <th>Add</th>
+                            <th>Edit / Update</th>
+                            <th>Delete</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rolePermissionMatrixBody"></tbody>
+                </table>
+            </div>
+            <p id="administratorAccessNote" class="permission-note hidden">Administrator accounts automatically have complete access to every page.</p>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" id="cancelUserAccess" class="secondary-btn">Cancel</button>
+            <button type="button" id="saveUserAccess" class="primary-btn">Save Access</button>
+        </div>
+    </div>
+</div>
 
 <!-- 1. ACTIVITY MODAL -->
 <div id="activityModal" class="modal hidden">

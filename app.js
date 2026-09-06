@@ -2740,6 +2740,18 @@ async function deleteAnnouncementFromSupabase(id) {
 
 function showPage(pageId) {
 
+    // Administrator/User access matrix (legacy roles remain supported below).
+    if (
+        typeof hasPagePermission === "function" &&
+        !hasPagePermission(pageId, "view")
+    ) {
+        churchAlert(
+            "You do not have VIEW permission for this page.",
+            { title: "Access Denied", tone: "warning" }
+        );
+        pageId = "dashboard";
+    }
+
     // =====================================
     // VIEWER RESTRICTED PAGES
     // =====================================
@@ -10064,7 +10076,7 @@ if (saveSongBtn) saveSongBtn.addEventListener("click", saveSong);
 
 async function saveSong() {
 
-    if (!requireAdmin()) {
+    if (!requireAdmin(editingSongId !== null ? "edit" : "add", "songs")) {
         return;
     }
 
@@ -10316,7 +10328,7 @@ async function saveSong() {
 }
 function openEditSongModal(id) {
 
-    if (!requireAdmin()) {
+    if (!requireAdmin("edit", "songs")) {
         return;
     }
 
@@ -10613,7 +10625,7 @@ function isLineChords(line) {
 
 async function deleteSong(id) {
 
-    if (!requireAdmin()) {
+    if (!requireAdmin("delete", "songs")) {
         return;
     }
 
@@ -26254,3 +26266,475 @@ if (newEditorTagInput) {
 // =====================================
 
 loadChurchEditorTags();
+
+// =====================================================
+// CHURCHHQ 2026 — UNIFIED MODALS, MOBILE RECORDS & ACCESS
+// Backward-compatible with the original admin/viewer/attendance roles.
+// Run SUPABASE-ROLE-ACCESS-MIGRATION.sql to enable the full access matrix.
+// =====================================================
+
+const CHURCH_PAGE_ACCESS = [
+    ["dashboard", "Dashboard"],
+    ["service-planner", "Service Planner"],
+    ["program-planner", "Program Planner"],
+    ["bible", "Bible"],
+    ["songs", "Song Library"],
+    ["editor", "Church Editor"],
+    ["members", "Members"],
+    ["leaders", "Leaders"],
+    ["attendance", "Attendance"],
+    ["reports", "Reports"],
+    ["files", "Files"],
+    ["settings", "Settings"]
+];
+
+let currentUserMemberType = "user";
+let currentUserPermissions = createDefaultPagePermissions();
+let userAccessRecords = [];
+let accessSchemaReady = true;
+
+function createDefaultPagePermissions() {
+    return Object.fromEntries(CHURCH_PAGE_ACCESS.map(([key]) => [key, {
+        view: true,
+        add: false,
+        edit: false,
+        delete: false
+    }]));
+}
+
+function normalizeMemberType(value) {
+    const normalized = String(value || "").toLowerCase();
+    return normalized === "administrator" || normalized === "admin"
+        ? "administrator"
+        : "user";
+}
+
+function normalizePagePermissions(value) {
+    const defaults = createDefaultPagePermissions();
+    const source = value && typeof value === "object" ? value : {};
+
+    CHURCH_PAGE_ACCESS.forEach(([key]) => {
+        const entry = source[key] || {};
+        defaults[key] = {
+            view: entry.view !== false,
+            add: entry.add === true,
+            edit: entry.edit === true,
+            delete: entry.delete === true
+        };
+    });
+
+    return defaults;
+}
+
+function getActivePageKey() {
+    const visiblePage = document.querySelector(".page:not(.hidden)");
+    if (visiblePage && visiblePage.id) return visiblePage.id;
+    return "dashboard";
+}
+
+function hasPagePermission(pageKey, action = "view") {
+    if (isAdminUser()) return true;
+    const page = currentUserPermissions[pageKey] || {};
+    return page[action] === true;
+}
+
+function inferRequestedAction() {
+    const stack = String(new Error().stack || "").toLowerCase();
+    if (/delete|remove|clear|reset/.test(stack)) return "delete";
+    if (/edit|update|rename|manage/.test(stack)) return "edit";
+    if (/add|create|save|insert|upload|import/.test(stack)) return "add";
+    return "edit";
+}
+
+function inferElementAction(element) {
+    const text = `${element.textContent || ""} ${element.title || ""} ${element.getAttribute("onclick") || ""}`.toLowerCase();
+    if (/delete|remove|clear|reset|✕|❌/.test(text)) return "delete";
+    if (/edit|update|rename|manage|✏/.test(text)) return "edit";
+    if (/add|new|create|save|upload|import|restore|＋|➕/.test(text)) return "add";
+    return "edit";
+}
+
+// Override the original role helpers with the Administrator/User matrix.
+isAdminUser = function () {
+    return currentUserMemberType === "administrator" || currentUserRole === "admin";
+};
+
+requireAdmin = function (requiredAction = null, pageKey = null) {
+    if (isAdminUser()) return true;
+
+    const action = requiredAction || inferRequestedAction();
+    const page = pageKey || getActivePageKey();
+    if (hasPagePermission(page, action)) return true;
+
+    churchAlert(`You do not have ${action.toUpperCase()} permission for this page.`, {
+        title: "Access Denied",
+        tone: "warning"
+    });
+    return false;
+};
+
+canManageAttendance = function () {
+    return isAdminUser() || isAttendanceUser() ||
+        hasPagePermission("attendance", "add") ||
+        hasPagePermission("attendance", "edit");
+};
+
+canManageMembers = function () {
+    return isAdminUser() || isAttendanceUser() ||
+        hasPagePermission("members", "add") ||
+        hasPagePermission("members", "edit");
+};
+
+async function loadEnhancedUserAccess() {
+    if (!currentUser) return false;
+
+    try {
+        const { data, error } = await churchSupabase
+            .from("user_roles")
+            .select("user_id,role,member_type,permissions,email,display_name")
+            .eq("user_id", currentUser.id)
+            .maybeSingle();
+
+        if (error) {
+            accessSchemaReady = false;
+            currentUserMemberType = normalizeMemberType(currentUserRole);
+            currentUserPermissions = createDefaultPagePermissions();
+            console.warn("Role-access migration is not installed yet; legacy roles remain active.", error.message);
+            return false;
+        }
+
+        accessSchemaReady = true;
+        currentUserMemberType = normalizeMemberType(data?.member_type || data?.role);
+        currentUserPermissions = normalizePagePermissions(data?.permissions);
+        applyEnhancedRoleUI();
+        return true;
+    } catch (error) {
+        console.error("Enhanced access load failed:", error);
+        return false;
+    }
+}
+
+function applyEnhancedRoleUI() {
+    document.querySelectorAll(".nav-item[onclick*='showPage']").forEach(navItem => {
+        const match = (navItem.getAttribute("onclick") || "").match(/showPage\(['\"]([^'\"]+)/);
+        if (!match) return;
+        navItem.style.setProperty("display", hasPagePermission(match[1], "view") ? "" : "none", hasPagePermission(match[1], "view") ? "" : "important");
+    });
+
+    document.querySelectorAll('[data-admin-only="true"]').forEach(element => {
+        if (element.closest(".role-access-card") || element.closest("#userAccessModal")) {
+            const allowed = isAdminUser();
+            element.style.display = allowed ? "" : "none";
+            element.disabled = !allowed;
+            return;
+        }
+
+        const page = element.closest(".page")?.id || getActivePageKey();
+        const action = inferElementAction(element);
+        const allowed = hasPagePermission(page, action);
+        element.style.display = allowed ? "" : "none";
+        element.disabled = !allowed;
+    });
+}
+
+const legacyApplyRoleBasedUI = applyRoleBasedUI;
+applyRoleBasedUI = function () {
+    legacyApplyRoleBasedUI();
+    applyEnhancedRoleUI();
+};
+
+// ---------------- UNIFIED MODAL BEHAVIOR ----------------
+function normalizeChurchModals() {
+    document.querySelectorAll(".modal").forEach(modal => {
+        const content = modal.querySelector(":scope > .modal-content, :scope > .leader-modal-content, :scope > .file-folder-modal-content");
+        if (!content) return;
+
+        modal.setAttribute("aria-hidden", modal.classList.contains("hidden") ? "true" : "false");
+        content.setAttribute("role", content.getAttribute("role") || "dialog");
+        content.setAttribute("aria-modal", "true");
+
+        const header = content.querySelector(":scope > .modal-header");
+        const footer = content.querySelector(":scope > .modal-footer, :scope > .modal-actions");
+        if (header && !content.querySelector(":scope > .modal-body")) {
+            const nodes = [];
+            let node = header.nextSibling;
+            while (node && node !== footer) {
+                const next = node.nextSibling;
+                nodes.push(node);
+                node = next;
+            }
+            if (nodes.some(item => item.nodeType === 1)) {
+                const body = document.createElement("div");
+                body.className = "modal-body";
+                header.after(body);
+                nodes.forEach(item => body.appendChild(item));
+            }
+        }
+
+        if (!modal.dataset.unifiedBound) {
+            modal.dataset.unifiedBound = "true";
+            modal.addEventListener("click", event => {
+                if (event.target === modal) closeUnifiedModal(modal);
+            });
+        }
+    });
+    syncModalBodyState();
+}
+
+function closeUnifiedModal(modal) {
+    modal.classList.add("hidden");
+    modal.setAttribute("aria-hidden", "true");
+    syncModalBodyState();
+}
+
+function syncModalBodyState() {
+    const hasOpenModal = Boolean(document.querySelector(".modal:not(.hidden), .church-system-dialog:not(.hidden)"));
+    document.body.classList.toggle("modal-open", hasOpenModal);
+    document.querySelectorAll(".modal").forEach(modal => {
+        modal.setAttribute("aria-hidden", modal.classList.contains("hidden") ? "true" : "false");
+    });
+}
+
+document.addEventListener("keydown", event => {
+    if (event.key !== "Escape") return;
+    const openModals = [...document.querySelectorAll(".modal:not(.hidden)")];
+    if (openModals.length) closeUnifiedModal(openModals[openModals.length - 1]);
+});
+
+// ---------------- MOBILE TABLE CARDS & ROW TAP ----------------
+function prepareResponsiveTables(root = document) {
+    root.querySelectorAll?.(".page table").forEach(table => {
+        if (table.classList.contains("role-matrix-table")) return;
+        table.dataset.responsiveTable = "true";
+        const labels = [...table.querySelectorAll("thead th")].map(th => th.textContent.trim() || "Details");
+
+        table.querySelectorAll("tbody tr").forEach(row => {
+            [...row.children].forEach((cell, index) => {
+                if (cell.tagName === "TD" && !cell.hasAttribute("data-label")) {
+                    cell.setAttribute("data-label", labels[index] || "Details");
+                }
+            });
+
+            const viewButton = [...row.querySelectorAll("button, a")].find(button => {
+                const value = `${button.textContent || ""} ${button.title || ""} ${button.getAttribute("onclick") || ""}`.toLowerCase();
+                return /view|open details|details|👀/.test(value) && !/edit|delete|remove/.test(value);
+            });
+
+            if (viewButton) {
+                viewButton.classList.add("mobile-view-action");
+                row.classList.add("mobile-row-clickable");
+                if (!row.dataset.mobileTapBound) {
+                    row.dataset.mobileTapBound = "true";
+                    row.addEventListener("click", event => {
+                        if (window.innerWidth > 768 || event.target.closest("button,a,input,select,textarea,label")) return;
+                        viewButton.click();
+                    });
+                    row.tabIndex = 0;
+                    row.addEventListener("keydown", event => {
+                        if (window.innerWidth <= 768 && (event.key === "Enter" || event.key === " ")) {
+                            event.preventDefault();
+                            viewButton.click();
+                        }
+                    });
+                }
+            }
+        });
+    });
+}
+
+// ---------------- USER ACCESS MANAGEMENT ----------------
+function renderPermissionMatrix(permissions = createDefaultPagePermissions()) {
+    const body = document.getElementById("rolePermissionMatrixBody");
+    if (!body) return;
+    const normalized = normalizePagePermissions(permissions);
+    body.innerHTML = CHURCH_PAGE_ACCESS.map(([key, label]) => `
+        <tr data-page-key="${key}">
+            <td>${label}</td>
+            ${["view", "add", "edit", "delete"].map(action => `
+                <td data-label="${action === "edit" ? "Edit / Update" : action[0].toUpperCase() + action.slice(1)}">
+                    <input type="checkbox" data-permission-action="${action}" ${normalized[key][action] ? "checked" : ""} aria-label="${label}: ${action}">
+                </td>`).join("")}
+        </tr>`).join("");
+}
+
+function setPermissionMatrixDisabled(disabled) {
+    document.querySelectorAll("#rolePermissionMatrix input").forEach(input => input.disabled = disabled);
+    document.getElementById("administratorAccessNote")?.classList.toggle("hidden", !disabled);
+}
+
+async function loadUserAccessRecords() {
+    const body = document.getElementById("roleAccessSummaryBody");
+    if (!body || !isAdminUser()) return;
+    body.innerHTML = '<tr><td colspan="4" class="empty-table-message">Loading user access…</td></tr>';
+
+    const { data, error } = await churchSupabase
+        .from("user_roles")
+        .select("user_id,role,member_type,permissions,email,display_name")
+        .order("email", { ascending: true });
+
+    if (error) {
+        accessSchemaReady = false;
+        body.innerHTML = '<tr><td colspan="4" class="empty-table-message">Run SUPABASE-ROLE-ACCESS-MIGRATION.sql to activate role management.</td></tr>';
+        return;
+    }
+
+    accessSchemaReady = true;
+    userAccessRecords = data || [];
+    if (!userAccessRecords.length) {
+        body.innerHTML = '<tr><td colspan="4" class="empty-table-message">No registered user role records yet.</td></tr>';
+        return;
+    }
+
+    body.innerHTML = userAccessRecords.map(record => {
+        const memberType = normalizeMemberType(record.member_type || record.role);
+        const permissions = normalizePagePermissions(record.permissions);
+        const pages = memberType === "administrator"
+            ? '<span class="access-page-chip">All pages</span>'
+            : CHURCH_PAGE_ACCESS.filter(([key]) => permissions[key].view).map(([, label]) => `<span class="access-page-chip">${label}</span>`).join("");
+        const name = record.display_name || record.email || record.user_id;
+        return `<tr>
+            <td data-label="Name of User"><strong>${escapeAccessHtml(name)}</strong><br><small>${escapeAccessHtml(record.email || "")}</small></td>
+            <td data-label="Member Type"><span class="member-type-badge ${memberType}">${memberType === "administrator" ? "Administrator" : "User"}</span></td>
+            <td data-label="Accessible Pages"><div class="access-page-chips">${pages || '<span class="access-page-chip">No pages</span>'}</div></td>
+            <td data-label="Actions" class="table-actions-cell"><div class="table-actions"><button type="button" class="secondary-btn" onclick="openUserAccessModal('${record.user_id}')">✏️ Edit Access</button></div></td>
+        </tr>`;
+    }).join("");
+    prepareResponsiveTables(document);
+}
+
+function escapeAccessHtml(value) {
+    const div = document.createElement("div");
+    div.textContent = String(value || "");
+    return div.innerHTML;
+}
+
+function openUserAccessModal(userId = "") {
+    if (!isAdminUser()) return;
+    const modal = document.getElementById("userAccessModal");
+    const select = document.getElementById("userAccessUserId");
+    const record = userAccessRecords.find(item => String(item.user_id) === String(userId)) || userAccessRecords[0];
+
+    select.innerHTML = userAccessRecords.map(item => `<option value="${item.user_id}">${escapeAccessHtml(item.display_name || item.email || item.user_id)}</option>`).join("");
+    if (record) select.value = record.user_id;
+    document.getElementById("userAccessRecordId").value = record?.user_id || "";
+    document.getElementById("userAccessMemberType").value = normalizeMemberType(record?.member_type || record?.role);
+    document.getElementById("userAccessModalTitle").textContent = userId ? "Edit User Access" : "Add User Access";
+    renderPermissionMatrix(record?.permissions);
+    setPermissionMatrixDisabled(document.getElementById("userAccessMemberType").value === "administrator");
+    modal.classList.remove("hidden");
+    normalizeChurchModals();
+}
+
+function syncSelectedAccessUser() {
+    const selectedId = document.getElementById("userAccessUserId")?.value;
+    const record = userAccessRecords.find(item => String(item.user_id) === String(selectedId));
+    if (!record) return;
+    document.getElementById("userAccessRecordId").value = record.user_id || "";
+    document.getElementById("userAccessMemberType").value = normalizeMemberType(record.member_type || record.role);
+    renderPermissionMatrix(record.permissions);
+    setPermissionMatrixDisabled(document.getElementById("userAccessMemberType").value === "administrator");
+}
+
+function collectPermissionMatrix() {
+    const permissions = createDefaultPagePermissions();
+    document.querySelectorAll("#rolePermissionMatrixBody tr[data-page-key]").forEach(row => {
+        const key = row.dataset.pageKey;
+        row.querySelectorAll("[data-permission-action]").forEach(input => {
+            permissions[key][input.dataset.permissionAction] = input.checked;
+        });
+    });
+    return permissions;
+}
+
+async function saveUserAccessRecord() {
+    if (!isAdminUser()) return;
+    const userId = document.getElementById("userAccessUserId")?.value;
+    const memberType = document.getElementById("userAccessMemberType")?.value || "user";
+    if (!userId) {
+        churchAlert("Select a registered user account first.", { tone: "warning" });
+        return;
+    }
+
+    const permissions = memberType === "administrator"
+        ? createDefaultPagePermissions()
+        : collectPermissionMatrix();
+    if (memberType === "administrator") {
+        Object.values(permissions).forEach(page => Object.keys(page).forEach(action => page[action] = true));
+    }
+
+    const { error } = await churchSupabase
+        .from("user_roles")
+        .update({
+            member_type: memberType,
+            // Keep the legacy role values compatible with existing constraints.
+            role: memberType === "administrator" ? "admin" : "viewer",
+            permissions,
+            updated_at: new Date().toISOString()
+        })
+        .eq("user_id", userId);
+
+    if (error) {
+        churchAlert(`Could not save access: ${error.message}`, { title: "Role Update Failed", tone: "error" });
+        return;
+    }
+
+    closeUnifiedModal(document.getElementById("userAccessModal"));
+    await loadUserAccessRecords();
+    churchAlert("User access was updated successfully.", { title: "Access Saved", tone: "success" });
+}
+
+function initializeEnhancedChurchUI() {
+    normalizeChurchModals();
+    prepareResponsiveTables(document);
+
+    const observer = new MutationObserver(mutations => {
+        const needsTableRefresh = mutations.some(item => item.type === "childList");
+        if (needsTableRefresh) prepareResponsiveTables(document);
+        syncModalBodyState();
+    });
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
+
+    document.getElementById("addUserAccessBtn")?.addEventListener("click", () => openUserAccessModal());
+    document.getElementById("closeUserAccessModal")?.addEventListener("click", () => closeUnifiedModal(document.getElementById("userAccessModal")));
+    document.getElementById("cancelUserAccess")?.addEventListener("click", () => closeUnifiedModal(document.getElementById("userAccessModal")));
+    document.getElementById("saveUserAccess")?.addEventListener("click", saveUserAccessRecord);
+    document.getElementById("userAccessUserId")?.addEventListener("change", syncSelectedAccessUser);
+    document.getElementById("userAccessMemberType")?.addEventListener("change", event => setPermissionMatrixDisabled(event.target.value === "administrator"));
+
+    // Use the correct Add/Edit heading for the shared song form.
+    document.getElementById("addSongBtn")?.addEventListener("click", () => {
+        const title = document.querySelector("#songModal .modal-header h2");
+        if (title) title.textContent = "Add New Song";
+    });
+    const originalOpenEditSongModal = window.openEditSongModal;
+    if (typeof originalOpenEditSongModal === "function") {
+        window.openEditSongModal = function (id) {
+            originalOpenEditSongModal(id);
+            const title = document.querySelector("#songModal .modal-header h2");
+            if (title) title.textContent = "Edit Song";
+        };
+    }
+
+    churchSupabase.auth.getUser().then(async ({ data }) => {
+        if (data?.user) {
+            currentUser = data.user;
+            await loadEnhancedUserAccess();
+            if (isAdminUser()) await loadUserAccessRecords();
+        }
+    });
+}
+
+churchSupabase.auth.onAuthStateChange((_event, session) => {
+    if (!session?.user) return;
+    window.setTimeout(async () => {
+        currentUser = session.user;
+        await loadEnhancedUserAccess();
+        if (isAdminUser()) await loadUserAccessRecords();
+    }, 0);
+});
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initializeEnhancedChurchUI);
+} else {
+    initializeEnhancedChurchUI();
+}
