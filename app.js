@@ -10207,7 +10207,7 @@ async function saveSong() {
 
         await writeAuditLog(
             "EDIT",
-            "Song Library",
+            "Chords Library",
             `Updated song: ${updatedSong.title}`,
             updatedSong.id,
             {
@@ -10285,7 +10285,7 @@ async function saveSong() {
 
         await writeAuditLog(
             "ADD",
-            "Song Library",
+            "Chords Library",
             `Added song: ${song.title}`,
             song.id,
             {
@@ -10675,7 +10675,7 @@ async function deleteSong(id) {
 
     await writeAuditLog(
         "DELETE",
-        "Song Library",
+        "Chords Library",
         `Deleted song: ${deletedSongTitle}`,
         id,
         {
@@ -10721,6 +10721,243 @@ function clearSongForm() {
     if (sKey) sKey.selectedIndex = 0;
     if (sCat) sCat.selectedIndex = 0;
     if (sLyr) sLyr.value = "";
+}
+
+/* =========================================
+   LYRICS LIBRARY (FREESHOW)
+   Separate from the existing songs table,
+   which remains the Chords Library.
+========================================= */
+let lyricsLibraryRecords = [];
+let editingLyricsLibraryId = null;
+
+function switchSongLibrary(libraryName) {
+    const showLyrics = libraryName === "lyrics";
+    const lyricsPanel = document.getElementById("lyricsLibraryPanel");
+    const chordsPanel = document.getElementById("chordsLibraryPanel");
+    const lyricsTab = document.getElementById("lyricsLibraryTab");
+    const chordsTab = document.getElementById("chordsLibraryTab");
+    const addChordButton = document.getElementById("addSongBtn");
+    const songsPage = document.getElementById("songs");
+
+    lyricsPanel?.classList.toggle("hidden", !showLyrics);
+    chordsPanel?.classList.toggle("hidden", showLyrics);
+    lyricsTab?.classList.toggle("active", showLyrics);
+    chordsTab?.classList.toggle("active", !showLyrics);
+    lyricsTab?.setAttribute("aria-selected", String(showLyrics));
+    chordsTab?.setAttribute("aria-selected", String(!showLyrics));
+    if (songsPage) songsPage.dataset.libraryView = showLyrics ? "lyrics" : "chords";
+    if (showLyrics) renderLyricsLibrary(lyricsLibraryRecords);
+    if (typeof applyEnhancedRoleUI === "function") applyEnhancedRoleUI();
+    if (addChordButton) addChordButton.style.display = showLyrics ? "none" : "";
+}
+
+async function loadLyricsLibraryFromSupabase() {
+    try {
+        const { data, error } = await churchSupabase
+            .from("lyrics_library")
+            .select("*")
+            .order("title", { ascending: true });
+
+        if (error) {
+            console.error("Failed to load Lyrics Library:", error);
+            const body = document.getElementById("lyricsLibraryTableBody");
+            if (body) body.innerHTML = '<tr><td colspan="5" class="empty-table-message">Run SUPABASE-LYRICS-CHORDS-LIBRARY.sql to activate the Lyrics Library.</td></tr>';
+            return false;
+        }
+
+        lyricsLibraryRecords = data || [];
+        renderLyricsLibrary(lyricsLibraryRecords);
+        return true;
+    } catch (error) {
+        console.error("Lyrics Library load error:", error);
+        return false;
+    }
+}
+
+function renderLyricsLibrary(records) {
+    const body = document.getElementById("lyricsLibraryTableBody");
+    const count = document.getElementById("lyricsLibraryCount");
+    if (!body) return;
+
+    if (count) count.textContent = `${records.length} ${records.length === 1 ? "record" : "records"}`;
+    if (!records.length) {
+        body.innerHTML = '<tr><td colspan="5" class="empty-table-message">No lyrics found in the FreeShow library.</td></tr>';
+        return;
+    }
+
+    body.innerHTML = records.map(record => {
+        const updated = record.updated_at || record.created_at;
+        const formattedDate = updated
+            ? new Date(updated).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })
+            : "-";
+        return `
+            <tr>
+                <td data-label="Song Title"><strong>${escapeLyricsHtml(record.title)}</strong></td>
+                <td data-label="Artist / Composer">${escapeLyricsHtml(record.artist || "Unknown Artist")}</td>
+                <td data-label="Category"><span class="lyrics-category-badge">${escapeLyricsHtml(record.category || "Worship")}</span></td>
+                <td data-label="Updated">${escapeLyricsHtml(formattedDate)}</td>
+                <td data-label="Actions" class="table-actions-cell">
+                    <div class="table-actions">
+                        <button type="button" class="secondary-btn" onclick="viewLyricsLibraryRecord(${Number(record.id)})" title="View lyrics">👀 View</button>
+                        <button type="button" class="icon-action-btn edit" data-admin-only="true" onclick="openLyricsLibraryModal(${Number(record.id)})" title="Edit lyrics">✏️</button>
+                        <button type="button" class="icon-action-btn delete" data-admin-only="true" onclick="deleteLyricsLibraryRecord(${Number(record.id)})" title="Delete lyrics">&times;</button>
+                    </div>
+                </td>
+            </tr>`;
+    }).join("");
+
+    if (typeof prepareResponsiveTables === "function") prepareResponsiveTables(document);
+    if (typeof applyEnhancedRoleUI === "function") applyEnhancedRoleUI();
+}
+
+function filterLyricsLibrary(query) {
+    const keyword = String(query || "").trim().toLowerCase();
+    const filtered = lyricsLibraryRecords.filter(record =>
+        String(record.title || "").toLowerCase().includes(keyword) ||
+        String(record.artist || "").toLowerCase().includes(keyword) ||
+        String(record.category || "").toLowerCase().includes(keyword)
+    );
+    renderLyricsLibrary(filtered);
+}
+
+function openLyricsLibraryModal(id = null) {
+    const action = id === null ? "add" : "edit";
+    if (!requireAdmin(action, "songs")) return;
+
+    const record = id === null
+        ? null
+        : lyricsLibraryRecords.find(item => String(item.id) === String(id));
+    if (id !== null && !record) return;
+
+    editingLyricsLibraryId = record?.id ?? null;
+    document.getElementById("lyricsLibraryModalTitle").textContent = record ? "Edit Lyrics" : "Add Lyrics";
+    document.getElementById("lyricsSongTitle").value = record?.title || "";
+    document.getElementById("lyricsSongArtist").value = record?.artist || "";
+    document.getElementById("lyricsSongCategory").value = record?.category || "Praise";
+    document.getElementById("lyricsSongContent").value = record?.lyrics || "";
+    document.getElementById("lyricsLibraryModal")?.classList.remove("hidden");
+    if (typeof normalizeChurchModals === "function") normalizeChurchModals();
+}
+
+function closeLyricsLibraryModal() {
+    editingLyricsLibraryId = null;
+    const modal = document.getElementById("lyricsLibraryModal");
+    if (modal && typeof closeUnifiedModal === "function") closeUnifiedModal(modal);
+    else modal?.classList.add("hidden");
+}
+
+async function saveLyricsLibraryRecord() {
+    const isEditing = editingLyricsLibraryId !== null;
+    if (!requireAdmin(isEditing ? "edit" : "add", "songs")) return;
+
+    const title = document.getElementById("lyricsSongTitle")?.value.trim();
+    const artist = document.getElementById("lyricsSongArtist")?.value.trim() || "Unknown Artist";
+    const category = document.getElementById("lyricsSongCategory")?.value || "Worship";
+    const lyrics = document.getElementById("lyricsSongContent")?.value.trim();
+
+    if (!title) {
+        churchAlert("Please enter a song title.", { title: "Song Title Required", tone: "warning" });
+        return;
+    }
+    if (!lyrics) {
+        churchAlert("Please enter the lyrics for FreeShow.", { title: "Lyrics Required", tone: "warning" });
+        return;
+    }
+
+    const payload = { title, artist, category, lyrics, updated_at: new Date().toISOString() };
+    let savedRecord;
+    let error;
+
+    if (isEditing) {
+        const response = await churchSupabase.from("lyrics_library")
+            .update(payload).eq("id", editingLyricsLibraryId).select().single();
+        savedRecord = response.data;
+        error = response.error;
+    } else {
+        const response = await churchSupabase.from("lyrics_library")
+            .insert({ id: Date.now(), ...payload }).select().single();
+        savedRecord = response.data;
+        error = response.error;
+    }
+
+    if (error) {
+        churchAlert(`Lyrics could not be saved: ${error.message}`, { title: "Save Failed", tone: "error" });
+        return;
+    }
+
+    await writeAuditLog(
+        isEditing ? "EDIT" : "ADD",
+        "Lyrics Library",
+        `${isEditing ? "Updated" : "Added"} FreeShow lyrics: ${savedRecord.title}`,
+        savedRecord.id,
+        { title: savedRecord.title, artist: savedRecord.artist, category: savedRecord.category }
+    );
+
+    closeLyricsLibraryModal();
+    await loadLyricsLibraryFromSupabase();
+    churchAlert(`Lyrics ${isEditing ? "updated" : "saved"} successfully.`, { title: "Lyrics Library", tone: "success" });
+}
+
+function viewLyricsLibraryRecord(id) {
+    const record = lyricsLibraryRecords.find(item => String(item.id) === String(id));
+    if (!record) return;
+
+    document.getElementById("viewLyricsLibraryTitle").textContent = record.title;
+    document.getElementById("viewLyricsLibrarySubtitle").textContent = `${record.artist || "Unknown Artist"} • ${record.category || "Worship"}`;
+    document.getElementById("viewLyricsLibraryContent").textContent = record.lyrics || "No lyrics available.";
+    document.getElementById("viewLyricsLibraryModal")?.classList.remove("hidden");
+    if (typeof normalizeChurchModals === "function") normalizeChurchModals();
+}
+
+async function deleteLyricsLibraryRecord(id) {
+    if (!requireAdmin("delete", "songs")) return;
+    const record = lyricsLibraryRecords.find(item => String(item.id) === String(id));
+    if (!record) return;
+
+    if (!await churchConfirm(`Delete the lyrics for “${record.title}”?`)) return;
+    const { error } = await churchSupabase.from("lyrics_library").delete().eq("id", id);
+
+    if (error) {
+        churchAlert(`Lyrics could not be deleted: ${error.message}`, { title: "Delete Failed", tone: "error" });
+        return;
+    }
+
+    await writeAuditLog("DELETE", "Lyrics Library", `Deleted FreeShow lyrics: ${record.title}`, record.id, {
+        title: record.title,
+        artist: record.artist,
+        category: record.category
+    });
+    await loadLyricsLibraryFromSupabase();
+    churchAlert("Lyrics deleted successfully.", { title: "Lyrics Library", tone: "success" });
+}
+
+function escapeLyricsHtml(value) {
+    const element = document.createElement("div");
+    element.textContent = String(value ?? "");
+    return element.innerHTML;
+}
+
+function initializeLyricsLibraryUI() {
+    document.getElementById("addLyricsBtn")?.addEventListener("click", () => openLyricsLibraryModal());
+    document.getElementById("closeLyricsLibraryModal")?.addEventListener("click", closeLyricsLibraryModal);
+    document.getElementById("cancelLyricsLibrary")?.addEventListener("click", closeLyricsLibraryModal);
+    document.getElementById("saveLyricsLibrary")?.addEventListener("click", saveLyricsLibraryRecord);
+
+    const closeView = () => {
+        const modal = document.getElementById("viewLyricsLibraryModal");
+        if (modal && typeof closeUnifiedModal === "function") closeUnifiedModal(modal);
+        else modal?.classList.add("hidden");
+    };
+    document.getElementById("closeViewLyricsLibraryModal")?.addEventListener("click", closeView);
+    document.getElementById("closeViewLyricsLibraryBtn")?.addEventListener("click", closeView);
+    switchSongLibrary("chords");
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initializeLyricsLibraryUI);
+} else {
+    initializeLyricsLibraryUI();
 }
 
 /* =========================================
@@ -17415,7 +17652,7 @@ if (!canManageAttendance()) {
 // =====================================================
 // CHURCHHQ SETTINGS
 // COMPLETE SUPABASE BACKUP
-// VERSION 7.0
+// VERSION 7.2
 // =====================================================
 
 async function exportChurchData() {
@@ -17427,7 +17664,7 @@ async function exportChurchData() {
     try {
 
         console.log(
-            "📦 Creating ChurchHQ Backup v7..."
+            "📦 Creating ChurchHQ Backup v7.2..."
         );
 
 
@@ -17440,6 +17677,7 @@ async function exportChurchData() {
             membersResult,
             tasksResult,
             songsResult,
+            lyricsLibraryResult,
             servicesResult,
             attendanceResult,
             activitiesResult,
@@ -17464,6 +17702,10 @@ async function exportChurchData() {
 
             churchSupabase
                 .from("songs")
+                .select("*"),
+
+            churchSupabase
+                .from("lyrics_library")
                 .select("*"),
 
             churchSupabase
@@ -17524,6 +17766,8 @@ async function exportChurchData() {
             ["planner_tasks", tasksResult],
 
             ["songs", songsResult],
+
+            ["lyrics_library", lyricsLibraryResult],
 
             ["service_records", servicesResult],
 
@@ -17622,7 +17866,7 @@ async function exportChurchData() {
                 "ChurchHQ",
 
             version:
-                "7.1",
+                "7.2",
 
             source:
                 "Supabase",
@@ -17641,6 +17885,9 @@ async function exportChurchData() {
 
                 songs:
                     songsResult.data || [],
+
+                lyrics_library:
+                    lyricsLibraryResult.data || [],
 
                 service_records:
                     servicesResult.data || [],
@@ -17728,7 +17975,7 @@ async function exportChurchData() {
 
 
         downloadAnchor.download =
-            `churchhq_backup_v7_${today}.json`;
+            `churchhq_backup_v7_2_${today}.json`;
 
 
         document.body.appendChild(
@@ -17794,7 +18041,7 @@ async function exportChurchData() {
                 {
 
                     version:
-                        "7.1",
+                        "7.2",
 
                     members:
                         backupData.data
@@ -17807,6 +18054,10 @@ async function exportChurchData() {
                     songs:
                         backupData.data
                             .songs.length,
+
+                    lyricsLibrary:
+                        backupData.data
+                            .lyrics_library.length,
 
                     services:
                         backupData.data
@@ -17864,7 +18115,7 @@ async function exportChurchData() {
         // =====================================================
 
         console.log(
-            "✅ ChurchHQ Backup v7 created:",
+            "✅ ChurchHQ Backup v7.2 created:",
             {
 
                 members:
@@ -17878,6 +18129,10 @@ async function exportChurchData() {
                 songs:
                     backupData.data
                         .songs.length,
+
+                lyrics_library:
+                    backupData.data
+                        .lyrics_library.length,
 
                 service_records:
                     backupData.data
@@ -17952,7 +18207,7 @@ async function exportChurchData() {
 // =====================================================
 // CHURCHHQ SETTINGS
 // IMPORT / RESTORE COMPLETE BACKUP
-// VERSION 7.0
+// VERSION 7.2
 // SUPPORTS OLD + NEW BACKUPS
 // =====================================================
 
@@ -18084,6 +18339,13 @@ async function importChurchData(event) {
                     songs:
                         rawBackup.songs || [],
 
+                    lyrics_library:
+                        Array.isArray(
+                            rawBackup.lyrics_library
+                        )
+                            ? rawBackup.lyrics_library
+                            : [],
+
                     service_records:
                         rawBackup.service_records || [],
 
@@ -18193,7 +18455,8 @@ async function importChurchData(event) {
 
                         "• Members\n" +
                         "• Planner Tasks\n" +
-                        "• Songs\n" +
+                        "• Chords Library Songs\n" +
+                        "• FreeShow Lyrics Library\n" +
                         "• Sunday & Midweek Services\n" +
                         "• Program Planner\n" +
                         "• Program Assignments\n" +
@@ -18322,6 +18585,13 @@ async function importChurchData(event) {
                     backup.songs
                 );
 
+                // 4B. FreeShow Lyrics Library
+
+                await restoreTable(
+                    "lyrics_library",
+                    backup.lyrics_library
+                );
+
 
                 // 5. Service Planner
 
@@ -18445,6 +18715,9 @@ async function importChurchData(event) {
 
                             songs:
                                 backup.songs.length,
+
+                            lyricsLibrary:
+                                backup.lyrics_library.length,
 
                             services:
                                 backup.service_records.length,
@@ -18635,7 +18908,10 @@ async function importChurchData(event) {
                             backup.program_items.length,
 
                         editor_tags:
-                            backup.editor_tags.length
+                            backup.editor_tags.length,
+
+                        lyrics_library:
+                            backup.lyrics_library.length
                     }
                 );
 
@@ -18771,7 +19047,8 @@ async function clearAllChurchData() {
 
             "• Members\n" +
             "• Planner Tasks\n" +
-            "• Songs\n" +
+            "• Chords Library Songs\n" +
+            "• FreeShow Lyrics Library\n" +
             "• Sunday & Midweek Services\n" +
             "• Program Planner\n" +
             "• Program Assignments\n" +
@@ -18882,6 +19159,8 @@ async function clearAllChurchData() {
     "planner_tasks",
 
     "songs",
+
+    "lyrics_library",
 
     "activities",
 
@@ -19023,6 +19302,15 @@ async function clearAllChurchData() {
         ) {
 
             songs = [];
+
+        }
+
+        if (
+            typeof lyricsLibraryRecords !==
+            "undefined"
+        ) {
+
+            lyricsLibraryRecords = [];
 
         }
 
@@ -22179,6 +22467,7 @@ async function initializeChurchHQ() {
         await loadAnnualActivitiesFromSupabase();
         await loadServicesFromSupabase();
         await loadSongsFromSupabase();
+        await loadLyricsLibraryFromSupabase();
         await loadActivitiesFromSupabase();
         await loadAnnouncementsFromSupabase();
         await loadAttendanceFromSupabase();
@@ -26704,14 +26993,14 @@ function initializeEnhancedChurchUI() {
     // Use the correct Add/Edit heading for the shared song form.
     document.getElementById("addSongBtn")?.addEventListener("click", () => {
         const title = document.querySelector("#songModal .modal-header h2");
-        if (title) title.textContent = "Add New Song";
+        if (title) title.textContent = "Add New Chord Song";
     });
     const originalOpenEditSongModal = window.openEditSongModal;
     if (typeof originalOpenEditSongModal === "function") {
         window.openEditSongModal = function (id) {
             originalOpenEditSongModal(id);
             const title = document.querySelector("#songModal .modal-header h2");
-            if (title) title.textContent = "Edit Song";
+            if (title) title.textContent = "Edit Chord Song";
         };
     }
 

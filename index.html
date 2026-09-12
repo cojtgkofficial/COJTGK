@@ -1487,18 +1487,30 @@
     <div>
         <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 4px;">
             <i data-lucide="music-4" style="width: 28px; height: 28px;"></i>
-            <h1 class="page-title" style="margin: 0;">Song Library & Lineup</h1>
+            <h1 class="page-title" style="margin: 0;">Song Library</h1>
         </div>
-        <p class="page-subtitle">Manage worship songs, chords, and Sunday service lineup</p>
+        <p class="page-subtitle">Separate libraries for FreeShow lyrics and worship chords</p>
     </div>
     <button
     class="primary-btn"
     id="addSongBtn"
     data-admin-only="true"
 >
-    + New Song
+    + New Chord Song
 </button>
 </div>
+            <div class="song-library-tabs" role="tablist" aria-label="Song Library sections">
+                <button type="button" id="lyricsLibraryTab" class="song-library-tab" onclick="switchSongLibrary('lyrics')" role="tab" aria-selected="false">
+                    <i data-lucide="file-text"></i>
+                    Lyrics Library
+                </button>
+                <button type="button" id="chordsLibraryTab" class="song-library-tab active" onclick="switchSongLibrary('chords')" role="tab" aria-selected="true">
+                    <i data-lucide="music-2"></i>
+                    Chords Library
+                </button>
+            </div>
+
+            <div id="chordsLibraryPanel" class="song-library-panel" role="tabpanel" aria-labelledby="chordsLibraryTab">
             <div class="card" style="margin-bottom: 25px;">
                 <h3>🎵 Sunday Service Song Lineup</h3>
                 <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">Select a song from the Library to add to this week's lineup (usually 2-5 songs).</p>
@@ -1537,7 +1549,7 @@
             </div>
 
             <div class="card">
-                <h3>📜 Worship Songs Repertoire (All Songs)</h3>
+                <h3>🎸 Chords Library</h3>
                 <div style="overflow-x: auto; margin-top: 15px;">
                     <table style="width: 100%; text-align: left; border-collapse: collapse;" id="fullSongTable">
                         <thead>
@@ -1551,6 +1563,40 @@
                         </thead>
                         <tbody id="fullSongTableBody"></tbody>
                     </table>
+                </div>
+            </div>
+            </div>
+
+            <div id="lyricsLibraryPanel" class="song-library-panel hidden" role="tabpanel" aria-labelledby="lyricsLibraryTab">
+                <div class="lyrics-library-toolbar">
+                    <div class="planner-search lyrics-library-search">
+                        <input type="text" id="lyricsLibrarySearch" placeholder="🔍 Search title, artist, or category..." oninput="filterLyricsLibrary(this.value)">
+                    </div>
+                    <button type="button" class="primary-btn" id="addLyricsBtn" data-admin-only="true">+ New Lyrics</button>
+                </div>
+
+                <div class="card">
+                    <div class="library-card-heading">
+                        <div>
+                            <h3>📄 FreeShow Lyrics Library</h3>
+                            <p>Plain song lyrics prepared for FreeShow. Chords are stored separately in the Chords Library.</p>
+                        </div>
+                        <span id="lyricsLibraryCount" class="library-count-badge">0 lyrics</span>
+                    </div>
+                    <div class="song-library-table-wrap">
+                        <table id="lyricsLibraryTable">
+                            <thead>
+                                <tr>
+                                    <th>Song Title</th>
+                                    <th>Artist / Composer</th>
+                                    <th>Category</th>
+                                    <th>Updated</th>
+                                    <th style="text-align:center;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lyricsLibraryTableBody"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </section>
@@ -3947,7 +3993,7 @@
 <div id="songModal" class="modal hidden">
     <div class="modal-content">
         <div class="modal-header">
-            <h2>Add New Song</h2>
+            <h2>Add New Chord Song</h2>
             <button id="closeSongModal" class="close-btn">&times;</button>
         </div>
 
@@ -3992,13 +4038,13 @@
         </div>
 
         <div class="form-group">
-            <label>Lyrics & Chords</label>
-            <textarea id="songLyrics" placeholder="Enter lyrics and chord placements here..." style="height:150px;"></textarea>
+            <label>Chords & Lyrics</label>
+            <textarea id="songLyrics" placeholder="Enter chord placements and lyrics here..." style="height:150px;"></textarea>
         </div>
 
         <div class="modal-footer">
             <button id="cancelSong" class="secondary-btn">Cancel</button>
-            <button id="saveSong" class="primary-btn">Save Song</button>
+            <button id="saveSong" class="primary-btn">Save Chord Song</button>
         </div>
     </div>
 </div>
@@ -4040,6 +4086,69 @@
 
         <div class="modal-footer" style="margin-top:15px;">
             <button id="closeViewSongBtn" class="secondary-btn">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- LYRICS LIBRARY ADD / EDIT MODAL -->
+<div id="lyricsLibraryModal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div>
+                <h2 id="lyricsLibraryModalTitle">Add Lyrics</h2>
+                <p class="modal-subtitle">Save plain lyrics prepared for FreeShow.</p>
+            </div>
+            <button type="button" id="closeLyricsLibraryModal" class="close-btn" aria-label="Close">&times;</button>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="lyricsSongTitle">Song Title</label>
+                <input type="text" id="lyricsSongTitle" placeholder="e.g. Way Maker">
+            </div>
+            <div class="form-group">
+                <label for="lyricsSongArtist">Artist / Composer</label>
+                <input type="text" id="lyricsSongArtist" placeholder="e.g. Sinach">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="lyricsSongCategory">Category</label>
+            <select id="lyricsSongCategory">
+                <option value="Praise">Praise</option>
+                <option value="Worship">Worship</option>
+                <option value="Special Item">Special Item</option>
+                <option value="Hymn">Hymn</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="lyricsSongContent">Lyrics for FreeShow</label>
+            <textarea id="lyricsSongContent" class="lyrics-editor-textarea" placeholder="Enter plain lyrics only. You may include labels such as Verse, Chorus, and Bridge."></textarea>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" id="cancelLyricsLibrary" class="secondary-btn">Cancel</button>
+            <button type="button" id="saveLyricsLibrary" class="primary-btn">Save Lyrics</button>
+        </div>
+    </div>
+</div>
+
+<!-- LYRICS LIBRARY VIEW MODAL -->
+<div id="viewLyricsLibraryModal" class="modal hidden">
+    <div class="modal-content" style="max-width:700px;">
+        <div class="modal-header">
+            <div>
+                <h2 id="viewLyricsLibraryTitle">Song Lyrics</h2>
+                <p id="viewLyricsLibrarySubtitle" class="modal-subtitle"></p>
+            </div>
+            <button type="button" id="closeViewLyricsLibraryModal" class="close-btn" aria-label="Close">&times;</button>
+        </div>
+        <div class="lyrics-view-sheet">
+            <pre id="viewLyricsLibraryContent"></pre>
+        </div>
+        <div class="modal-footer">
+            <button type="button" id="closeViewLyricsLibraryBtn" class="secondary-btn">Close</button>
         </div>
     </div>
 </div>
