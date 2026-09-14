@@ -13466,17 +13466,67 @@ let attendanceRecords = [];
 let currentCheckIns = {};
 let selectedAttendanceYear = new Date().getFullYear();
 
+// Tracks the exact Supabase row being edited from Attendance History.
+// This is important when correcting Sunday <-> Midweek because the
+// service type itself may change while the database row must stay the same.
+let editingAttendanceId = null;
+let editingAttendanceOriginalDate = null;
+let editingAttendanceOriginalServiceType = null;
+
+function clearAttendanceEditState() {
+    editingAttendanceId = null;
+    editingAttendanceOriginalDate = null;
+    editingAttendanceOriginalServiceType = null;
+
+    if (saveAttendanceBtn) {
+        saveAttendanceBtn.textContent = "Save Attendance";
+    }
+}
+
 const attDateInput = document.getElementById("attDate");
 const attServiceType = document.getElementById("attServiceType");
 const saveAttendanceBtn = document.getElementById("saveAttendanceBtn");
 
 if (attDateInput) {
     attDateInput.value = new Date().toISOString().split("T")[0];
-    attDateInput.addEventListener("change", loadAttendanceForDate);
+    attDateInput.addEventListener("change", () => {
+        // Changing the date means the user is moving to another record.
+        // Leave edit mode so we never update the previously loaded row by mistake.
+        if (editingAttendanceId !== null) {
+            clearAttendanceEditState();
+        }
+        loadAttendanceForDate();
+    });
 }
 
 if (attServiceType) {
-    attServiceType.addEventListener("change", loadAttendanceForDate);
+    attServiceType.addEventListener("change", () => {
+        // While editing an existing attendance row, changing Sunday/Midweek
+        // is a correction to that same row. Keep the current check-ins intact.
+        if (editingAttendanceId !== null) {
+            const eventNameEl = document.getElementById("attEventName");
+            const oldDefault =
+                editingAttendanceOriginalServiceType === "midweek"
+                    ? "Midweek Service"
+                    : "Sunday General Service";
+            const newDefault =
+                attServiceType.value === "midweek"
+                    ? "Midweek Service"
+                    : "Sunday General Service";
+
+            if (
+                eventNameEl &&
+                (!eventNameEl.value.trim() || eventNameEl.value === oldDefault)
+            ) {
+                eventNameEl.value = newDefault;
+            }
+
+            renderAttendanceList();
+            return;
+        }
+
+        loadAttendanceForDate();
+    });
 }
 
 if (saveAttendanceBtn) saveAttendanceBtn.addEventListener("click", saveAttendance);
@@ -13793,12 +13843,18 @@ async function saveAttendance() {
         return;
     }
 
-    const index =
-    attendanceRecords.findIndex(
-        r =>
-            r.date === date &&
-            (r.serviceType || "sunday") === serviceType
-    );
+    // When a History record was loaded for editing, always locate it by
+    // its exact database ID. This allows changing Sunday to Midweek (or
+    // Midweek to Sunday) without the app mistakenly treating it as new.
+    let index = editingAttendanceId !== null
+        ? attendanceRecords.findIndex(
+            r => String(r.id) === String(editingAttendanceId)
+        )
+        : attendanceRecords.findIndex(
+            r =>
+                r.date === date &&
+                (r.serviceType || "sunday") === serviceType
+        );
 
     const recordData = {
     date,
@@ -13812,10 +13868,53 @@ async function saveAttendance() {
 };
 
     // =====================================
+    // DOUBLE-CHECK SUPABASE BEFORE INSERT
+    // Prevents 409 duplicate conflicts when
+    // the local attendance array is stale.
+    // =====================================
+
+    let existingSupabaseRecord = null;
+
+    if (index === -1 && editingAttendanceId === null) {
+
+        existingSupabaseRecord =
+            await findAttendanceRecordInSupabase(
+                date,
+                serviceType
+            );
+
+        if (existingSupabaseRecord) {
+
+            attendanceRecords.push({
+                id: existingSupabaseRecord.id,
+                date: existingSupabaseRecord.date || date,
+                eventName:
+                    existingSupabaseRecord.event_name || eventName,
+                serviceType:
+                    existingSupabaseRecord.service_type || serviceType,
+                checkIns:
+                    existingSupabaseRecord.check_ins || {},
+                totalMembers:
+                    existingSupabaseRecord.total_members || 0,
+                presentCount:
+                    existingSupabaseRecord.present_count || 0
+            });
+
+            index = attendanceRecords.length - 1;
+        }
+    }
+
+    // =====================================
     // EXISTING RECORD
     // =====================================
 
-if (index !== -1) {
+if (index !== -1 || editingAttendanceId !== null) {
+
+    recordData.id =
+        editingAttendanceId ||
+        attendanceRecords[index]?.id ||
+        existingSupabaseRecord?.id ||
+        null;
 
     const updatedInSupabase =
         await updateAttendanceToSupabase(
@@ -13833,10 +13932,19 @@ if (index !== -1) {
     }
 
 
-    attendanceRecords[index] = {
-        ...recordData,
-        id: attendanceRecords[index].id
-    };
+    if (index !== -1) {
+        attendanceRecords[index] = {
+            ...recordData,
+            id: recordData.id
+        };
+    } else {
+        // Fallback if local data was stale but the exact edit ID was known.
+        attendanceRecords.push({
+            ...recordData,
+            id: recordData.id
+        });
+        index = attendanceRecords.length - 1;
+    }
 
 
     // =====================================
@@ -13917,6 +14025,9 @@ if (index !== -1) {
     "churchhq_attendance",
     JSON.stringify(attendanceRecords)
 );
+
+// The edit is complete. Future saves should be treated normally.
+clearAttendanceEditState();
 
 
 // =====================================
@@ -14157,6 +14268,45 @@ function renderTopAttendance(){
 }
 
 // =====================================
+// ATTENDANCE - CHECK EXISTING SUPABASE ROW
+// =====================================
+
+async function findAttendanceRecordInSupabase(date, serviceType) {
+
+    try {
+
+        const { data, error } = await churchSupabase
+            .from("attendance_records")
+            .select("*")
+            .eq("date", date)
+            .eq("service_type", serviceType || "sunday")
+            .limit(1)
+            .maybeSingle();
+
+        if (error) {
+
+            console.error(
+                "❌ Failed to check existing attendance in Supabase:",
+                error
+            );
+
+            return null;
+        }
+
+        return data || null;
+
+    } catch (error) {
+
+        console.error(
+            "❌ Attendance Supabase lookup error:",
+            error
+        );
+
+        return null;
+    }
+}
+
+// =====================================
 // ATTENDANCE - SUPABASE INSERT
 // =====================================
 
@@ -14184,6 +14334,10 @@ async function saveAttendanceToSupabase(record) {
                 "❌ Failed to save attendance to Supabase:",
                 error
             );
+            console.error("Supabase code:", error?.code);
+            console.error("Supabase message:", error?.message);
+            console.error("Supabase details:", error?.details);
+            console.error("Supabase hint:", error?.hint);
 
             return false;
         }
@@ -14214,18 +14368,36 @@ async function updateAttendanceToSupabase(record) {
 
     try {
 
-        const { data, error } = await churchSupabase
-    .from("attendance_records")
-    .update({
-        event_name: record.eventName || "",
-        service_type: record.serviceType || "sunday",
-        check_ins: record.checkIns || {},
-        total_members: record.totalMembers || 0,
-        present_count: record.presentCount || 0
-    })
-    .eq("date", record.date)
-    .eq("service_type", record.serviceType || "sunday")
-    .select();
+        let query = churchSupabase
+            .from("attendance_records")
+            .update({
+                event_name: record.eventName || "",
+                service_type: record.serviceType || "sunday",
+                check_ins: record.checkIns || {},
+                total_members: record.totalMembers || 0,
+                present_count: record.presentCount || 0
+            });
+
+        // Prefer the exact Supabase row ID when available.
+        // This makes Edit safe even if date/service fields change later.
+        if (record.id !== undefined &&
+            record.id !== null &&
+            record.id !== "") {
+
+            query = query.eq("id", record.id);
+
+        } else {
+
+            query = query
+                .eq("date", record.date)
+                .eq(
+                    "service_type",
+                    record.serviceType || "sunday"
+                );
+        }
+
+        const { data, error } =
+            await query.select();
 
         if (error) {
 
@@ -17614,6 +17786,16 @@ if (!canManageAttendance()) {
     );
 
     if (!record) return;
+
+    // Enter true edit mode using the exact Supabase row ID. The user can
+    // now correct the service type without creating a duplicate date row.
+    editingAttendanceId = record.id ?? null;
+    editingAttendanceOriginalDate = record.date || date;
+    editingAttendanceOriginalServiceType = actualServiceType;
+
+    if (saveAttendanceBtn) {
+        saveAttendanceBtn.textContent = "Update Attendance";
+    }
 
     if (attDateInput) {
         attDateInput.value = record.date || "";
